@@ -5,6 +5,8 @@ https://github.com/KevinBatdorf/laravel-forge-raycast
 
 Consider sponsoring this project via [GitHub Sponsors](https://github.com/KevinBatdorf).
 
+<img src="assets/screenshot.png" />
+
 ## Features from Forge API
 - View site details
 - Multiple accounts
