@@ -6,31 +6,74 @@ import {
   Icon,
   preferences,
   PushAction,
+  allLocalStorageItems,
+  setLocalStorageItem,
+  LocalStorageValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Server } from "./api/Server";
-import { SitesList } from "./Site";
-import { getProviderIcon } from "./helpers";
+import { Site } from "./api/Site";
+import { SitesList, ISite } from "./Site";
+import { getProviderIcon, useIsMounted } from "./helpers";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
+  const [siteData, setSiteData] = useState<LocalStorageValues>({});
+  const isMounted = useIsMounted();
+
+  /**
+   * This will attempt to fetch and cache sites as the user
+   * navigates. However, the cache isn't useful until they
+   * reload the extension. As far as I can tell, it's because
+   * We can't re-evaluate the props in the push action component
+   */
+  const maybeFetchAndCacheSites = async (serverId: string) => {
+    const key = `forge-sites-${serverId.toString()}`;
+    // If the sites already exist in the cache, or not found, do nothign
+    if (siteData[key] || !isMounted.current) return;
+    const server = servers.find((s) => s.id.toString() === serverId) as IServer;
+    if (!Object.keys(server).length) return;
+    const thisSiteData = (await Site.getAll(server)) as ISite[] | undefined;
+    thisSiteData && (await setLocalStorageItem(`forge-sites-${serverId}`, JSON.stringify(thisSiteData)));
+  };
+
   useEffect(() => {
-    // TODO: Maybe cahe these for first load? Wait on user feedback
-    Server.getAll().then((servers: Array<IServer> | undefined) => {
-      servers && setServers(servers);
-    });
+    allLocalStorageItems()
+      .then((data) => {
+        if (!isMounted.current) return;
+        const servers = data["forge-servers"];
+        delete data["forge-servers"];
+        const serverList = JSON.parse(servers?.toString() ?? "[]") as Array<IServer>;
+        setServers(serverList?.length ? serverList : []);
+        setSiteData(data ?? {});
+      })
+      .finally(() => {
+        if (!isMounted.current) return;
+        Server.getAll().then(async (servers: Array<IServer> | undefined) => {
+          if (!isMounted.current) return;
+          // Add the server list to storage to avoid content flash
+          servers && setServers(servers);
+          await setLocalStorageItem("forge-servers", JSON.stringify(servers));
+        });
+      });
   }, []);
 
   return (
-    <List isLoading={servers.length > 0} searchBarPlaceholder="Search servers...">
-      {servers.map((server: IServer) => (
-        <ServerListItem key={server.id} server={server} />
-      ))}
+    <List
+      isLoading={!servers?.length}
+      searchBarPlaceholder="Search servers..."
+      onSelectionChange={(serverId) => serverId && maybeFetchAndCacheSites(serverId)}
+    >
+      {servers.map((server: IServer) => {
+        const key = `forge-sites-${server.id.toString()}`;
+        const sites = JSON.parse(siteData[key] ?? "[]") as ISite[];
+        return <ServerListItem key={server.id} server={server} sites={sites} />;
+      })}
     </List>
   );
 };
 
-const ServerListItem = ({ server }: { server: IServer }) => {
+const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
   return (
     <List.Item
       id={server.id.toString()}
@@ -43,7 +86,7 @@ const ServerListItem = ({ server }: { server: IServer }) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction title="Open server info" target={<SingleServerView server={server} />} />
+            <PushAction title="Open server info" target={<SingleServerView server={server} sites={sites} />} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Commands">
             <ServerCommands server={server} />
@@ -54,12 +97,12 @@ const ServerListItem = ({ server }: { server: IServer }) => {
   );
 };
 
-const SingleServerView = ({ server }: { server: IServer }) => {
+const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
   const sshUser = preferences?.laravel_forge_ssh_user?.value ?? "forge";
   return (
     <List searchBarPlaceholder="Search sites...">
       <List.Section title={`Sites (${server.name})`}>
-        <SitesList server={server} />
+        <SitesList server={server} sites={sites} />
       </List.Section>
       <List.Section title="Common Commands">
         <List.Item

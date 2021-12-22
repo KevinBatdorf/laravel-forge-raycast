@@ -3,17 +3,17 @@ A command center for sites managed by [Laravel Forge](https://forge.laravel.com/
 
 https://github.com/KevinBatdorf/laravel-forge-raycast
 
-Consider sponsoring this project via [GitHub Sponsors](https://github.com/KevinBatdorf).
-
+<img src="assets/screenshot-dark.png" />
 <img src="assets/screenshot.png" />
 
 ## Features from Forge API
 - View site details
+- View deployment status
 - Multiple accounts
 - Trigger deploy script
 - Reboot services
 
-## Non-API Features
+## Non-Forge API Features
 - Check site connectivity
 - Open terminal session
 - Copy IP addess

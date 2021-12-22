@@ -79,5 +79,5 @@ const getServers = async (token: string) => {
 };
 
 type ServersResponse = {
-  servers: Array<IServer>;
+  servers: IServer[];
 };
