@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { API_RATE_LIMIT } from "./config";
 import fetch from "node-fetch";
 import { ISite } from "./Site";
-import { Color } from "@raycast/api";
+import { Color, Icon } from "@raycast/api";
 
 export const getProviderIcon = (provider: string): string => {
   switch (provider) {
@@ -21,7 +21,7 @@ export const getProviderIcon = (provider: string): string => {
   }
   return "";
 };
-export function useIsMounted() {
+export const useIsMounted = () => {
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
@@ -30,7 +30,7 @@ export function useIsMounted() {
     };
   });
   return isMounted;
-}
+};
 
 export const usePolling = (callback: () => Promise<void>) => {
   const [isPolling, setIsPolling] = useState(false);
@@ -83,22 +83,19 @@ export const checkServerisOnline = async (urls: Array<string>): Promise<boolean>
 
 export const siteStatusState = (site: ISite) => {
   const details = {
-    icon: { source: "ok.png", tintColor: Color.Green },
+    icon: { source: Icon.Circle, tintColor: Color.Green },
     text: "connected",
   };
   if (site.deploymentStatus === "failed") {
     details.icon.tintColor = Color.Red;
-    details.icon.source = "error.png";
     details.text = "deployment failed";
   }
   if (!site.isOnline) {
     details.icon.tintColor = Color.Red;
-    details.icon.source = "error.png";
     details.text = "offline";
   }
   if (site.deploymentStatus === "deploying") {
     details.icon.tintColor = Color.Purple;
-    details.icon.source = "eye.png";
     details.text = "deploying...";
   }
 

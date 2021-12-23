@@ -1,15 +1,28 @@
-import { Icon, OpenInBrowserAction, List, ActionPanel, PushAction, CopyToClipboardAction, Color } from "@raycast/api";
+import {
+  Icon,
+  OpenInBrowserAction,
+  List,
+  ActionPanel,
+  PushAction,
+  CopyToClipboardAction,
+  Color,
+  setLocalStorageItem,
+} from "@raycast/api";
 import { useState } from "react";
 import { Site } from "./api/Site";
 import { IServer, ServerCommands } from "./Server";
 import { siteStatusState, useIsMounted, usePolling } from "./helpers";
 
-export const SitesList = ({ server }: { server: IServer }) => {
-  const [sites, setSites] = useState<ISite[]>([]);
+export const SitesList = ({ server, sites: sitesArray }: { server: IServer; sites: ISite[] }) => {
+  const [sites, setSites] = useState<ISite[]>(sitesArray);
   const isMounted = useIsMounted();
   usePolling(() =>
-    Site.getAll(server).then((sites: ISite[] | undefined) => {
-      isMounted.current && sites && setSites(sites);
+    Site.getAll(server).then(async (sites: ISite[] | undefined) => {
+      if (isMounted.current && sites?.length) {
+        setSites(sites);
+        // Add the server list to storage to avoid content flash
+        await setLocalStorageItem(`forge-sites-${server.id}`, JSON.stringify(sites));
+      }
     })
   );
 
@@ -23,7 +36,6 @@ export const SitesList = ({ server }: { server: IServer }) => {
 };
 
 const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
-  //   console.log(site);
   const { icon: stateIcon, text: stateText } = siteStatusState(site);
   return (
     <List.Item
