@@ -12,6 +12,8 @@ import { useState } from "react";
 import { Site } from "./api/Site";
 import { IServer, ServerCommands } from "./Server";
 import { siteStatusState, useIsMounted, usePolling } from "./helpers";
+import { EnvironmentFile } from "./components/EnvironmentFile";
+import { NginxFile } from "./components/NginxFile";
 
 export const SitesList = ({ server, sites: sitesArray }: { server: IServer; sites: ISite[] }) => {
   const [sites, setSites] = useState<ISite[]>(sitesArray);
@@ -93,8 +95,30 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
               }
             />
           )}
+          <List.Item
+            id="site-env"
+            key="site-env"
+            title="View .env file"
+            accessoryTitle="press to view"
+            actions={
+              <ActionPanel>
+                <PushAction title="Open .env file" target={<EnvironmentFile site={site} server={server} />} />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            id="site-nginx"
+            key="site-nginx"
+            title="View nginx config"
+            accessoryTitle="press to view"
+            actions={
+              <ActionPanel>
+                <PushAction title="Open nginx config" target={<NginxFile site={site} server={server} />} />
+              </ActionPanel>
+            }
+          />
         </List.Section>
-        <List.Section title="Site Information">
+        <List.Section title="Site Additonal Information">
           {Object.entries({
             id: "Forge site ID",
             serverId: "Forge server ID",
@@ -142,11 +166,11 @@ export const SiteCommands = ({ site, server }: { site: ISite; server: IServer })
   }
   return (
     <>
-      {url && <OpenInBrowserAction icon={Icon.Globe} title={`Open site in browser`} url={url.toString()} />}
       {/* As fas as I'm aware only sites with a repo can deploy */}
       {site.repository && (
         <ActionPanel.Item icon={Icon.Hammer} title="Trigger deploy script" onAction={() => Site.deploy(site, server)} />
       )}
+      {url && <OpenInBrowserAction icon={Icon.Globe} title={`Open site in browser`} url={url.toString()} />}
     </>
   );
 };
