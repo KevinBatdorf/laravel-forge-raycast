@@ -24,8 +24,9 @@ export const ServersList = () => {
   /**
    * This will attempt to fetch and cache sites as the user
    * navigates. However, the cache isn't useful until they
-   * reload the extension. As far as I can tell, it's because
-   * We can't re-evaluate the props in the push action component
+   * reload the extension.
+   * Possible Raycast rendering bug discussed here:
+   * https://raycastcommunity.slack.com/archives/C01A0R0NXGQ/p1640566594305400?thread_ts=1640282139.293800&cid=C01A0R0NXGQ
    */
   const maybeFetchAndCacheSites = async (serverId: string) => {
     const key = `forge-sites-${serverId.toString()}`;
@@ -86,7 +87,7 @@ const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction title="Open server info" target={<SingleServerView server={server} sites={sites} />} />
+            <PushAction title="Open Server Information" target={<SingleServerView server={server} sites={sites} />} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Commands">
             <ServerCommands server={server} />
@@ -106,18 +107,6 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
       </List.Section>
       <List.Section title="Common Commands">
         <List.Item
-          id="open-in-ssh"
-          key="open-in-ssh"
-          title={`Open SSH connection (${sshUser})`}
-          icon={Icon.Terminal}
-          accessoryTitle={`ssh://${sshUser}@${server.ipAddress}`}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction title={`SSH in as user ${sshUser}`} url={`ssh://${sshUser}@${server.ipAddress}`} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
           id="open-on-forge"
           key="open-on-forge"
           title="Open on Laravel Forge"
@@ -130,6 +119,21 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
           }
         />
         <List.Item
+          id="open-in-ssh"
+          key="open-in-ssh"
+          title={`Open SSH connection (${sshUser})`}
+          icon={Icon.Terminal}
+          accessoryTitle={`ssh://${sshUser}@${server.ipAddress}`}
+          actions={
+            <ActionPanel>
+              <OpenInBrowserAction
+                title={`Open SSH Connection (${sshUser})`}
+                url={`ssh://${sshUser}@${server.ipAddress}`}
+              />
+            </ActionPanel>
+          }
+        />
+        <List.Item
           id="copy-ip"
           key="copy-ip"
           title="Copy IP address"
@@ -137,7 +141,7 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
           accessoryTitle={server.ipAddress}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction title="Copy IP address" content={server.ipAddress} />
+              <CopyToClipboardAction title="Copy IP Address" content={server.ipAddress} />
             </ActionPanel>
           }
         />
@@ -189,9 +193,10 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
   const sshUser = preferences?.laravel_forge_ssh_user?.value ?? "forge";
   return (
     <>
+      <OpenInBrowserAction title="Open on Laravel Forge" url={`https://forge.laravel.com/servers/${server.id}`} />
       <OpenInBrowserAction
         icon={Icon.Terminal}
-        title={`SSH in as user ${sshUser}`}
+        title={`Open SSH Connection (${sshUser})`}
         url={`ssh://${sshUser}@${server.ipAddress}`}
       />
       <ActionPanel.Item
@@ -199,8 +204,7 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
         title="Reboot Server"
         onAction={() => Server.reboot({ serverId: server.id, token: server.apiToken })}
       />
-      <CopyToClipboardAction title="Copy IP address" content={server.ipAddress} />
-      <OpenInBrowserAction title="Open on Laravel Forge" url={`https://forge.laravel.com/servers/${server.id}`} />
+      <CopyToClipboardAction title="Copy IP Address" content={server.ipAddress} />
     </>
   );
 };

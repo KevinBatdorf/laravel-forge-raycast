@@ -12,7 +12,7 @@
       "title": "Manage Servers",
       "subtitle": "Laravel Forge",
       "icon": "forge.png",
-      "description": "Search and manage your Laravel Forge sites",
+      "description": "Search and manage your Laravel Forge servers and sites",
       "mode": "view"
     }
   ],
