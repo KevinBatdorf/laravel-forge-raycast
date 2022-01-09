@@ -51,7 +51,7 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction title="Open site info" target={<SitesSingleView site={site} server={server} />} />
+            <PushAction title="Open Site Info" target={<SitesSingleView site={site} server={server} />} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Site Commands">
             <SiteCommands site={site} server={server} />
@@ -88,7 +88,7 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
                 <ActionPanel>
                   <ActionPanel.Item
                     icon={Icon.Hammer}
-                    title="Trigger deploy script"
+                    title="Trigger Deploy Script"
                     onAction={() => Site.deploy(current, server)}
                   />
                 </ActionPanel>
@@ -102,7 +102,7 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
             accessoryTitle="press to view"
             actions={
               <ActionPanel>
-                <PushAction title="Open .env file" target={<EnvironmentFile site={site} server={server} />} />
+                <PushAction title="Open .env File" target={<EnvironmentFile site={site} server={server} />} />
               </ActionPanel>
             }
           />
@@ -113,7 +113,7 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
             accessoryTitle="press to view"
             actions={
               <ActionPanel>
-                <PushAction title="Open nginx config" target={<NginxFile site={site} server={server} />} />
+                <PushAction title="Open Nginx Config" target={<NginxFile site={site} server={server} />} />
               </ActionPanel>
             }
           />
@@ -168,9 +168,9 @@ export const SiteCommands = ({ site, server }: { site: ISite; server: IServer })
     <>
       {/* As fas as I'm aware only sites with a repo can deploy */}
       {site.repository && (
-        <ActionPanel.Item icon={Icon.Hammer} title="Trigger deploy script" onAction={() => Site.deploy(site, server)} />
+        <ActionPanel.Item icon={Icon.Hammer} title="Trigger Deploy Script" onAction={() => Site.deploy(site, server)} />
       )}
-      {url && <OpenInBrowserAction icon={Icon.Globe} title={`Open site in browser`} url={url.toString()} />}
+      {url && <OpenInBrowserAction icon={Icon.Globe} title="Open Site in Browser" url={url.toString()} />}
     </>
   );
 };

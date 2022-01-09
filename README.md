@@ -3,7 +3,7 @@ A command center for sites managed by [Laravel Forge](https://forge.laravel.com/
 
 Source repo: https://github.com/KevinBatdorf/laravel-forge-raycast
 
-This extension is not currently on the Raycast store (still testing), but you can use it now:
+To run the dev build, you can:
 
 1. Clone the repo
 2. Navigate to the directory then run `npm i && npm run build`
