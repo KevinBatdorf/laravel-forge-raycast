@@ -51,9 +51,9 @@ export const ServersList = () => {
       })
       .finally(() => {
         if (!isMounted.current) return;
-        setLoading(false);
         Server.getAll().then(async (servers: Array<IServer> | undefined) => {
           if (!isMounted.current) return;
+          setLoading(false);
           // Add the server list to storage to avoid content flash
           servers && setServers(servers);
           await setLocalStorageItem("forge-servers", JSON.stringify(servers));
