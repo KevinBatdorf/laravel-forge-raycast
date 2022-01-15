@@ -1,7 +1,7 @@
 # Laravel Forge
 A command center for sites managed by [Laravel Forge](https://forge.laravel.com/).
 
-Get an API token here: https://forge.laravel.com/user/profile#/api
+Get an API token here: https://forge.laravel.com/user-profile/api
 
 Source repo: https://github.com/KevinBatdorf/laravel-forge-raycast
 
@@ -34,6 +34,6 @@ To run the dev build, you can:
 - Connect with provider APIs (e.g. Digital Ocean)
 
 ## FAQ
-- Get an API token here: https://forge.laravel.com/user/profile#/api
+- Get an API token here: https://forge.laravel.com/user-profile/api
 - What's Raycast? https://www.raycast.com/
 - Dev instructions here: https://developers.raycast.com/basics/create-your-first-extension
