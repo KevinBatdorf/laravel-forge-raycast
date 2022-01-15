@@ -61,7 +61,7 @@ export const ServersList = () => {
       });
   }, []);
 
-  if (!servers.length) {
+  if (!servers.length && !loading) {
     return (
       <List>
         <List.Item title="Nothing found..." />
