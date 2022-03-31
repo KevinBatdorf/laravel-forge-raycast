@@ -109,7 +109,7 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
   const sshUser = preferences?.laravel_forge_ssh_user ?? "forge";
   return (
     <List searchBarPlaceholder="Search sites...">
-      <List.Section title={`Sites (${server.name})`}>
+      <List.Section title={`${server.name?.toUpperCase()} -> Sites`}>
         <SitesList server={server} sites={sites} />
       </List.Section>
       <List.Section title="Common Commands">

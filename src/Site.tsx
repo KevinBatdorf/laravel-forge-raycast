@@ -72,7 +72,7 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
   return (
     <>
       <List searchBarPlaceholder="Search sites...">
-        <List.Section title={`Site Commands (${current.name})`}>
+        <List.Section title={`${server.name?.toUpperCase()} -> Sites -> ${current.name}`}>
           <List.Item
             id="open-on-forge"
             key="open-on-forge"
