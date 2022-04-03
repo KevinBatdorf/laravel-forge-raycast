@@ -4,11 +4,13 @@ import { Server } from "./api/Server";
 import { Site } from "./api/Site";
 import { SitesList, ISite } from "./Site";
 import { getServerColor, useIsMounted } from "./helpers";
+// import serversJSON from "./fixtures/servers.json";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
   const [siteData, setSiteData] = useState<LocalStorage.Values>({});
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const isMounted = useIsMounted();
 
   /**
@@ -34,28 +36,34 @@ export const ServersList = () => {
         if (!isMounted.current) return;
         const servers = data["forge-servers"];
         delete data["forge-servers"];
-        const serverList = JSON.parse(servers?.toString() ?? "[]") as Array<IServer>;
+        const serverList = JSON.parse(servers?.toString() ?? "[]") as IServer[];
         setServers(serverList?.length ? serverList : []);
         setSiteData(data ?? {});
       })
       .finally(() => {
         if (!isMounted.current) return;
-        Server.getAll().then(async (servers: Array<IServer> | undefined) => {
-          if (!isMounted.current) return;
-          setLoading(false);
-          // Add the server list to storage to avoid content flash
-          servers && setServers(servers);
-          await LocalStorage.setItem("forge-servers", JSON.stringify(servers));
-        });
+        Server.getAll()
+          .then(async (servers: Array<IServer> | undefined) => {
+            if (!isMounted.current) return;
+            setLoading(false);
+            if (!servers?.length) return;
+            // setServers(serversJSON);
+            setServers(servers);
+            // Add the server list to storage to avoid content flash
+            await LocalStorage.setItem("forge-servers", JSON.stringify(servers));
+          })
+          .catch((error) => setErrorMessage(error.message));
       });
   }, []);
 
-  if (!servers.length && !loading) {
-    return (
-      <List>
-        <List.Item title="Nothing found..." />
-      </List>
-    );
+  if (errorMessage.length) {
+    return <EmptyView title={errorMessage} />;
+  }
+  if (loading) {
+    return <EmptyView title="Fetching servers..." />;
+  }
+  if (!servers.length) {
+    return <EmptyView title="No servers found" />;
   }
 
   return (
@@ -72,6 +80,12 @@ export const ServersList = () => {
     </List>
   );
 };
+
+const EmptyView = ({ title }: { title: string }) => (
+  <List>
+    <List.EmptyView icon={{ source: "forge-icon-64.png" }} title={title} />
+  </List>
+);
 
 const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
   if (!server?.id) return null;
@@ -220,11 +234,11 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
 export interface IServer {
   apiToken?: string;
   id?: number;
-  credentialId?: string;
+  credentialId?: string | null;
   name?: string;
   type?: string;
   provider?: string;
-  providerId?: string;
+  providerId?: string | null;
   size?: string;
   region?: string;
   dbStatus?: string | null;
@@ -240,7 +254,7 @@ export interface IServer {
   revoked?: boolean;
   createdAt?: string;
   isReady?: boolean;
-  tags?: Array<string>;
-  keywords?: Array<string>;
-  network?: string;
+  tags?: string[];
+  keywords?: string[];
+  network?: string[];
 }
