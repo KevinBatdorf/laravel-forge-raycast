@@ -4,7 +4,6 @@ import { Server } from "./api/Server";
 import { Site } from "./api/Site";
 import { SitesList, ISite } from "./Site";
 import { getServerColor, useIsMounted } from "./helpers";
-// import serversJSON from "./fixtures/servers.json";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
@@ -47,7 +46,6 @@ export const ServersList = () => {
             if (!isMounted.current) return;
             setLoading(false);
             if (!servers?.length) return;
-            // setServers(serversJSON);
             setServers(servers);
             // Add the server list to storage to avoid content flash
             await LocalStorage.setItem("forge-servers", JSON.stringify(servers));
