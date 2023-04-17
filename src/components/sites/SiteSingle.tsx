@@ -44,20 +44,6 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
             </ActionPanel>
           }
         />
-        {url && (
-          <List.Item
-            id="open-in-browser"
-            key="open-in-browser"
-            title="Open site in browser"
-            icon={Icon.Globe}
-            accessories={[{ text: url }]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={url} />
-              </ActionPanel>
-            }
-          />
-        )}
         {site.repository && (
           <List.Item
             id="site-deploy"
@@ -135,6 +121,20 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
             </ActionPanel>
           }
         />
+        {url && (
+          <List.Item
+            id="open-in-browser"
+            key="open-in-browser"
+            title="Open site in browser"
+            icon={Icon.Globe}
+            accessories={[{ text: url }]}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={url} />
+              </ActionPanel>
+            }
+          />
+        )}
       </List.Section>
       <List.Section title="Site Additonal Information">
         {Object.entries({

@@ -18,6 +18,7 @@ To run the dev build, you can:
 ## Features from Forge API
 - View site details
 - View deployment status
+- Background refresh with menubar display
 - Multiple accounts
 - Trigger deploy script
 - Reboot services
@@ -25,13 +26,7 @@ To run the dev build, you can:
 ## Non-Forge API Features
 - Check site connectivity
 - Open terminal session
-- Copy IP addess
-
-## Future features being considered
-- Run Artisan commands
-- Run WP-CLI commands
-- View stats about the server
-- Connect with provider APIs (e.g. Digital Ocean)
+- Copy meta information
 
 ## FAQ
 - Get an API token here: https://forge.laravel.com/user-profile/api

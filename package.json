@@ -29,6 +29,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "check-deploy-status",
+      "title": "Forge Deployments",
+      "description": "Shows sites that are currently being deployed",
+      "mode": "menu-bar",
+      "interval": "10s"
     }
   ],
   "preferences": [
@@ -72,6 +79,7 @@
     "@raycast/utils": "^1.5.2",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.1",
+    "run-applescript": "^6.1.0",
     "swr": "^2.1.3"
   },
   "devDependencies": {

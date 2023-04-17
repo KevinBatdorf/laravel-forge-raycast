@@ -3,6 +3,7 @@ import { sortBy } from "lodash";
 import { FORGE_API_URL } from "../config";
 import { IServer, ISite } from "../types";
 import { apiFetch } from "../lib/api";
+import { Site } from "./Site";
 
 const defaultHeaders = {
   "Content-Type": "application/x-www-form-urlencoded",
@@ -53,10 +54,7 @@ const getServers = async ({ token, tokenKey }: { token: string; tokenKey: string
   // Get site data which will by searchable along with servers
   let keywordsByServer: Record<number, Set<string>> = {};
   try {
-    const { sites } = await apiFetch<{ sites: ISite[] }>(`${FORGE_API_URL}/sites`, {
-      method: "get",
-      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
-    });
+    const sites = await Site.getSitesWithoutServer({ token });
     keywordsByServer = getSiteKeywords(sites ?? []);
   } catch (error) {
     console.error(error);
