@@ -20,7 +20,15 @@
       "subtitle": "Laravel Forge",
       "icon": "command-icon.png",
       "description": "Search and manage your Laravel Forge servers and sites",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "server",
+          "placeholder": "Server",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

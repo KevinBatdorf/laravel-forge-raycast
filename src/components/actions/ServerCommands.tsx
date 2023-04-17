@@ -26,7 +26,8 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
           });
         }}
       />
-      <Action.CopyToClipboard title="Copy IP Address" content={server?.ip_address ?? ""} />
+      {server.ip_address && <Action.CopyToClipboard title="Copy IP Address" content={server.ip_address} />}
+      <Action.CopyToClipboard title="Copy Server ID" content={server.id} />
       <Action
         title="Clear All Server Cache"
         onAction={async () => {
