@@ -1,8 +1,8 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
+import { getPreferenceValues } from "@raycast/api";
 import { sortBy } from "lodash";
 import { FORGE_API_URL } from "../config";
 import { IServer, ISite } from "../types";
+import { apiFetch } from "../lib/api";
 
 const defaultHeaders = {
   "Content-Type": "application/x-www-form-urlencoded",
@@ -30,54 +30,39 @@ export const Server = {
         tokenKey: "laravel_forge_api_key_two",
         token: preferences?.laravel_forge_api_key_two as string,
       });
-      servers = servers.concat(serversTwo);
+      servers = [...servers, ...serversTwo];
     }
     return sortBy(servers, (s) => s?.name?.toLowerCase()) ?? {};
   },
 
-  async reboot({ serverId, token, key = "", label = "server" }: DynamicReboot) {
+  async reboot({ serverId, token, key = "" }: DynamicReboot) {
     const endpoint = key ? `servers/${serverId}/${key}/reboot` : `servers/${serverId}/reboot`;
-    try {
-      await fetch(`${FORGE_API_URL}/${endpoint}`, {
-        method: "post",
-        headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
-      });
-      showToast(Toast.Style.Success, `Rebooting ${label}...`);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        showToast(Toast.Style.Failure, error?.message ?? "Error rebooting server");
-      }
-      // Rethrow the error so the caller can handle it
-      throw error;
-    }
+    await apiFetch(`${FORGE_API_URL}/${endpoint}`, {
+      method: "post",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
   },
 };
 
 const getServers = async ({ token, tokenKey }: { token: string; tokenKey: string }) => {
-  const response = await fetch(`${FORGE_API_URL}/servers`, {
+  const { servers } = await apiFetch<{ servers: IServer[] }>(`${FORGE_API_URL}/servers`, {
     method: "get",
     headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
   });
-  if (response.status === 401) {
-    throw new Error("Error authenticating with Forge");
-  }
+
   // Get site data which will by searchable along with servers
   let keywordsByServer: Record<number, Set<string>> = {};
   try {
-    const sitesResponse = await fetch(`${FORGE_API_URL}/sites`, {
+    const { sites } = await apiFetch<{ sites: ISite[] }>(`${FORGE_API_URL}/sites`, {
       method: "get",
       headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
     });
-    const sitesData = (await sitesResponse.json()) as { sites: ISite[] };
-    keywordsByServer = getSiteKeywords(sitesData?.sites ?? []);
+    keywordsByServer = getSiteKeywords(sites ?? []);
   } catch (error) {
     console.error(error);
     // fail gracefully here as it's not critical information
   }
 
-  // Get the server data
-  const serverData = (await response.json()) as ServersResponse;
-  const servers: IServer[] = serverData?.servers ?? [];
   return servers
     .map((server) => {
       server.keywords = server?.id && keywordsByServer[server.id] ? [...keywordsByServer[server.id]] : [];
@@ -97,8 +82,4 @@ const getSiteKeywords = (sites: ISite[]) => {
     keywords.forEach((keyword) => site?.server_id && acc[site.server_id].add(keyword));
     return acc;
   }, <Record<number, Set<string>>>{});
-};
-
-type ServersResponse = {
-  servers?: IServer[];
 };

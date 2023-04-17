@@ -12,17 +12,15 @@ const fetcher = async ([serverId, tokenKey]: key) => {
   Site.getAll({
     serverId,
     token: unwrapToken(tokenKey),
-  }).then((data) => {
-    LocalStorage.setItem(cacheKey, JSON.stringify(data));
-  });
+  })
+    .then((data) => LocalStorage.setItem(cacheKey, JSON.stringify(data)))
+    .catch(() => LocalStorage.removeItem(cacheKey));
+
   return await backupData(cacheKey);
 };
 
 export const useSites = (server?: IServer, optons: Partial<SWRConfiguration> = {}) => {
-  const cacheKey = `sites-${server?.id}`;
   const { data, error } = useSWR<ISite[]>(server?.id ? [server.id, server.api_token_key] : null, fetcher, optons);
-
-  if (error) LocalStorage.removeItem(cacheKey);
 
   return {
     sites: data,

@@ -18,8 +18,8 @@ export const ServersList = () => {
     setPreLoadedServer(server);
   };
 
-  if (error) {
-    return <EmptyView title={error} />;
+  if (error?.message) {
+    return <EmptyView title={`Error: ${error.message}`} />;
   }
   if (loading) {
     return <EmptyView title="Fetching servers..." />;
