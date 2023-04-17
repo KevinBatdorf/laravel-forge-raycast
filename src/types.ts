@@ -8,14 +8,17 @@ export interface IServer {
   provider_id?: string | null;
   size?: string;
   region?: string;
+  ubuntu_version?: string;
   db_status?: string | null;
   redis_status?: string | null;
   php_version?: string;
+  opcache_status?: string | null;
   php_cli_version?: string;
   database_type?: string;
   ip_address?: string;
   ssh_port?: number;
   private_ip_address?: string;
+  local_public_key?: string;
   blackfire_status?: string | null;
   papertrail_status?: string | null;
   revoked?: boolean;

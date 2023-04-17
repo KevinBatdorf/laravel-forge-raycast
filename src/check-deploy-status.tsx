@@ -1,7 +1,8 @@
-import { Cache, Image, MenuBarExtra, open } from "@raycast/api";
+import { Cache, Image, MenuBarExtra, open, updateCommandMetadata } from "@raycast/api";
 import { useAllSites } from "./hooks/useAllSites";
 import { ISite } from "./types";
 import { runAppleScript } from "run-applescript";
+import { useEffect } from "react";
 
 const cache = new Cache();
 if (!cache.get("deploying-ids")) {
@@ -56,13 +57,17 @@ export default function Command() {
     .map((entry: RecentEntry) => allSites?.find((site: ISite) => site.id === entry.id) ?? {})
     .filter((site: ISite) => site?.id && site.deployment_status !== "deploying");
 
+  useEffect(() => {
+    updateCommandMetadata({ subtitle: deploying?.length > 0 ? "Deploying..." : "Idle" });
+  }, [deploying]);
+
   return (
     <MenuBarExtra
       isLoading={loadingOne || loadingTwo}
       icon={{
         source: "forge-icon-64.png",
         mask: Image.Mask.Circle,
-        tintColor: deploying?.length > 0 ? "#19b69c" : "white",
+        tintColor: deploying?.length > 0 ? "#19b69c" : { light: "#000000", dark: "#ffffff", adjustContrast: true },
       }}
       tooltip="Laravel Forge"
     >

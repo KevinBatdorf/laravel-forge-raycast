@@ -4,10 +4,13 @@ import { IServer, ISite } from "../types";
 import { Site } from "../api/Site";
 import { unwrapToken } from "../lib/auth";
 import { LocalStorage } from "@raycast/api";
+import { USE_FAKE_DATA } from "../config";
+import { MockSite } from "../api/Mock";
 
 type key = [IServer["id"], IServer["api_token_key"]];
 
 const fetcher = async ([serverId, tokenKey]: key) => {
+  if (USE_FAKE_DATA) return MockSite.getAll(serverId);
   const cacheKey = `sites-${serverId}`;
   Site.getAll({
     serverId,

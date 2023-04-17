@@ -52,7 +52,7 @@ export const Site = {
   },
 };
 
-const sortAndFilterSites = (sites: ISite[]) => {
+export const sortAndFilterSites = (sites: ISite[]) => {
   const filtered =
     sites?.map((site) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

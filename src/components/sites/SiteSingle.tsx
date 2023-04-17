@@ -9,9 +9,9 @@ import { unwrapToken } from "../../lib/auth";
 import { EmptyView } from "../EmptyView";
 import { useIsSiteOnline } from "../../hooks/useIsSiteOnline";
 import { useEffect, useState } from "react";
+import { siteStatusState } from "../../lib/color";
 
 export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) => {
-  const token = unwrapToken(server.api_token_key);
   const refreshInterval = 60_000 / API_RATE_LIMIT + 100;
   const { site: siteData, loading, error } = useSite(server, site, { refreshInterval });
   const { url } = useIsSiteOnline(site);
@@ -44,32 +44,7 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
             </ActionPanel>
           }
         />
-        {site.repository && (
-          <List.Item
-            id="site-deploy"
-            key="site-deploy"
-            title="Trigger deploy script"
-            icon={Icon.ArrowClockwise}
-            accessories={[
-              { text: siteData.deployment_status ?? "press to deploy" },
-              { icon: siteData.deployment_status ? { source: Icon.Circle, tintColor: Color.Purple } : undefined },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action
-                  icon={Icon.ArrowClockwise}
-                  title="Trigger Deploy Script"
-                  onAction={() => {
-                    showToast(Toast.Style.Success, "Deploying...");
-                    Site.deploy({ siteId: siteData.id, serverId: server.id, token }).catch(() =>
-                      showToast(Toast.Style.Failure, "Failed to trigger deploy script")
-                    );
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        )}
+        {site.repository && <DeployListItem siteData={siteData} server={server} />}
         <List.Item
           id="site-env"
           key="site-env"
@@ -169,5 +144,49 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
         })}
       </List.Section>
     </List>
+  );
+};
+
+const DeployListItem = ({ siteData, server }: { siteData: ISite; server: IServer }) => {
+  const token = unwrapToken(server.api_token_key);
+  const [lastDeployTime, setLastDeployTime] = useState(0);
+
+  useEffect(() => {
+    if (siteData?.deployment_status !== "deploying") return;
+    // rerender every 1s to update the deployment status icon
+    const id = setTimeout(() => setLastDeployTime(Date.now()), 1000);
+    return () => clearTimeout(id);
+  }, [siteData, lastDeployTime]);
+
+  return (
+    <List.Item
+      id="site-deploy"
+      key="site-deploy"
+      title="Trigger deploy script"
+      icon={Icon.ArrowRight}
+      accessories={[
+        { icon: siteData.deployment_status === "deploying" ? siteStatusState(siteData, true).icon : undefined },
+        {
+          text:
+            siteData.deployment_status === "deploying"
+              ? "deploying..."
+              : siteData.deployment_status ?? "press to deploy",
+        },
+      ]}
+      actions={
+        <ActionPanel>
+          <Action
+            icon={Icon.ArrowClockwise}
+            title="Trigger Deploy Script"
+            onAction={() => {
+              showToast(Toast.Style.Success, "Deploying...");
+              Site.deploy({ siteId: siteData.id, serverId: server.id, token }).catch(() =>
+                showToast(Toast.Style.Failure, "Failed to trigger deploy script")
+              );
+            }}
+          />
+        </ActionPanel>
+      }
+    />
   );
 };
