@@ -1,93 +1,82 @@
 import { showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
-import { ISite } from "../Site";
-import { sortBy, mapKeys, camelCase } from "lodash";
-import { IServer } from "../Server";
-import { checkServerisOnline } from "../helpers";
+import { sortBy } from "lodash";
 import { FORGE_API_URL } from "../config";
+import { ConfigFile, IServer, ISite } from "../types";
 
-function theHeaders(token: string) {
-  return {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/x-www-form-urlencoded",
-    Accept: "application/json",
-  };
-}
+const defaultHeaders = {
+  "Content-Type": "application/x-www-form-urlencoded",
+  Accept: "application/json",
+};
+type ServerWithToken = { serverId: IServer["id"]; token: string };
+type ServerSiteWithToken = { serverId: IServer["id"]; siteId: ISite["id"]; token: string };
 
 export const Site = {
-  async getAll(server: IServer) {
-    const headers = theHeaders(server?.apiToken ?? "");
+  async getAll({ serverId, token }: ServerWithToken) {
+    const response = await fetch(`${FORGE_API_URL}/servers/${serverId}/sites`, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    const siteData = (await response.json()) as { sites: ISite[] };
+    const sites =
+      siteData?.sites?.map((site) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { telegram_secret, ...siteData } = site;
+        return siteData;
+      }) ?? [];
+    return sortBy(sites, "name") as ISite[];
+  },
+
+  async get({ serverId, siteId, token }: ServerSiteWithToken) {
     try {
-      const response = await fetch(`${FORGE_API_URL}/servers/${server.id}/sites`, {
+      const response = await fetch(`${FORGE_API_URL}/servers/${serverId}/sites/${siteId}`, {
         method: "get",
-        headers,
+        headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
       });
-      const siteData = (await response.json()) as SitesResponse;
-      let sites = siteData?.sites ?? [];
-      // do a check to see if the server is returning 200
-      sites = await Promise.all(
-        sites?.map(async (s) => {
-          const urls = [...(s?.aliases ?? []), s?.name ?? ""];
-          s.isOnline = await checkServerisOnline(urls);
-          return s;
-        })
-      );
-      sites = sites.map((s) => mapKeys(s, (_, k) => camelCase(k)) as ISite);
-      return sortBy(sites, "name") as ISite[];
+      const siteData = (await response.json()) as { site: ISite };
+      if (!siteData?.site?.id) throw new Error("Site not found");
+      return siteData.site;
     } catch (error: unknown) {
-      showToast(Toast.Style.Failure, (error as ErrorEvent).message);
-      return;
+      if (error instanceof Error) {
+        showToast(Toast.Style.Failure, error?.message ?? "Site not found");
+      }
+      // Rethrow the error so the caller can handle it
+      throw error;
     }
   },
-  async get(site: ISite, server: IServer) {
-    const headers = theHeaders(server?.apiToken ?? "");
-    try {
-      const response = await fetch(`${FORGE_API_URL}/servers/${server.id}/sites/${site.id}`, {
-        method: "get",
-        headers,
-      });
-      const siteData = (await response.json()) as SitesResponse;
-      // eslint-disable-next-line
-      // @ts-expect-error Not sure how to convert Dictionary from lodash to IServer
-      return mapKeys(siteData["site"], (_, k) => camelCase(k)) as ISite;
-    } catch (error: unknown) {
-      showToast(Toast.Style.Failure, (error as ErrorEvent).message);
-      return;
-    }
-  },
-  async deploy(site: ISite, server: IServer) {
-    const headers = theHeaders(server?.apiToken ?? "");
+
+  async deploy({ serverId, siteId, token }: ServerSiteWithToken) {
     const toast = new Toast({ style: Toast.Style.Animated, title: "Deploying..." });
     try {
       toast.show();
-      await fetch(`${FORGE_API_URL}/servers/${server.id}/sites/${site.id}/deployment/deploy`, {
+      await fetch(`${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/deployment/deploy`, {
         method: "post",
-        headers,
+        headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
       });
       await new Promise((resolve) => setTimeout(resolve, 3000));
       toast.hide();
     } catch (error: unknown) {
-      showToast(Toast.Style.Failure, (error as ErrorEvent).message);
-      return;
+      if (error instanceof Error) {
+        showToast(Toast.Style.Failure, error?.message ?? "There was an error deploying.");
+      }
+      // Rethrow the error so the caller can handle it
+      throw error;
     }
   },
-  async getConfig(type: "env" | "nginx", site: ISite, server: IServer) {
-    const headers = theHeaders(server?.apiToken ?? "");
-    try {
-      const response = await fetch(`${FORGE_API_URL}/servers/${server.id}/sites/${site.id}/${type}`, {
-        method: "get",
-        headers,
-      });
-      const resource = await response.text();
-      // Adding <pre> here seems to convert the file into a readable markdown format
-      return resource ? `<pre><!-- ${type} file begin -->\n\n${resource}` : "Nothing found";
-    } catch (error: unknown) {
-      showToast(Toast.Style.Failure, "There was an error.");
-      return (error as ErrorEvent).message;
-    }
-  },
-};
 
-export type SitesResponse = {
-  sites?: ISite[];
+  async getConfig({ serverId, siteId, token, type }: ServerSiteWithToken & { type: ConfigFile }) {
+    try {
+      const response = await fetch(`${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/${type}`, {
+        method: "get",
+        headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+      });
+      return (await response.text())?.trim();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showToast(Toast.Style.Failure, error?.message ?? "Config not found");
+      }
+      // Rethrow the error so the caller can handle it
+      throw error;
+    }
+  },
 };
