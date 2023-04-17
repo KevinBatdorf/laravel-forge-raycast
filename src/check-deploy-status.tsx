@@ -1,12 +1,17 @@
 import { Cache, Image, MenuBarExtra, open } from "@raycast/api";
 import { useAllSites } from "./hooks/useAllSites";
 import { ISite } from "./types";
+import { runAppleScript } from "run-applescript";
 
 const cache = new Cache();
 if (!cache.get("deploying-ids")) {
   cache.set("deploying-ids", JSON.stringify([]));
 }
+if (!cache.get("deploying-last-status")) {
+  cache.set("deploying-last-status", JSON.stringify([]));
+}
 const recentlyDeployed = () => JSON.parse(cache.get("deploying-ids") ?? "[]");
+const lastStatus = () => JSON.parse(cache.get("deploying-last-status") ?? "[]");
 
 interface RecentEntry {
   id: number;
@@ -18,6 +23,18 @@ export default function Command() {
   const { sites: sitesTokenTwo, loading: loadingTwo } = useAllSites("laravel_forge_api_key_two");
   const allSites = [...(sitesTokenOne ?? []), ...(sitesTokenTwo ?? [])];
   const deploying = allSites.filter((site: ISite) => site.deployment_status === "deploying");
+
+  const newDeploying = deploying.filter((site: ISite) => {
+    // find any that were null but now are deploying
+    return lastStatus().find((last: ISite) => last.id === site.id)?.deployment_status !== "deploying";
+  });
+
+  if (newDeploying.length > 0) {
+    const toShow = newDeploying[0];
+    // Seems the best we can do?
+    runAppleScript(`display notification "Deploying ${toShow.name}" with title "Laravel Forge"`);
+  }
+  if (allSites?.length) cache.set("deploying-last-status", JSON.stringify(allSites));
 
   // Clear out any sites that have been deploying for more than 3 minutes
   const IdsToKeep = recentlyDeployed().filter((entry: { id: number; timestamp: number }) => {
@@ -37,7 +54,7 @@ export default function Command() {
 
   const recentlyActive = recentlyDeployed()
     .map((entry: RecentEntry) => allSites?.find((site: ISite) => site.id === entry.id) ?? {})
-    .filter((site: ISite) => site.deployment_status !== "deploying");
+    .filter((site: ISite) => site?.id && site.deployment_status !== "deploying");
 
   return (
     <MenuBarExtra
@@ -49,12 +66,12 @@ export default function Command() {
       }}
       tooltip="Laravel Forge"
     >
-      {deploying?.length > 0 && <MenuBarExtra.Item key="currently-deploying" title="Currently Deploying" />}
+      {deploying?.length > 0 && <MenuBarExtra.Item key="currently-deploying" title="Current Activity" />}
       {deploying.map((site: ISite) => (
         <MenuBarExtra.Item
-          key={site.id}
+          key={"current" + site.id}
           title={site?.name ?? site?.aliases?.[0] ?? "Unknown"}
-          subtitle={site?.deployment_status ?? "deployed"}
+          subtitle={site?.deployment_status === "deploying" ? "deploying..." : site?.deployment_status ?? "deployed"}
           tooltip="Open in Raycast"
           onAction={() => {
             open(
@@ -66,7 +83,7 @@ export default function Command() {
       {recentlyActive?.length > 0 && <MenuBarExtra.Item key="recent-activity" title="Recent Activity" />}
       {recentlyActive.map((site: ISite) => (
         <MenuBarExtra.Item
-          key={site.id}
+          key={"recent" + site.id}
           title={site?.name ?? site?.aliases?.[0] ?? "Unknown"}
           subtitle={site?.deployment_status ?? "deployed"}
           tooltip="Open in Raycast"
