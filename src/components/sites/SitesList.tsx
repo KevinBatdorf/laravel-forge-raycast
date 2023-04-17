@@ -7,6 +7,7 @@ import { SiteCommands } from "../actions/SiteCommands";
 import { useSites } from "../../hooks/useSites";
 import { API_RATE_LIMIT } from "../../config";
 import { useIsSiteOnline } from "../../hooks/useIsSiteOnline";
+import { useSite } from "../../hooks/useSite";
 
 export const SitesList = ({ server }: { server: IServer }) => {
   const refreshInterval = 60_000 / API_RATE_LIMIT + 100;
@@ -28,6 +29,7 @@ export const SitesList = ({ server }: { server: IServer }) => {
 const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
   const { isOnline, loading } = useIsSiteOnline(site);
   const { icon: stateIcon, text: stateText } = siteStatusState(site, loading ? true : isOnline);
+  useSite(server, site);
   if (!site?.id) return null;
   return (
     <List.Item

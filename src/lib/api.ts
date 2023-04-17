@@ -8,11 +8,13 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
     res = await fetch(url, options);
   } catch (e) {
     if (e instanceof Error) {
+      console.error({ error: e, url });
       showResetToast({ title: `Error ${res?.status}: ${e.message}` });
       throw new Error(e.message);
     }
   }
   if (!res?.ok) {
+    console.error({ status: res?.status, text: res?.statusText, url });
     showResetToast({ title: `Error ${res?.status}: ${res?.statusText}` });
     throw new Error(res?.statusText);
   }
