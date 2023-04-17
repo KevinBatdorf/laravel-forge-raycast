@@ -47,10 +47,22 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
           key="copy-ip"
           title="Copy IP address"
           icon={Icon.Clipboard}
-          accessories={[{ text: server.ip_address }]}
+          accessories={[{ text: server?.ip_address ?? "Not found" }]}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy IP Address" content={server?.ip_address ?? ""} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          id="copy-forge-id"
+          key="copy-forge-id"
+          title="Copy Forge ID"
+          icon={Icon.Clipboard}
+          accessories={[{ text: server.id.toString() }]}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy Forge ID" content={server.id} />
             </ActionPanel>
           }
         />

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { useServers } from "../../hooks/useServers";
 import { IServer } from "../../types";
 import { EmptyView } from "../../components/EmptyView";
@@ -6,12 +6,26 @@ import { ServerSingle } from "./ServerSingle";
 import { ServerCommands } from "../actions/ServerCommands";
 import { getServerColor } from "../../lib/color";
 import { useSites } from "../../hooks/useSites";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export const ServersList = () => {
+export const ServersList = ({ search }: { search: string }) => {
   const [preLoadedServer, setPreLoadedServer] = useState<IServer>();
   const { servers, loading, error } = useServers();
+  const [incomingSearch, setIncomingSearch] = useState(search);
   useSites(preLoadedServer);
+  const { push } = useNavigation();
+
+  useEffect(() => {
+    if (!incomingSearch) return;
+    const server =
+      // First match by ID, then if not do a full search
+      servers?.find((server) => server.id.toString() === incomingSearch) ||
+      servers?.find((server) => JSON.stringify(server).includes(incomingSearch));
+    if (!server) return;
+    showToast(Toast.Style.Success, `Now showing: ${server?.name}` ?? `Now showing: #${server?.id}`);
+    push(<ServerSingle server={server} />);
+    setIncomingSearch("");
+  }, [incomingSearch]);
 
   const preFetchSites = (serverId: string | null) => {
     const server = servers?.find((server) => server.id.toString() === serverId);
