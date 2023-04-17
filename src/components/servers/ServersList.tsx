@@ -65,7 +65,7 @@ const ServerListItem = ({ server }: { server: IServer }) => {
       accessories={[{ text: server?.keywords?.join(", ") ?? "" }]}
       title={server?.name ?? "Server name undefined"}
       icon={{
-        source: "server.png",
+        source: Icon.Box,
         tintColor: getServerColor(server?.provider ?? ""),
       }}
       actions={

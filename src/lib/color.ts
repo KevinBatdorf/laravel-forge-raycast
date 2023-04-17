@@ -21,22 +21,37 @@ export const getServerColor = (provider: string): string => {
 };
 
 export const siteStatusState = (site: ISite, online: boolean) => {
-  const details = {
-    icon: { source: Icon.Circle, tintColor: Color.Green },
-    text: "connected",
-  };
   if (site.deployment_status === "failed") {
-    details.icon.tintColor = Color.Red;
-    details.text = "deployment failed";
+    return {
+      icon: { source: Icon.MinusCircleFilled, tintColor: Color.Red },
+      text: "deployment failed",
+    };
   }
   if (!online) {
-    details.icon.tintColor = Color.Red;
-    details.text = "offline";
+    return {
+      icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
+      text: "offline",
+    };
   }
   if (site.deployment_status === "deploying") {
-    details.icon.tintColor = Color.Purple;
-    details.text = "deploying...";
+    const progressIcons = [
+      Icon.Circle,
+      Icon.CircleProgress25,
+      Icon.CircleProgress50,
+      Icon.CircleProgress75,
+      Icon.CircleProgress100,
+    ];
+    // based on the time we can return a progress icon
+    const timeNow = new Date().getTime();
+    const source = progressIcons[Math.floor((timeNow / 1000) % 5)];
+    return {
+      icon: { source, tintColor: Color.Purple },
+      text: "deploying...",
+    };
   }
 
-  return details;
+  return {
+    icon: { source: Icon.CheckCircle, tintColor: Color.Green },
+    text: "connected",
+  };
 };
