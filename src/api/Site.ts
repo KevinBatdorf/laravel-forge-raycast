@@ -11,18 +11,21 @@ type ServerWithToken = { serverId: IServer["id"]; token: string };
 type ServerSiteWithToken = { serverId: IServer["id"]; siteId: ISite["id"]; token: string };
 
 export const Site = {
+  async getSitesWithoutServer({ token }: { token: string }) {
+    if (!token) return [];
+    const { sites } = await apiFetch<{ sites: ISite[] }>(`${FORGE_API_URL}/sites`, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    return sortAndFilterSites(sites);
+  },
+
   async getAll({ serverId, token }: ServerWithToken) {
     const { sites } = await apiFetch<{ sites: ISite[] }>(`${FORGE_API_URL}/servers/${serverId}/sites`, {
       method: "get",
       headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
     });
-    const filtered =
-      sites?.map((site) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { telegram_secret, ...siteData } = site;
-        return siteData;
-      }) ?? [];
-    return sortBy(filtered, "name") as ISite[];
+    return sortAndFilterSites(sites);
   },
 
   async get({ serverId, siteId, token }: ServerSiteWithToken) {
@@ -30,7 +33,7 @@ export const Site = {
       method: "get",
       headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
     });
-    return site;
+    return sortAndFilterSites([site])?.[0];
   },
 
   async deploy({ serverId, siteId, token }: ServerSiteWithToken) {
@@ -47,4 +50,14 @@ export const Site = {
     });
     return response.trim();
   },
+};
+
+const sortAndFilterSites = (sites: ISite[]) => {
+  const filtered =
+    sites?.map((site) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { telegram_secret, ...siteData } = site;
+      return siteData;
+    }) ?? [];
+  return sortBy(filtered, "name") as ISite[];
 };

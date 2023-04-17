@@ -29,6 +29,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "check-deploy-status",
+      "title": "Forge Deployments",
+      "description": "Shows sites that are currently being deployed",
+      "mode": "menu-bar",
+      "interval": "10s"
     }
   ],
   "preferences": [
