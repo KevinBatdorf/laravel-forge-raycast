@@ -1,4 +1,4 @@
-import { Icon, Action, getPreferenceValues, showToast, LocalStorage } from "@raycast/api";
+import { Icon, Action, getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/api";
 import { Server } from "../../api/Server";
 import { IServer } from "../../types";
 import { clearCache } from "../../lib/cache";
@@ -19,7 +19,12 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
       <Action
         icon={Icon.ArrowClockwise}
         title="Reboot Server"
-        onAction={() => Server.reboot({ serverId: server.id, token })}
+        onAction={() => {
+          showToast(Toast.Style.Animated, "Rebooting server...");
+          Server.reboot({ serverId: server.id, token }).catch(() => {
+            showToast(Toast.Style.Failure, "Failed to reboot server");
+          });
+        }}
       />
       <Action.CopyToClipboard title="Copy IP Address" content={server?.ip_address ?? ""} />
       <Action

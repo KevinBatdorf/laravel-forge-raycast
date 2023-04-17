@@ -1,4 +1,4 @@
-import { Icon, List, ActionPanel, Color, Action } from "@raycast/api";
+import { Icon, List, ActionPanel, Color, Action, showToast, Toast } from "@raycast/api";
 import { Site } from "../../api/Site";
 import { IServer, ISite } from "../../types";
 import { EnvFile } from "../configs/EnvFile";
@@ -70,10 +70,15 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
             ]}
             actions={
               <ActionPanel>
-                <ActionPanel.Item
+                <Action
                   icon={Icon.ArrowClockwise}
                   title="Trigger Deploy Script"
-                  onAction={() => Site.deploy({ siteId: siteData.id, serverId: server.id, token })}
+                  onAction={() => {
+                    showToast(Toast.Style.Success, "Deploying...");
+                    Site.deploy({ siteId: siteData.id, serverId: server.id, token }).catch(() =>
+                      showToast(Toast.Style.Failure, "Failed to trigger deploy script")
+                    );
+                  }}
                 />
               </ActionPanel>
             }

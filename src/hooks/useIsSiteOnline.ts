@@ -15,7 +15,7 @@ const fetcher = async (site: ISite) => {
 
 export const useIsSiteOnline = (site: ISite) => {
   const { data, error } = useSWR<string>(site?.id ? site : null, fetcher, {
-    refreshInterval: 1000,
+    refreshInterval: 1_000,
   });
 
   return {

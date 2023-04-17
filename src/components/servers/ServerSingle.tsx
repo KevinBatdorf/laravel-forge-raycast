@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Action, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Icon, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Server } from "../../api/Server";
 import { IServer } from "../../types";
 import { unwrapToken } from "../../lib/auth";
@@ -66,7 +66,12 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
               <Action
                 icon={Icon.ArrowClockwise}
                 title="Reboot Server"
-                onAction={async () => await Server.reboot({ serverId: server.id, token })}
+                onAction={async () => {
+                  showToast(Toast.Style.Animated, `Rebooting server...`);
+                  await Server.reboot({ serverId: server.id, token }).catch(() => {
+                    showToast(Toast.Style.Failure, `Failed to reboot server`);
+                  });
+                }}
               />
             </ActionPanel>
           }
@@ -83,7 +88,12 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
                   <Action
                     icon={Icon.ArrowClockwise}
                     title={`Reboot ${label}`}
-                    onAction={async () => await Server.reboot({ serverId: server.id, token, key, label })}
+                    onAction={async () => {
+                      showToast(Toast.Style.Animated, `Rebooting ${label}...`);
+                      await Server.reboot({ serverId: server.id, token, key }).catch(() => {
+                        showToast(Toast.Style.Failure, `Failed to reboot ${label}`);
+                      });
+                    }}
                   />
                 </ActionPanel>
               }
