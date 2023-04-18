@@ -1,4 +1,4 @@
-import { Color, Icon } from "@raycast/api";
+import { Color, Icon, Image } from "@raycast/api";
 import { ISite } from "../types";
 
 export const getServerColor = (provider: string): string => {
@@ -20,20 +20,14 @@ export const getServerColor = (provider: string): string => {
   return "rgb(24, 182, 155)";
 };
 
-export const siteStatusState = (site: ISite, online: boolean) => {
-  if (site.deployment_status === "failed") {
+export const getDeplymentStateIcon = (status: string): { text: string; icon: Image.ImageLike } => {
+  if (status === "failed") {
     return {
       icon: { source: Icon.MinusCircleFilled, tintColor: Color.Red },
       text: "deployment failed",
     };
   }
-  if (!online) {
-    return {
-      icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
-      text: "offline",
-    };
-  }
-  if (site.deployment_status === "deploying") {
+  if (status === "deploying") {
     const progressIcons = [
       Icon.Circle,
       Icon.CircleProgress25,
@@ -49,9 +43,23 @@ export const siteStatusState = (site: ISite, online: boolean) => {
       text: "deploying...",
     };
   }
-
   return {
     icon: { source: Icon.CheckCircle, tintColor: Color.Green },
-    text: "connected",
+    text: status,
   };
+};
+
+export const siteStatusState = (site: ISite, online: boolean) => {
+  if (site.deployment_status === "failed") return getDeplymentStateIcon(site.deployment_status);
+  if (!online) {
+    return {
+      icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
+      text: "offline",
+    };
+  }
+  const status = getDeplymentStateIcon(site.deployment_status || "connected");
+  if (status.text === "finished") {
+    return { ...status, text: "connected" };
+  }
+  return status;
 };

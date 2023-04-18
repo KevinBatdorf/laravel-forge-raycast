@@ -7,7 +7,6 @@ import { SiteCommands } from "../actions/SiteCommands";
 import { useSites } from "../../hooks/useSites";
 import { API_RATE_LIMIT } from "../../config";
 import { useIsSiteOnline } from "../../hooks/useIsSiteOnline";
-import { useSite } from "../../hooks/useSite";
 import { useEffect, useState } from "react";
 
 export const SitesList = ({ server }: { server: IServer }) => {
@@ -31,7 +30,6 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
   const [lastDeployTime, setLastDeployTime] = useState(0);
   const { isOnline, loading } = useIsSiteOnline(site);
   const { icon: stateIcon, text: stateText } = siteStatusState(site, loading ? true : isOnline);
-  useSite(server, site);
 
   useEffect(() => {
     if (site?.deployment_status !== "deploying") return;

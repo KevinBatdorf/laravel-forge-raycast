@@ -1,4 +1,4 @@
-import { Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Icon, Action, showToast, Toast } from "@raycast/api";
 import { Site } from "../../api/Site";
 import { IServer, ISite } from "../../types";
 import { unwrapToken } from "../../lib/auth";

@@ -1,33 +1,22 @@
-import { Icon, List, ActionPanel, Color, Action, showToast, Toast } from "@raycast/api";
+import { Icon, List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { Site } from "../../api/Site";
 import { IServer, ISite } from "../../types";
 import { EnvFile } from "../configs/EnvFile";
 import { NginxFile } from "../configs/NginxFile";
-import { useSite } from "../../hooks/useSite";
-import { API_RATE_LIMIT } from "../../config";
 import { unwrapToken } from "../../lib/auth";
 import { EmptyView } from "../EmptyView";
 import { useIsSiteOnline } from "../../hooks/useIsSiteOnline";
 import { useEffect, useState } from "react";
 import { siteStatusState } from "../../lib/color";
+import { DeployHistory } from "./DeployHistory";
+import { useSites } from "../../hooks/useSites";
 
 export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) => {
-  const refreshInterval = 60_000 / API_RATE_LIMIT + 100;
-  const { site: siteData, loading, error } = useSite(server, site, { refreshInterval });
+  const { sites } = useSites(server);
+  const siteData = sites?.find((s) => s.id === site.id);
   const { url } = useIsSiteOnline(site);
-  const [reallyLoading, setReallyLoading] = useState(false);
 
-  useEffect(() => {
-    if (!loading) return setReallyLoading(false);
-    // Essentially a loading debounce to prevent flickering
-    const id = setTimeout(() => setReallyLoading(loading), 100);
-    return () => clearTimeout(id);
-  }, [loading]);
-
-  if (reallyLoading) return <EmptyView title="Loading..." />;
-  if (loading) return null;
-  if (error) return <EmptyView title={error} />;
-  if (!siteData) return <EmptyView title="No site found" />;
+  if (!siteData) return <EmptyView title="Loading..." />;
 
   return (
     <List searchBarPlaceholder="Search sites...">
@@ -45,6 +34,40 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
           }
         />
         {site.repository && <DeployListItem siteData={siteData} server={server} />}
+        {site.repository && (
+          <List.Item
+            id="deploy-history"
+            key="deploy-history"
+            title="View deployment logs"
+            accessories={[{ text: "press to view" }]}
+            icon={Icon.List}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="View Deployment Logs"
+                  icon={Icon.List}
+                  target={<DeployHistory site={site} server={server} />}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+        <List.Item
+          id="open-in-ssh"
+          key="open-in-ssh"
+          title={`Open SSH connection (${site.username})`}
+          icon={Icon.Terminal}
+          accessories={[{ text: `ssh://${site.username}@${server.ip_address}` }]}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title={`Open SSH Connection (${site.username})`}
+                url={`ssh://${site.username}@${server.ip_address}`}
+              />
+            </ActionPanel>
+          }
+        />
         <List.Item
           id="site-env"
           key="site-env"
@@ -54,6 +77,7 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
           actions={
             <ActionPanel>
               <Action.Push
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Open .env File"
                 icon={Icon.BlankDocument}
                 target={<EnvFile site={site} server={server} />}
@@ -77,21 +101,6 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
                 title="Open Nginx Config"
                 icon={Icon.BlankDocument}
                 target={<NginxFile site={site} server={server} />}
-              />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          id="open-in-ssh"
-          key="open-in-ssh"
-          title={`Open SSH connection (${site.username})`}
-          icon={Icon.Terminal}
-          accessories={[{ text: `ssh://${site.username}@${server.ip_address}` }]}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title={`Open SSH Connection (${site.username})`}
-                url={`ssh://${site.username}@${server.ip_address}`}
               />
             </ActionPanel>
           }
@@ -184,6 +193,11 @@ const DeployListItem = ({ siteData, server }: { siteData: ISite; server: IServer
                 showToast(Toast.Style.Failure, "Failed to trigger deploy script")
               );
             }}
+          />
+          <Action.Push
+            icon={Icon.Document}
+            title="View Deployment History"
+            target={<DeployHistory site={siteData} server={server} />}
           />
         </ActionPanel>
       }

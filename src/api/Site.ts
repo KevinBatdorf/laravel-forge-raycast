@@ -1,6 +1,6 @@
 import { sortBy } from "lodash";
 import { FORGE_API_URL } from "../config";
-import { ConfigFile, IServer, ISite } from "../types";
+import { ConfigFile, IDeployment, IServer, ISite } from "../types";
 import { apiFetch, apiFetchText } from "../lib/api";
 
 const defaultHeaders = {
@@ -28,14 +28,6 @@ export const Site = {
     return sortAndFilterSites(sites);
   },
 
-  async get({ serverId, siteId, token }: ServerSiteWithToken) {
-    const { site } = await apiFetch<{ site: ISite }>(`${FORGE_API_URL}/servers/${serverId}/sites/${siteId}`, {
-      method: "get",
-      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
-    });
-    return sortAndFilterSites([site])?.[0];
-  },
-
   async deploy({ serverId, siteId, token }: ServerSiteWithToken) {
     await apiFetch(`${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/deployment/deploy`, {
       method: "post",
@@ -49,6 +41,29 @@ export const Site = {
       headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
     });
     return response.trim();
+  },
+
+  async getDeploymentHistory({ serverId, siteId, token }: ServerSiteWithToken) {
+    const endpoint = `${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/deployment-history`;
+    const { deployments } = await apiFetch<{ deployments: IDeployment[] }>(endpoint, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    return deployments;
+  },
+
+  async getDeploymentOutput({
+    serverId,
+    siteId,
+    deploymentId,
+    token,
+  }: ServerSiteWithToken & { deploymentId: IDeployment["id"] }) {
+    const endpoint = `${FORGE_API_URL}/servers/${serverId}/sites/${siteId}/deployment-history/${deploymentId}/output`;
+    const { output } = await apiFetch<{ output: string }>(endpoint, {
+      method: "get",
+      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
+    });
+    return output;
   },
 };
 

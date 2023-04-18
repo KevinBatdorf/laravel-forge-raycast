@@ -62,3 +62,17 @@ export interface ISite {
 }
 
 export type ConfigFile = "env" | "nginx";
+
+export interface IDeployment {
+  id: number;
+  server_id?: number;
+  site_id?: number;
+  type?: number;
+  commit_hash?: string;
+  commit_author?: string;
+  commit_message?: string;
+  started_at?: string;
+  ended_at?: string;
+  status?: string;
+  displayable_type?: string;
+}
