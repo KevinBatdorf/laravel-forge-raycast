@@ -12,7 +12,12 @@ export const ServersList = ({ search }: { search: string }) => {
   const [preLoadedServer, setPreLoadedServer] = useState<IServer>();
   const { servers, loading, error } = useServers();
   const [incomingSearch, setIncomingSearch] = useState(search);
-  useSites(preLoadedServer);
+  useSites(preLoadedServer, {
+    // Immutable
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
   const { push } = useNavigation();
 
   useEffect(() => {

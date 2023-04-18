@@ -11,7 +11,7 @@ const fetcher = ([_, tokenKey]: [unknown, string]) =>
 
 export const useAllSites = (tokenKey: string) => {
   const { data, error } = useSWR<ISite[]>(["all-sites", tokenKey], fetcher, {
-    refreshInterval: 5_000,
+    refreshInterval: 60_000 * 5,
   });
 
   return {
