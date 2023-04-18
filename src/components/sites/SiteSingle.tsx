@@ -3,8 +3,6 @@ import { Site } from "../../api/Site";
 import { IServer, ISite } from "../../types";
 import { EnvFile } from "../configs/EnvFile";
 import { NginxFile } from "../configs/NginxFile";
-import { useSite } from "../../hooks/useSite";
-import { API_RATE_LIMIT } from "../../config";
 import { unwrapToken } from "../../lib/auth";
 import { EmptyView } from "../EmptyView";
 import { useIsSiteOnline } from "../../hooks/useIsSiteOnline";
@@ -63,6 +61,7 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title={`Open SSH Connection (${site.username})`}
                 url={`ssh://${site.username}@${server.ip_address}`}
               />
@@ -78,6 +77,7 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
           actions={
             <ActionPanel>
               <Action.Push
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Open .env File"
                 icon={Icon.BlankDocument}
                 target={<EnvFile site={site} server={server} />}

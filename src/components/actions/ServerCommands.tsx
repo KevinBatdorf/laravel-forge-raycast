@@ -13,6 +13,7 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
       <Action.OpenInBrowser title="Open on Laravel Forge" url={`https://forge.laravel.com/servers/${server.id}`} />
       <Action.OpenInBrowser
         icon={Icon.Terminal}
+        // eslint-disable-next-line @raycast/prefer-title-case
         title={`Open SSH Connection (${sshUser})`}
         url={`ssh://${sshUser}@${server.ip_address}`}
       />
