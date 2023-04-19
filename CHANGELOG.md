@@ -7,6 +7,7 @@
 - Dynamic activity icons
 - Trigger command from anywhere with arguments
 - Shows system notification when deploy starts
+- Add view into recent deployments
 
 ## [Cache optimization] - 2022-12-29
 - Update initial view to show cached data immediately
