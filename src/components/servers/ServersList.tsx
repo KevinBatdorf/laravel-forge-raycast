@@ -40,20 +40,13 @@ export const ServersList = ({ search }: { search: string }) => {
   if (error?.message) {
     return <EmptyView title={`Error: ${error.message}`} />;
   }
-  if (loading) {
-    return <EmptyView title="Fetching servers..." />;
-  }
-  if (!servers) {
+  if (servers?.length === 0 && !loading) {
     return <EmptyView title="No servers found" />;
   }
 
   return (
-    <List
-      isLoading={!servers?.length && !loading}
-      searchBarPlaceholder="Search servers..."
-      onSelectionChange={preFetchSites}
-    >
-      {servers.map((server: IServer) => {
+    <List isLoading={loading} searchBarPlaceholder="Search servers..." onSelectionChange={preFetchSites}>
+      {servers?.map((server: IServer) => {
         return <ServerListItem key={server.id} server={server} />;
       })}
     </List>
