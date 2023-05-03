@@ -82,7 +82,7 @@ export default function Command() {
             launchCommand({
               name: "laravel-forge",
               type: LaunchType.UserInitiated,
-              arguments: { server: site.server_id },
+              arguments: { server: String(site.server_id) },
             })
           }
         />
@@ -94,11 +94,13 @@ export default function Command() {
           title={site?.name ?? site?.aliases?.[0] ?? "Unknown"}
           subtitle={site?.deployment_status ?? "deployed"}
           tooltip="Open in Raycast"
-          onAction={() => {
-            open(
-              `raycast://extensions/KevinBatdorf/laravel-forge/index?arguments=%7B%22server%22%3A%22${site.server_id}%22%7D`
-            );
-          }}
+          onAction={() =>
+            launchCommand({
+              name: "laravel-forge",
+              type: LaunchType.UserInitiated,
+              arguments: { server: String(site.server_id) },
+            })
+          }
         />
       ))}
     </MenuBarExtra>
