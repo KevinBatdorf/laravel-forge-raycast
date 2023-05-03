@@ -80,7 +80,7 @@ export default function Command() {
           tooltip="Open in Raycast"
           onAction={() =>
             launchCommand({
-              name: "laravel-forge",
+              name: "index",
               type: LaunchType.UserInitiated,
               arguments: { server: String(site.server_id) },
             })
@@ -96,7 +96,7 @@ export default function Command() {
           tooltip="Open in Raycast"
           onAction={() =>
             launchCommand({
-              name: "laravel-forge",
+              name: "index",
               type: LaunchType.UserInitiated,
               arguments: { server: String(site.server_id) },
             })
