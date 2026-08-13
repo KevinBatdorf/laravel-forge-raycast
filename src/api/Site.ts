@@ -12,7 +12,7 @@ export const Site = {
     if (!token) return [];
     const sites = await getCollection("sites?include=server", token);
     return sortAndFilterSites(
-      sites.map((site) => ({ ...flatten<ISite>(site), server_id: relatedId(site, "server") ?? 0 }))
+      sites.map((site) => ({ ...flatten<ISite>(site), server_id: relatedId(site, "server") ?? 0 })),
     );
   },
 

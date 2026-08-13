@@ -10,7 +10,7 @@ export const findValidUrlsFromSite = (site: ISite) => {
       try {
         new URL("https://" + url);
         return true;
-      } catch (error) {
+      } catch {
         return false;
       }
     });

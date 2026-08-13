@@ -54,7 +54,7 @@ const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKe
         api_token_key: tokenKey,
         ssh_user: sshUser,
       }));
-    })
+    }),
   );
 
   // Get site data which will by searchable along with servers
@@ -77,13 +77,16 @@ const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKe
 };
 
 const getSiteKeywords = (sites: ISite[]) => {
-  return sites?.reduce((acc, site): Record<number, Set<string>> => {
-    if (!site?.server_id) return acc;
-    const keywords = [site?.name ?? "", ...(site?.aliases ?? [])];
-    if (!acc[site.server_id]) {
-      acc[site.server_id] = new Set<string>();
-    }
-    keywords.forEach((keyword) => site?.server_id && acc[site.server_id].add(keyword));
-    return acc;
-  }, <Record<number, Set<string>>>{});
+  return sites?.reduce(
+    (acc, site): Record<number, Set<string>> => {
+      if (!site?.server_id) return acc;
+      const keywords = [site?.name ?? "", ...(site?.aliases ?? [])];
+      if (!acc[site.server_id]) {
+        acc[site.server_id] = new Set<string>();
+      }
+      keywords.forEach((keyword) => site?.server_id && acc[site.server_id].add(keyword));
+      return acc;
+    },
+    <Record<number, Set<string>>>{},
+  );
 };

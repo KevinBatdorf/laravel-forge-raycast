@@ -15,7 +15,7 @@ export const useDeployments = ({ server, site }: IncomingProps) => {
     fetcher,
     {
       refreshInterval: 5_000,
-    }
+    },
   );
   return {
     deployments: data,

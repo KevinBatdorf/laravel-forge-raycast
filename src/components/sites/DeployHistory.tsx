@@ -99,10 +99,10 @@ const DeployDetails = ({ site, server, deployment }: { site: ISite; server: ISer
                 status === "finished"
                   ? Color.Green
                   : status === "failed"
-                  ? Color.Red
-                  : status === "deploying"
-                  ? Color.Purple
-                  : Color.Magenta
+                    ? Color.Red
+                    : status === "deploying"
+                      ? Color.Purple
+                      : Color.Magenta
               }
             />
           </Detail.Metadata.TagList>

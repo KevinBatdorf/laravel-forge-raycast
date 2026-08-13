@@ -13,7 +13,7 @@ export const useConfig = ({ server, site, type }: IncomingProps) => {
   const { data, error } = useSWR<string>(
     server?.id ? [server.id, site?.id, type, server.api_token_key, server.org_slug] : null,
     fetcher,
-    { refreshInterval: 5_000 }
+    { refreshInterval: 5_000 },
   );
   return {
     fileString: data,

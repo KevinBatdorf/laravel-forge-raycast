@@ -27,7 +27,7 @@ export const useSites = (server?: IServer, optons: Partial<SWRConfiguration> = {
   const { data, error } = useSWR<ISite[]>(
     server?.id ? [server.id, server.api_token_key, server.org_slug] : null,
     fetcher,
-    optons
+    optons,
   );
 
   return {

@@ -58,7 +58,7 @@ export const postAction = async (path: string, token: string, payload: Record<st
 };
 
 export const flatten = <T>(resource: ForgeResource) =>
-  ({ ...resource.attributes, id: Number(resource.id) } as unknown as T);
+  ({ ...resource.attributes, id: Number(resource.id) }) as unknown as T;
 
 export const relatedId = (resource: ForgeResource, name: string) => {
   const related = resource?.relationships?.[name]?.data;

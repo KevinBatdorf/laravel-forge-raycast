@@ -62,7 +62,6 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
-                  // eslint-disable-next-line @raycast/prefer-title-case
                   title={`Open SSH Connection (${site.user})`}
                   url={`ssh://${site.user}@${server.ip_address}`}
                 />
@@ -187,7 +186,7 @@ const DeployListItem = ({ siteData, server }: { siteData?: ISite; server: IServe
           text:
             siteData.deployment_status === "deploying"
               ? "deploying..."
-              : siteData.deployment_status ?? "press to deploy",
+              : (siteData.deployment_status ?? "press to deploy"),
         },
       ]}
       actions={
@@ -198,7 +197,7 @@ const DeployListItem = ({ siteData, server }: { siteData?: ISite; server: IServe
             onAction={() => {
               showToast(Toast.Style.Success, "Deploying...");
               Site.deploy({ orgSlug: server.org_slug, siteId: siteData.id, serverId: server.id, token }).catch(() =>
-                showToast(Toast.Style.Failure, "Failed to trigger deploy script")
+                showToast(Toast.Style.Failure, "Failed to trigger deploy script"),
               );
             }}
           />

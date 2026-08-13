@@ -10,7 +10,7 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
   } catch (e) {
     if (e instanceof Error) {
       console.error({ error: e, url });
-      isBackground || showResetToast({ title: `Error ${res?.status}: ${e.message}` });
+      if (!isBackground) showResetToast({ title: `Error ${res?.status}: ${e.message}` });
       throw new Error(e.message);
     }
   }
@@ -20,7 +20,7 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
     const title = rejectedToken
       ? "Forge rejected the API token. Create a v2 token with the scopes you need."
       : `Error ${res?.status}: ${res?.statusText}`;
-    isBackground || showResetToast({ title });
+    if (!isBackground) showResetToast({ title });
     throw new Error(res?.statusText);
   }
   return res;

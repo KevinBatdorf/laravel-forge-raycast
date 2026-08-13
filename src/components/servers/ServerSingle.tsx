@@ -34,7 +34,6 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                // eslint-disable-next-line @raycast/prefer-title-case
                 title={`Open SSH Connection (${server.ssh_user})`}
                 url={`ssh://${server.ssh_user}@${server.ip_address}`}
               />
@@ -102,7 +101,7 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
                 <ActionPanel>
                   <Action
                     icon={Icon.ArrowClockwise}
-                    // eslint-disable-next-line @raycast/prefer-title-case
+
                     title={`Reboot ${label}`}
                     onAction={async () => {
                       showToast(Toast.Style.Animated, `Rebooting ${label}...`);

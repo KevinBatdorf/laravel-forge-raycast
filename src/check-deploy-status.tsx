@@ -1,4 +1,4 @@
-import { Cache, Image, LaunchType, MenuBarExtra, launchCommand, open, updateCommandMetadata } from "@raycast/api";
+import { Cache, Image, LaunchType, MenuBarExtra, launchCommand, updateCommandMetadata } from "@raycast/api";
 import { useAllSites } from "./hooks/useAllSites";
 import { ISite } from "./types";
 import { runAppleScript } from "run-applescript";
@@ -76,7 +76,7 @@ export default function Command() {
         <MenuBarExtra.Item
           key={"current" + site.id}
           title={site?.name ?? site?.aliases?.[0] ?? "Unknown"}
-          subtitle={site?.deployment_status === "deploying" ? "deploying..." : site?.deployment_status ?? "deployed"}
+          subtitle={site?.deployment_status === "deploying" ? "deploying..." : (site?.deployment_status ?? "deployed")}
           tooltip="Open in Raycast"
           onAction={() =>
             launchCommand({
