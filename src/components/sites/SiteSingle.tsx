@@ -1,8 +1,9 @@
 import { Icon, List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { Site } from "../../api/Site";
-import { IServer, ISite } from "../../types";
+import { ConfigFile, IServer, ISite } from "../../types";
 import { EnvFile } from "../configs/EnvFile";
 import { NginxFile } from "../configs/NginxFile";
+import { LogFile } from "../configs/LogFile";
 import { unwrapToken } from "../../lib/auth";
 import { useIsSiteOnline } from "../../hooks/useIsSiteOnline";
 import { useEffect, useState } from "react";
@@ -12,6 +13,12 @@ import { useSites } from "../../hooks/useSites";
 import { repositoryLabel } from "../../lib/url";
 
 const text = (value?: unknown) => (value === undefined || value === null ? "" : String(value));
+
+const logFiles: { type: ConfigFile; title: string; action: string }[] = [
+  { type: "application-log", title: "View application log", action: "Open Application Log" },
+  { type: "nginx-error-log", title: "View nginx error log", action: "Open Nginx Error Log" },
+  { type: "nginx-access-log", title: "View nginx access log", action: "Open Nginx Access Log" },
+];
 
 export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) => {
   const { sites } = useSites(server);
@@ -109,6 +116,24 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
               </ActionPanel>
             }
           />
+          {logFiles.map(({ type, title, action }) => (
+            <List.Item
+              id={type}
+              key={type}
+              title={title}
+              icon={Icon.Receipt}
+              accessories={[{ text: "press to view" }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title={action}
+                    icon={Icon.Receipt}
+                    target={<LogFile site={site} server={server} type={type} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
           {url && (
             <List.Item
               id="open-in-browser"
@@ -148,7 +173,7 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
                   accessories={[{ text: value }]}
                   actions={
                     <ActionPanel>
-                      <Action.CopyToClipboard content={value ?? ""} />
+                      <Action.CopyToClipboard title={`Copy ${label}`} content={value} />
                     </ActionPanel>
                   }
                 />

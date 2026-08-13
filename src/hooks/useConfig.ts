@@ -17,7 +17,8 @@ export const useConfig = ({ server, site, type }: IncomingProps) => {
   );
   return {
     fileString: data,
-    loading: !error && !data,
+    // An empty file is a valid answer, so only an absent one counts as loading
+    loading: !error && data === undefined,
     error: error,
   };
 };

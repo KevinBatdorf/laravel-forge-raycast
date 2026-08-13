@@ -8,7 +8,15 @@ import { useSites } from "../../hooks/useSites";
 import { API_RATE_LIMIT } from "../../config";
 import { useIsSiteOnline } from "../../hooks/useIsSiteOnline";
 import { repositoryLabel } from "../../lib/url";
+import { formatDistance } from "date-fns";
 import { useEffect, useState } from "react";
+
+const lastDeployLabel = (site: ISite) => {
+  const { started_at, ended_at, status } = site.latest_deployment ?? {};
+  if (!started_at) return undefined;
+  const when = formatDistance(new Date(started_at), new Date(), { addSuffix: true });
+  return ended_at ? `${status} ${when}` : `deploying since ${when}`;
+};
 
 export const SitesList = ({ server }: { server: IServer }) => {
   const refreshInterval = 60_000 / API_RATE_LIMIT + 100;
@@ -47,7 +55,7 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
       title={site?.name ?? "Site name undefined"}
       subtitle={repositoryLabel(site.repository) || site.app_type || ""}
       icon={stateIcon}
-      accessories={[{ text: stateText }]}
+      accessories={[{ text: lastDeployLabel(site) }, { text: stateText }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

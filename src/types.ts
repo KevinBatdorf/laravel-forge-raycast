@@ -41,8 +41,9 @@ export interface IRepository {
 }
 
 export interface ISite {
-  // Not an API attribute; the site list carries the server as a relationship
+  // Not API attributes; both arrive as relationships on the site list
   server_id: number;
+  latest_deployment?: IDeployment;
 
   id: number;
   name?: string;
@@ -71,13 +72,21 @@ export interface ISite {
   updated_at?: string;
 }
 
-export type ConfigFile = "env" | "nginx";
+export type ConfigFile = "env" | "nginx" | "application-log" | "nginx-error-log" | "nginx-access-log";
 
 export interface ICommit {
   hash?: string;
   author?: string;
   message?: string;
   branch?: string;
+}
+
+export interface IEvent {
+  id: number;
+  description?: string;
+  ran_as?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface IDeployment {

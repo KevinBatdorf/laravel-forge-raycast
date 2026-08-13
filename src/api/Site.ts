@@ -1,25 +1,41 @@
 import { sortBy } from "lodash";
 import { ConfigFile, IDeployment, IServer, ISite } from "../types";
-import { flatten, getCollection, getResource, postAction, relatedId } from "../lib/forge";
+import { flatten, getCollection, getResource, postAction, relatedId, relatedResource } from "../lib/forge";
 
 type ServerWithToken = { orgSlug: IServer["org_slug"]; serverId: IServer["id"]; token: string };
 type ServerSiteWithToken = ServerWithToken & { siteId: ISite["id"] };
 
-const configResource: Record<ConfigFile, string> = { env: "environment", nginx: "nginx" };
+const configResource: Record<ConfigFile, string> = {
+  env: "environment",
+  nginx: "nginx",
+  "application-log": "logs/application",
+  "nginx-error-log": "logs/nginx-error",
+  "nginx-access-log": "logs/nginx-access",
+};
 
 export const Site = {
   async getSitesWithoutServer({ token }: { token: string }) {
     if (!token) return [];
-    const sites = await getCollection("sites?include=server", token);
+    const { items } = await getCollection("sites?include=server", token);
     return sortAndFilterSites(
-      sites.map((site) => ({ ...flatten<ISite>(site), server_id: relatedId(site, "server") ?? 0 })),
+      items.map((site) => ({ ...flatten<ISite>(site), server_id: relatedId(site, "server") ?? 0 })),
     );
   },
 
   async getAll({ orgSlug, serverId, token }: ServerWithToken) {
     if (!token) return [];
-    const sites = await getCollection(`orgs/${orgSlug}/servers/${serverId}/sites`, token);
-    return sortAndFilterSites(sites.map((site) => ({ ...flatten<ISite>(site), server_id: serverId })));
+    const endpoint = `orgs/${orgSlug}/servers/${serverId}/sites?include=latestDeployment`;
+    const { items, included } = await getCollection(endpoint, token);
+    return sortAndFilterSites(
+      items.map((site) => {
+        const deployment = relatedResource(site, "latestDeployment", included);
+        return {
+          ...flatten<ISite>(site),
+          server_id: serverId,
+          latest_deployment: deployment && flatten<IDeployment>(deployment),
+        };
+      }),
+    );
   },
 
   async deploy({ orgSlug, serverId, siteId, token }: ServerSiteWithToken) {
@@ -35,8 +51,8 @@ export const Site = {
   async getDeploymentHistory({ orgSlug, serverId, siteId, token }: ServerSiteWithToken) {
     // created_at is the only sort this endpoint allows
     const endpoint = `orgs/${orgSlug}/servers/${serverId}/sites/${siteId}/deployments?sort=-created_at`;
-    const deployments = await getCollection(endpoint, token, { pages: 1 });
-    return deployments.map((deployment) => flatten<IDeployment>(deployment));
+    const { items } = await getCollection(endpoint, token, { pages: 1 });
+    return items.map((deployment) => flatten<IDeployment>(deployment));
   },
 
   async getDeploymentOutput({

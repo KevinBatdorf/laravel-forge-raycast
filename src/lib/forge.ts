@@ -12,6 +12,7 @@ export type ForgeResource = {
 
 type ForgeCollection = {
   data?: ForgeResource[];
+  included?: ForgeResource[];
   meta?: { next_cursor?: string | null };
 };
 
@@ -25,19 +26,21 @@ const headers = (token: string) => ({
 });
 
 export const getCollection = async (path: string, token: string, { pages = PAGE_LIMIT } = {}) => {
-  const resources: ForgeResource[] = [];
+  const items: ForgeResource[] = [];
+  const included: ForgeResource[] = [];
   let cursor: string | null | undefined;
 
   for (let page = 0; page < pages; page++) {
     const url = new URL(`${FORGE_API_URL}/${path}`);
     if (cursor) url.searchParams.set("page[cursor]", cursor);
     const body = await apiFetch<ForgeCollection>(url.toString(), { method: "get", headers: headers(token) });
-    resources.push(...(body?.data ?? []));
+    items.push(...(body?.data ?? []));
+    included.push(...(body?.included ?? []));
     cursor = body?.meta?.next_cursor;
     if (!cursor) break;
   }
 
-  return resources;
+  return { items, included };
 };
 
 export const getResource = async (path: string, token: string) => {
@@ -64,4 +67,10 @@ export const relatedId = (resource: ForgeResource, name: string) => {
   const related = resource?.relationships?.[name]?.data;
   if (!related || Array.isArray(related)) return undefined;
   return Number(related.id);
+};
+
+export const relatedResource = (resource: ForgeResource, name: string, included: ForgeResource[]) => {
+  const related = resource?.relationships?.[name]?.data;
+  if (!related || Array.isArray(related)) return undefined;
+  return included.find((entry) => entry.type === related.type && entry.id === related.id);
 };

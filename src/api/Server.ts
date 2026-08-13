@@ -1,14 +1,19 @@
 import { getPreferenceValues } from "@raycast/api";
 import { sortBy } from "lodash";
-import { IServer, ISite } from "../types";
-import { flatten, getCollection, postAction } from "../lib/forge";
+import { IEvent, IServer, ISite } from "../types";
+import { flatten, getCollection, getResource, postAction } from "../lib/forge";
 import { Site } from "./Site";
 
-type Reboot = {
+export type ServiceAction = "reboot" | "start" | "stop";
+
+type RunAction = {
   server: IServer;
   token: string;
+  action?: ServiceAction;
   service?: string;
 };
+
+type ServerWithToken = { server: IServer; token: string };
 
 export const Server = {
   async getAll() {
@@ -31,23 +36,35 @@ export const Server = {
     return sortBy(servers, (s) => s?.name?.toLowerCase()) ?? {};
   },
 
-  async reboot({ server, token, service }: Reboot) {
+  async runAction({ server, token, action = "reboot", service }: RunAction) {
     const endpoint = service
       ? `orgs/${server.org_slug}/servers/${server.id}/services/${service}/actions`
       : `orgs/${server.org_slug}/servers/${server.id}/actions`;
-    // PHP runs one pool per installed version, so the reboot has to name one
-    const payload = service === "php" ? { action: "reboot", version: server.php_version } : { action: "reboot" };
+    // PHP runs one pool per installed version, so the action has to name one
+    const payload = service === "php" ? { action, version: server.php_version } : { action };
     await postAction(endpoint, token, payload);
+  },
+
+  async getEvents({ server, token }: ServerWithToken) {
+    const endpoint = `orgs/${server.org_slug}/servers/${server.id}/events?sort=-created_at`;
+    const { items } = await getCollection(endpoint, token, { pages: 1 });
+    return items.map((event) => flatten<IEvent>(event));
+  },
+
+  async getEventOutput({ server, token, eventId }: ServerWithToken & { eventId: IEvent["id"] }) {
+    const endpoint = `orgs/${server.org_slug}/servers/${server.id}/events/${eventId}/output`;
+    const event = await getResource(endpoint, token);
+    return String(event?.attributes?.output ?? "");
   },
 };
 
 const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKey: string; sshUser: string }) => {
   if (!token) return [];
-  const organizations = await getCollection("orgs", token);
+  const { items: organizations } = await getCollection("orgs", token);
   const serversByOrg = await Promise.all(
     organizations.map(async (organization) => {
       const orgSlug = String(organization?.attributes?.slug ?? "");
-      const servers = await getCollection(`orgs/${orgSlug}/servers`, token);
+      const { items: servers } = await getCollection(`orgs/${orgSlug}/servers`, token);
       return servers.map((server) => ({
         ...flatten<IServer>(server),
         org_slug: orgSlug,
