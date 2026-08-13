@@ -29,25 +29,19 @@ const DeployHistorySingle = ({
   server: IServer;
   deployment: IDeployment;
 }) => {
-  const { text: stateText, icon } = getDeplymentStateIcon(deployment?.status ?? "unknown");
   const { id, started_at, ended_at, status } = deployment;
+  // A running deploy has no ended_at, and its status string is not "deploying"
+  const running = !ended_at;
+  const { text: stateText, icon } = getDeplymentStateIcon(running ? "deploying" : (status ?? "unknown"));
+  const runtime =
+    started_at && ended_at ? formatDistance(new Date(ended_at), new Date(started_at), { addSuffix: true }) : "";
   return (
     <List.Item
       id={id.toString()}
       title={deployment?.commit?.message || "No commit message"}
       subtitle={started_at ? formatDistance(new Date(started_at), new Date(), { addSuffix: true }) : undefined}
       icon={icon}
-      accessories={[
-        { text: deployment?.status === "deploying" ? "Deploying..." : undefined },
-        {
-          text:
-            deployment?.status === "deploying"
-              ? undefined
-              : `${stateText} ${formatDistance(new Date(ended_at ?? ""), new Date(started_at ?? ""), {
-                  addSuffix: true,
-                })}`,
-        },
-      ]}
+      accessories={[{ text: running ? "Deploying..." : `${stateText} ${runtime}`.trim() }]}
       actions={
         <ActionPanel>
           <Action.Push
@@ -55,10 +49,10 @@ const DeployHistorySingle = ({
             icon={Icon.Binoculars}
             target={
               // Disable when deploying so we dont need to keep checking state
-              status !== "deploying" ? (
-                <DeployDetails site={site} server={server} deployment={deployment} />
-              ) : (
+              running ? (
                 <EmptyView title="Deploying site. Check back shortly." />
+              ) : (
+                <DeployDetails site={site} server={server} deployment={deployment} />
               )
             }
           />
@@ -81,15 +75,17 @@ const DeployDetails = ({ site, server, deployment }: { site: ISite; server: ISer
           {commit?.author && <Detail.Metadata.Label title="Commit Author" text={commit.author} />}
           {type && <Detail.Metadata.Label title="Via" text={type} />}
           <Detail.Metadata.Separator />
-          {ended_at ? (
+          {started_at && ended_at ? (
             <Detail.Metadata.TagList title="Runtime">
               <Detail.Metadata.TagList.Item
-                text={formatDistance(new Date(ended_at), new Date(started_at ?? ""), { addSuffix: false })}
+                text={formatDistance(new Date(ended_at), new Date(started_at), { addSuffix: false })}
                 color={Color.Purple}
               />
             </Detail.Metadata.TagList>
           ) : null}
-          <Detail.Metadata.Label title="Started At" text={new Date(started_at ?? "").toLocaleString()} />
+          {started_at ? (
+            <Detail.Metadata.Label title="Started At" text={new Date(started_at).toLocaleString()} />
+          ) : null}
           {ended_at ? <Detail.Metadata.Label title="Finished At" text={new Date(ended_at).toLocaleString()} /> : null}
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Status">
