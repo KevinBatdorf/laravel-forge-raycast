@@ -42,6 +42,7 @@ export const Server = {
 };
 
 const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKey: string; sshUser: string }) => {
+  if (!token) return [];
   const organizations = await getCollection("orgs", token);
   const serversByOrg = await Promise.all(
     organizations.map(async (organization) => {

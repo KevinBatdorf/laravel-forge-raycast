@@ -17,6 +17,7 @@ export const Site = {
   },
 
   async getAll({ orgSlug, serverId, token }: ServerWithToken) {
+    if (!token) return [];
     const sites = await getCollection(`orgs/${orgSlug}/servers/${serverId}/sites`, token);
     return sortAndFilterSites(sites.map((site) => ({ ...flatten<ISite>(site), server_id: serverId })));
   },
