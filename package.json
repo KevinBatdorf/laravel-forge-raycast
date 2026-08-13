@@ -40,12 +40,12 @@
   ],
   "preferences": [
     {
-      "name": "laravel_forge_api_key",
+      "name": "laravel_forge_api_token",
       "type": "password",
       "required": true,
-      "title": "Laravel Forge API Key",
-      "description": "Generate a v2 API token from your Laravel Forge profile",
-      "placeholder": "API Key"
+      "title": "Laravel Forge API Token",
+      "description": "Create a token at forge.laravel.com/profile/api. See the README for the scopes to tick.",
+      "placeholder": "API Token"
     },
     {
       "name": "laravel_forge_ssh_user",
@@ -57,12 +57,12 @@
       "placeholder": "SSH User"
     },
     {
-      "name": "laravel_forge_api_key_two",
+      "name": "laravel_forge_api_token_two",
       "type": "password",
       "required": false,
-      "title": "Laravel Forge API Key 2 (optional)",
+      "title": "Laravel Forge API Token 2 (optional)",
       "description": "Optionally add a second account.",
-      "placeholder": "API Key (optional)"
+      "placeholder": "API Token (optional)"
     },
     {
       "name": "laravel_forge_ssh_user_two",

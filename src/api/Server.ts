@@ -15,15 +15,15 @@ export const Server = {
     const preferences = getPreferenceValues();
     // Because we have support for two accounts, pass the key through
     let servers = await getServers({
-      tokenKey: "laravel_forge_api_key",
-      token: preferences?.laravel_forge_api_key as string,
+      tokenKey: "laravel_forge_api_token",
+      token: preferences?.laravel_forge_api_token as string,
       sshUser: (preferences?.laravel_forge_ssh_user as string) || "forge",
     });
 
-    if (preferences?.laravel_forge_api_key_two) {
+    if (preferences?.laravel_forge_api_token_two) {
       const serversTwo = await getServers({
-        tokenKey: "laravel_forge_api_key_two",
-        token: preferences?.laravel_forge_api_key_two as string,
+        tokenKey: "laravel_forge_api_token_two",
+        token: preferences?.laravel_forge_api_token_two as string,
         sshUser: (preferences?.laravel_forge_ssh_user_two as string) || "forge",
       });
       servers = [...servers, ...serversTwo];

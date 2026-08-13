@@ -20,8 +20,8 @@ interface RecentEntry {
 }
 
 export default function Command() {
-  const { sites: sitesTokenOne, loading: loadingOne } = useAllSites("laravel_forge_api_key");
-  const { sites: sitesTokenTwo, loading: loadingTwo } = useAllSites("laravel_forge_api_key_two");
+  const { sites: sitesTokenOne, loading: loadingOne } = useAllSites("laravel_forge_api_token");
+  const { sites: sitesTokenTwo, loading: loadingTwo } = useAllSites("laravel_forge_api_token_two");
   const allSites = [...(sitesTokenOne ?? []), ...(sitesTokenTwo ?? [])];
   const deploying = allSites.filter((site: ISite) => site.deployment_status === "deploying");
 
