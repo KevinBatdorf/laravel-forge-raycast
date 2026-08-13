@@ -20,7 +20,7 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
         title="Reboot Server"
         onAction={() => {
           showToast(Toast.Style.Animated, "Rebooting server...");
-          Server.reboot({ serverId: server.id, token }).catch(() => {
+          Server.reboot({ server, token }).catch(() => {
             showToast(Toast.Style.Failure, "Failed to reboot server");
           });
         }}

@@ -1,5 +1,10 @@
 # Laravel Forge Changelog
 
+## [Forge API v2] - 2026-08-13
+- Move every request to the Forge API v2, which replaces v1 on August 31, 2026
+- Servers are now listed per organization, across all organizations a token can see
+- Requires a Forge v2 API token — create a new one if the extension starts returning 401 or 403
+
 ## [Fix] - 2023-05-12
 - Fixes bug in displaying the ssh:// protocol string
 ## [Fix] - 2023-05-04

@@ -44,7 +44,7 @@
       "type": "password",
       "required": true,
       "title": "Laravel Forge API Key",
-      "description": "Generate from your Laravel Forge profile",
+      "description": "Generate a v2 API token from your Laravel Forge profile",
       "placeholder": "API Key"
     },
     {

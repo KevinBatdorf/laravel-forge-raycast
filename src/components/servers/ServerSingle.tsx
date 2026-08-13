@@ -83,7 +83,7 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
                 title="Reboot Server"
                 onAction={async () => {
                   showToast(Toast.Style.Animated, `Rebooting server...`);
-                  await Server.reboot({ serverId: server.id, token }).catch(() => {
+                  await Server.reboot({ server, token }).catch(() => {
                     showToast(Toast.Style.Failure, `Failed to reboot server`);
                   });
                 }}
@@ -106,7 +106,7 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
                     title={`Reboot ${label}`}
                     onAction={async () => {
                       showToast(Toast.Style.Animated, `Rebooting ${label}...`);
-                      await Server.reboot({ serverId: server.id, token, key }).catch(() => {
+                      await Server.reboot({ server, token, service: key }).catch(() => {
                         showToast(Toast.Style.Failure, `Failed to reboot ${label}`);
                       });
                     }}

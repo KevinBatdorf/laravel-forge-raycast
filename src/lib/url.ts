@@ -1,4 +1,7 @@
-import { ISite } from "../types";
+import { IRepository, ISite } from "../types";
+
+export const repositoryLabel = (repository?: IRepository | null) =>
+  repository?.url?.replace(/^https?:\/\/[^/]+\//, "") ?? "";
 
 export const findValidUrlsFromSite = (site: ISite) => {
   const urls = [...(site?.aliases ?? []), site?.name ?? ""]

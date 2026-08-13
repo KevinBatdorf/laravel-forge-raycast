@@ -1,20 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import { sortBy } from "lodash";
-import { FORGE_API_URL } from "../config";
 import { IServer, ISite } from "../types";
-import { apiFetch } from "../lib/api";
+import { flatten, getCollection, postAction } from "../lib/forge";
 import { Site } from "./Site";
 
-const defaultHeaders = {
-  "Content-Type": "application/x-www-form-urlencoded",
-  Accept: "application/json",
-};
-
-type DynamicReboot = {
-  serverId: number;
+type Reboot = {
+  server: IServer;
   token: string;
-  key?: string;
-  label?: string;
+  service?: string;
 };
 
 export const Server = {
@@ -38,20 +31,30 @@ export const Server = {
     return sortBy(servers, (s) => s?.name?.toLowerCase()) ?? {};
   },
 
-  async reboot({ serverId, token, key = "" }: DynamicReboot) {
-    const endpoint = key ? `servers/${serverId}/${key}/reboot` : `servers/${serverId}/reboot`;
-    await apiFetch(`${FORGE_API_URL}/${endpoint}`, {
-      method: "post",
-      headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
-    });
+  async reboot({ server, token, service }: Reboot) {
+    const endpoint = service
+      ? `orgs/${server.org_slug}/servers/${server.id}/services/${service}/actions`
+      : `orgs/${server.org_slug}/servers/${server.id}/actions`;
+    // PHP runs one pool per installed version, so the reboot has to name one
+    const payload = service === "php" ? { action: "reboot", version: server.php_version } : { action: "reboot" };
+    await postAction(endpoint, token, payload);
   },
 };
 
 const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKey: string; sshUser: string }) => {
-  const { servers } = await apiFetch<{ servers: IServer[] }>(`${FORGE_API_URL}/servers`, {
-    method: "get",
-    headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
-  });
+  const organizations = await getCollection("orgs", token);
+  const serversByOrg = await Promise.all(
+    organizations.map(async (organization) => {
+      const orgSlug = String(organization?.attributes?.slug ?? "");
+      const servers = await getCollection(`orgs/${orgSlug}/servers`, token);
+      return servers.map((server) => ({
+        ...flatten<IServer>(server),
+        org_slug: orgSlug,
+        api_token_key: tokenKey,
+        ssh_user: sshUser,
+      }));
+    })
+  );
 
   // Get site data which will by searchable along with servers
   let keywordsByServer: Record<number, Set<string>> = {};
@@ -63,11 +66,10 @@ const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKe
     // fail gracefully here as it's not critical information
   }
 
-  return servers
+  return serversByOrg
+    .flat()
     .map((server) => {
       server.keywords = server?.id && keywordsByServer[server.id] ? [...keywordsByServer[server.id]] : [];
-      server.api_token_key = tokenKey;
-      server.ssh_user = sshUser;
       return server;
     })
     .filter((s) => !s.revoked);

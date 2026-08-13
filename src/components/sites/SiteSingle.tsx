@@ -9,6 +9,9 @@ import { useEffect, useState } from "react";
 import { siteStatusState } from "../../lib/color";
 import { DeployHistory } from "./DeployHistory";
 import { useSites } from "../../hooks/useSites";
+import { repositoryLabel } from "../../lib/url";
+
+const text = (value?: unknown) => (value === undefined || value === null ? "" : String(value));
 
 export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) => {
   const { sites } = useSites(server);
@@ -53,19 +56,19 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
           <List.Item
             id="open-in-ssh"
             key="open-in-ssh"
-            title={`Open SSH connection (${site.username})`}
+            title={`Open SSH connection (${site.user})`}
             icon={Icon.Terminal}
-            accessories={[{ text: `ssh://${site.username}@${server.ip_address}` }]}
+            accessories={[{ text: `ssh://${site.user}@${server.ip_address}` }]}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
                   // eslint-disable-next-line @raycast/prefer-title-case
-                  title={`Open SSH Connection (${site.username})`}
-                  url={`ssh://${site.username}@${server.ip_address}`}
+                  title={`Open SSH Connection (${site.user})`}
+                  url={`ssh://${site.user}@${server.ip_address}`}
                 />
                 <Action.CopyToClipboard
                   title="Copy SSH Connection String"
-                  content={`ssh://${site.username}@${server.ip_address}`}
+                  content={`ssh://${site.user}@${server.ip_address}`}
                 />
               </ActionPanel>
             }
@@ -125,20 +128,18 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
       ) : null}
       {siteData?.id ? (
         <List.Section title="Site Additonal Information">
-          {Object.entries({
-            id: "Forge site ID",
-            server_d: "Forge server ID",
-            name: "Site name",
-            aliases: "Aliases",
-            is_secured: "SSL",
-            deployment_url: "Deployment webhook Url",
-            tags: "Tags",
-            directory: "Directory",
-            repository: "Repository",
-            quick_deploy: "Quick deploy enabled",
-            deployment_status: "Deploy status",
-          }).map(([key, label]) => {
-            const value = siteData[key as keyof ISite]?.toString() ?? "";
+          {[
+            { key: "id", label: "Forge site ID", value: text(siteData.id) },
+            { key: "server_id", label: "Forge server ID", value: text(siteData.server_id) },
+            { key: "name", label: "Site name", value: text(siteData.name) },
+            { key: "aliases", label: "Aliases", value: siteData.aliases?.join(", ") ?? "" },
+            { key: "https", label: "SSL", value: text(siteData.https) },
+            { key: "deployment_url", label: "Deployment webhook Url", value: text(siteData.deployment_url) },
+            { key: "web_directory", label: "Directory", value: text(siteData.web_directory) },
+            { key: "repository", label: "Repository", value: repositoryLabel(siteData.repository) },
+            { key: "quick_deploy", label: "Quick deploy enabled", value: text(siteData.quick_deploy) },
+            { key: "deployment_status", label: "Deploy status", value: text(siteData.deployment_status) },
+          ].map(({ key, label, value }) => {
             return (
               value.length > 0 && (
                 <List.Item
@@ -196,7 +197,7 @@ const DeployListItem = ({ siteData, server }: { siteData?: ISite; server: IServe
             title="Trigger Deploy Script"
             onAction={() => {
               showToast(Toast.Style.Success, "Deploying...");
-              Site.deploy({ siteId: siteData.id, serverId: server.id, token }).catch(() =>
+              Site.deploy({ orgSlug: server.org_slug, siteId: siteData.id, serverId: server.id, token }).catch(() =>
                 showToast(Toast.Style.Failure, "Failed to trigger deploy script")
               );
             }}

@@ -34,8 +34,8 @@ const DeployHistorySingle = ({
   return (
     <List.Item
       id={id.toString()}
-      title={deployment?.commit_message || "No commit message"}
-      subtitle={started_at ? formatDistance(new Date(started_at + " UTC"), new Date(), { addSuffix: true }) : undefined}
+      title={deployment?.commit?.message || "No commit message"}
+      subtitle={started_at ? formatDistance(new Date(started_at), new Date(), { addSuffix: true }) : undefined}
       icon={icon}
       accessories={[
         { text: deployment?.status === "deploying" ? "Deploying..." : undefined },
@@ -43,7 +43,7 @@ const DeployHistorySingle = ({
           text:
             deployment?.status === "deploying"
               ? undefined
-              : `${stateText} ${formatDistance(new Date(ended_at + " UTC"), new Date(started_at + " UTC"), {
+              : `${stateText} ${formatDistance(new Date(ended_at ?? ""), new Date(started_at ?? ""), {
                   addSuffix: true,
                 })}`,
         },
@@ -70,29 +70,27 @@ const DeployHistorySingle = ({
 
 const DeployDetails = ({ site, server, deployment }: { site: ISite; server: IServer; deployment: IDeployment }) => {
   const { output, loading } = useDeploymentOutput({ site, server, deployment });
-  const { status, commit_message, displayable_type, commit_author, commit_hash, started_at, ended_at } = deployment;
+  const { status, commit, type, started_at, ended_at } = deployment;
   return (
     <Detail
       isLoading={loading}
       markdown={output ? "```sh\n" + output + "\n```" : ""}
-      navigationTitle={commit_message || "No commit message"}
+      navigationTitle={commit?.message || "No commit message"}
       metadata={
         <Detail.Metadata>
-          {commit_author && <Detail.Metadata.Label title="Commit Author" text={commit_author} />}
-          {displayable_type && <Detail.Metadata.Label title="Via" text={displayable_type} />}
+          {commit?.author && <Detail.Metadata.Label title="Commit Author" text={commit.author} />}
+          {type && <Detail.Metadata.Label title="Via" text={type} />}
           <Detail.Metadata.Separator />
           {ended_at ? (
             <Detail.Metadata.TagList title="Runtime">
               <Detail.Metadata.TagList.Item
-                text={formatDistance(new Date(ended_at + " UTC"), new Date(started_at + " UTC"), { addSuffix: false })}
+                text={formatDistance(new Date(ended_at), new Date(started_at ?? ""), { addSuffix: false })}
                 color={Color.Purple}
               />
             </Detail.Metadata.TagList>
           ) : null}
-          <Detail.Metadata.Label title="Started At" text={new Date(started_at + " UTC").toLocaleString()} />
-          {ended_at ? (
-            <Detail.Metadata.Label title="Finished At" text={new Date(ended_at + " UTC").toLocaleString()} />
-          ) : null}
+          <Detail.Metadata.Label title="Started At" text={new Date(started_at ?? "").toLocaleString()} />
+          {ended_at ? <Detail.Metadata.Label title="Finished At" text={new Date(ended_at).toLocaleString()} /> : null}
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item
@@ -108,7 +106,7 @@ const DeployDetails = ({ site, server, deployment }: { site: ISite; server: ISer
               }
             />
           </Detail.Metadata.TagList>
-          {commit_hash && <Detail.Metadata.Label title="Commit Hash" text={commit_hash} />}
+          {commit?.hash && <Detail.Metadata.Label title="Commit Hash" text={commit.hash} />}
         </Detail.Metadata>
       }
     />
