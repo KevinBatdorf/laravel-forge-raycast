@@ -158,7 +158,7 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
         </List.Section>
       ) : null}
       {siteData?.id ? (
-        <List.Section title="Site Additonal Information">
+        <List.Section title="Site Additional Information">
           {[
             { key: "id", label: "Forge site ID", action: "Copy Forge Site ID", value: text(siteData.id) },
             {
