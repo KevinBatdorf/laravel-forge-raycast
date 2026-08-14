@@ -1,6 +1,6 @@
 import { Icon, List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { Site } from "../../api/Site";
-import { ConfigFile, IServer, ISite } from "../../types";
+import { ConfigFile, IDeployment, IServer, ISite } from "../../types";
 import { EnvFile } from "../configs/EnvFile";
 import { NginxFile } from "../configs/NginxFile";
 import { LogFile } from "../configs/LogFile";
@@ -11,8 +11,15 @@ import { siteStatusState } from "../../lib/color";
 import { DeployHistory } from "./DeployHistory";
 import { useSites } from "../../hooks/useSites";
 import { repositoryLabel } from "../../lib/url";
+import { formatDistance } from "date-fns";
 
 const text = (value?: unknown) => (value === undefined || value === null ? "" : String(value));
+
+const lastDeployLabel = (deployment?: IDeployment) => {
+  if (!deployment?.started_at) return "press to deploy";
+  const when = formatDistance(new Date(deployment.started_at), new Date(), { addSuffix: true });
+  return `${deployment.status ?? "deployed"} ${when}`;
+};
 
 const logFiles: { type: ConfigFile; title: string; action: string }[] = [
   { type: "application-log", title: "View application log", action: "Open Application Log" },
@@ -239,9 +246,7 @@ const DeployListItem = ({ siteData, server }: { siteData?: ISite; server: IServe
         { icon: siteData.deployment_status === "deploying" ? siteStatusState(siteData, true).icon : undefined },
         {
           text:
-            siteData.deployment_status === "deploying"
-              ? "deploying..."
-              : (siteData.deployment_status ?? "press to deploy"),
+            siteData.deployment_status === "deploying" ? "deploying..." : lastDeployLabel(siteData.latest_deployment),
         },
       ]}
       actions={
