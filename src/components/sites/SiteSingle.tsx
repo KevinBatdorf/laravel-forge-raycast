@@ -153,17 +153,47 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
       {siteData?.id ? (
         <List.Section title="Site Additonal Information">
           {[
-            { key: "id", label: "Forge site ID", value: text(siteData.id) },
-            { key: "server_id", label: "Forge server ID", value: text(siteData.server_id) },
-            { key: "name", label: "Site name", value: text(siteData.name) },
-            { key: "aliases", label: "Aliases", value: siteData.aliases?.join(", ") ?? "" },
-            { key: "https", label: "SSL", value: text(siteData.https) },
-            { key: "deployment_url", label: "Deployment webhook Url", value: text(siteData.deployment_url) },
-            { key: "web_directory", label: "Directory", value: text(siteData.web_directory) },
-            { key: "repository", label: "Repository", value: repositoryLabel(siteData.repository) },
-            { key: "quick_deploy", label: "Quick deploy enabled", value: text(siteData.quick_deploy) },
-            { key: "deployment_status", label: "Deploy status", value: text(siteData.deployment_status) },
-          ].map(({ key, label, value }) => {
+            { key: "id", label: "Forge site ID", action: "Copy Forge Site ID", value: text(siteData.id) },
+            {
+              key: "server_id",
+              label: "Forge server ID",
+              action: "Copy Forge Server ID",
+              value: text(siteData.server_id),
+            },
+            { key: "name", label: "Site name", action: "Copy Site Name", value: text(siteData.name) },
+            { key: "aliases", label: "Aliases", action: "Copy Aliases", value: siteData.aliases?.join(", ") ?? "" },
+            { key: "https", label: "SSL", action: "Copy SSL", value: text(siteData.https) },
+            {
+              key: "deployment_url",
+              label: "Deployment webhook Url",
+              action: "Copy Deployment Webhook URL",
+              value: text(siteData.deployment_url),
+            },
+            {
+              key: "web_directory",
+              label: "Directory",
+              action: "Copy Directory",
+              value: text(siteData.web_directory),
+            },
+            {
+              key: "repository",
+              label: "Repository",
+              action: "Copy Repository",
+              value: repositoryLabel(siteData.repository),
+            },
+            {
+              key: "quick_deploy",
+              label: "Quick deploy enabled",
+              action: "Copy Quick Deploy Enabled",
+              value: text(siteData.quick_deploy),
+            },
+            {
+              key: "deployment_status",
+              label: "Deploy status",
+              action: "Copy Deploy Status",
+              value: text(siteData.deployment_status),
+            },
+          ].map(({ key, label, action, value }) => {
             return (
               value.length > 0 && (
                 <List.Item
@@ -173,7 +203,7 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
                   accessories={[{ text: value }]}
                   actions={
                     <ActionPanel>
-                      <Action.CopyToClipboard title={`Copy ${label}`} content={value} />
+                      <Action.CopyToClipboard title={action} content={value} />
                     </ActionPanel>
                   }
                 />
