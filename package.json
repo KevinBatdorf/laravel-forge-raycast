@@ -44,7 +44,7 @@
       "type": "password",
       "required": true,
       "title": "Forge API Token (v2)",
-      "description": "Forge API v1 is retired, so this needs a new v2 token. Create one at forge.laravel.com/profile/api \u2014 see the README for the scopes to tick.",
+      "description": "Generate from your Laravel Forge profile",
       "placeholder": "API Token"
     },
     {
