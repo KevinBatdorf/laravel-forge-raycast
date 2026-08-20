@@ -38,6 +38,9 @@
       "interval": "10s"
     }
   ],
+  "ai": {
+    "instructions": "Deployments belong to sites, not servers. To explain a failed deploy, call deployment-status first to learn which site failed, then deployment-log for that site. If no site is currently marked failed, call deployment-history for the site in question and pass the id of the most recent failed deployment to deployment-log. Server-level trouble - provisioning, a service that will not come back - is in server-events, not in a deployment log. Site names are domains, and a site also answers on its aliases. Never guess a name: when a tool returns an error listing the available servers or sites, ask the user which one they meant. Only deploy a site, restart a service or reboot a server when the user asks for that action."
+  },
   "tools": [
     {
       "name": "list-servers",
@@ -52,12 +55,12 @@
     {
       "name": "deployment-status",
       "title": "Check Deployment Status",
-      "description": "Show which sites are deploying right now and which ones have a failed deployment"
+      "description": "Show which sites are deploying right now and which ones have a failed deployment. Start here to work out which site a question about a failed deploy is about"
     },
     {
       "name": "deployment-history",
       "title": "Get Deployment History",
-      "description": "List recent deployments for a site with their status, commit and timings"
+      "description": "List recent deployments for a site with their status, commit and timings. Use it to find an earlier failed deployment once the current status is no longer failed"
     },
     {
       "name": "deployment-log",
