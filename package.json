@@ -39,7 +39,7 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers. To explain a failed deploy, call deployment-status first to learn which site failed, then deployment-log for that site. If no site is currently marked failed, call deployment-history for the site in question and pass the id of the most recent failed deployment to deployment-log. Server-level trouble - provisioning, a service that will not come back - is in server-events, not in a deployment log. Site names are domains, and a site also answers on its aliases. Never guess a name: when a tool returns an error listing the available servers or sites, ask the user which one they meant. Only deploy a site, restart a service or reboot a server when the user asks for that action."
+    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the failing site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nWhich server, PHP version, repository or branch a site uses: list-sites.\nA site's env file is not available here.\nSite names are domains and also answer on their aliases. If a lookup returns several names, ask which one.\nOnly deploy, restart or reboot when asked. Quick deploy being off means Forge will not deploy on push by itself."
   },
   "tools": [
     {
