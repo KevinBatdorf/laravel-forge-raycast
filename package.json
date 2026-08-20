@@ -78,7 +78,6 @@
     "@raycast/api": "^1.104.24",
     "date-fns": "^4.4.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2",
     "run-applescript": "^7.1.0",
     "swr": "^2.5.1"
   },
