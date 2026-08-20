@@ -6,29 +6,14 @@ import { unwrapToken } from "../lib/auth";
 export type ServerMatch = { server: IServer; token: string };
 export type SiteMatch = { site: ISite; server: IServer; token: string };
 
-type Candidate<T> = { entry: T; label: string; score: number };
-
 const normalize = (value: string) => value.trim().toLowerCase();
 
-const score = (name: string | undefined, query: string) => {
-  const target = normalize(name ?? "");
-  const search = normalize(query);
-  if (!target || !search) return 0;
-  if (target === search) return 2;
-  return target.includes(search) ? 1 : 0;
-};
-
 // Errors instead of a best guess, so the model re-asks rather than hitting the wrong server
-const pick = <T>(candidates: Candidate<T>[], query: string, kind: string) => {
-  const best = Math.max(0, ...candidates.map((candidate) => candidate.score));
-  const labels = candidates.map((candidate) => candidate.label).join(", ");
-  if (!best) throw new Error(`No ${kind} matches "${query}". Available ${kind}s: ${labels}`);
-  const winners = candidates.filter((candidate) => candidate.score === best);
-  if (winners.length > 1) {
-    throw new Error(`"${query}" matches several ${kind}s: ${winners.map((w) => w.label).join(", ")}. Ask which one.`);
-  }
-  return winners[0].entry;
-};
+const noMatch = (kind: string, query: string, names: string[]) =>
+  new Error(`No ${kind} matches "${query}". Available ${kind}s: ${names.join(", ")}`);
+
+const ambiguous = (kind: string, query: string, names: string[]) =>
+  new Error(`"${query}" matches several ${kind}s: ${names.join(", ")}. Ask which one.`);
 
 export const allServers = async (): Promise<ServerMatch[]> => {
   const servers = await Server.getAll();
@@ -37,15 +22,15 @@ export const allServers = async (): Promise<ServerMatch[]> => {
 
 export const findServer = async (query: string) => {
   const servers = await allServers();
-  return pick(
-    servers.map((entry) => ({
-      entry,
-      label: entry.server.name ?? String(entry.server.id),
-      score: Math.max(score(entry.server.name, query), String(entry.server.id) === normalize(query) ? 2 : 0),
-    })),
-    query,
-    "server",
-  );
+  const search = normalize(query);
+  const label = ({ server }: ServerMatch) => server.name ?? String(server.id);
+
+  const exact = servers.filter(({ server }) => normalize(server.name ?? "") === search || String(server.id) === search);
+  const found = exact.length ? exact : servers.filter(({ server }) => normalize(server.name ?? "").includes(search));
+
+  if (!found.length) throw noMatch("server", query, servers.map(label));
+  if (found.length > 1) throw ambiguous("server", query, found.map(label));
+  return found[0];
 };
 
 export const allSites = async (): Promise<SiteMatch[]> => {
@@ -67,19 +52,16 @@ export const allSites = async (): Promise<SiteMatch[]> => {
 
 export const findSite = async (query: string) => {
   const sites = await allSites();
-  return pick(
-    sites.map((entry) => ({
-      entry,
-      label: entry.site.name ?? String(entry.site.id),
-      score: Math.max(
-        score(entry.site.name, query),
-        String(entry.site.id) === normalize(query) ? 2 : 0,
-        ...(entry.site.aliases ?? []).map((alias) => score(alias, query)),
-      ),
-    })),
-    query,
-    "site",
-  );
+  const search = normalize(query);
+  const label = ({ site }: SiteMatch) => site.name ?? String(site.id);
+  const names = ({ site }: SiteMatch) => [site.name ?? "", ...(site.aliases ?? [])].map(normalize);
+
+  const exact = sites.filter((match) => names(match).includes(search) || String(match.site.id) === search);
+  const found = exact.length ? exact : sites.filter((match) => names(match).some((name) => name.includes(search)));
+
+  if (!found.length) throw noMatch("site", query, sites.map(label));
+  if (found.length > 1) throw ambiguous("site", query, found.map(label));
+  return found[0];
 };
 
 // Logs run to megabytes and the whole result is fed to the model
