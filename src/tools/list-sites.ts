@@ -1,4 +1,4 @@
-import { allSites } from "../lib/resolve";
+import { allSites } from "./helpers";
 
 type Input = {
   /**

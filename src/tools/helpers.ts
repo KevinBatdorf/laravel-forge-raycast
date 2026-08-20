@@ -1,7 +1,7 @@
 import { Server } from "../api/Server";
 import { Site } from "../api/Site";
 import { IServer, ISite } from "../types";
-import { unwrapToken } from "./auth";
+import { unwrapToken } from "../lib/auth";
 
 export type ServerMatch = { server: IServer; token: string };
 export type SiteMatch = { site: ISite; server: IServer; token: string };

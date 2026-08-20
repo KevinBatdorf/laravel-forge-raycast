@@ -1,5 +1,5 @@
 import { Server } from "../api/Server";
-import { findServer, tail } from "../lib/resolve";
+import { findServer, tail } from "./helpers";
 
 type Input = {
   /**

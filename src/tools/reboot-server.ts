@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { Server } from "../api/Server";
-import { findServer } from "../lib/resolve";
+import { findServer } from "./helpers";
 
 type Input = {
   /**

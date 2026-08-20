@@ -1,5 +1,5 @@
 import { Site } from "../api/Site";
-import { findSite, tail } from "../lib/resolve";
+import { findSite, tail } from "./helpers";
 
 type Input = {
   /**

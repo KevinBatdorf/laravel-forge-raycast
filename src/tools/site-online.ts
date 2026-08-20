@@ -1,4 +1,4 @@
-import { findSite } from "../lib/resolve";
+import { findSite } from "./helpers";
 import { findValidUrlsFromSite } from "../lib/url";
 
 type Input = {

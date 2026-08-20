@@ -1,4 +1,4 @@
-import { allServers } from "../lib/resolve";
+import { allServers } from "./helpers";
 
 export default async function tool() {
   const servers = await allServers();
