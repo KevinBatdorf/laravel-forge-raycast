@@ -38,6 +38,9 @@
       "interval": "10s"
     }
   ],
+  "ai": {
+    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the failing site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nWhich server, PHP version, repository or branch a site uses: list-sites.\nA site's env file is not available here.\nSite names are domains and also answer on their aliases. If a lookup returns several names, ask which one.\nOnly deploy, restart or reboot when asked. Quick deploy being off means Forge will not deploy on push by itself."
+  },
   "tools": [
     {
       "name": "list-servers",
@@ -52,12 +55,12 @@
     {
       "name": "deployment-status",
       "title": "Check Deployment Status",
-      "description": "Show which sites are deploying right now and which ones have a failed deployment"
+      "description": "Show which sites are deploying right now and which ones have a failed deployment. Start here to work out which site a question about a failed deploy is about"
     },
     {
       "name": "deployment-history",
       "title": "Get Deployment History",
-      "description": "List recent deployments for a site with their status, commit and timings"
+      "description": "List recent deployments for a site with their status, commit and timings. Use it to find an earlier failed deployment once the current status is no longer failed"
     },
     {
       "name": "deployment-log",
