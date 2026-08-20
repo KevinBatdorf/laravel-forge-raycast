@@ -64,6 +64,19 @@ export const findSite = async (query: string) => {
   return found[0];
 };
 
+export const sitesOnServer = async (server: IServer) => {
+  const sites = await allSites();
+  return sites
+    .filter((match) => match.server.id === server.id && match.server.api_token_key === server.api_token_key)
+    .map(({ site }) => site.name ?? String(site.id));
+};
+
+export const nameList = (names: string[], limit = 8) => {
+  if (!names.length) return "none";
+  if (names.length <= limit) return names.join(", ");
+  return `${names.slice(0, limit).join(", ")} and ${names.length - limit} more`;
+};
+
 // Logs run to megabytes and the whole result is fed to the model
 export const tail = (output: string, limit = 4_000) =>
   output.length > limit ? `…truncated…\n${output.slice(-limit)}` : output;

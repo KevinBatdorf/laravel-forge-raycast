@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { Server, ServiceAction } from "../api/Server";
-import { findServer } from "./helpers";
+import { findServer, nameList, sitesOnServer } from "./helpers";
 
 type Input = {
   /**
@@ -19,9 +19,14 @@ type Input = {
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, service, action = "reboot" }) => {
   const { server: found } = await findServer(server);
+  const sites = await sitesOnServer(found);
   return {
     message: `${action === "reboot" ? "Restart" : action} ${service} on ${found.name}?`,
-    info: [{ name: "Sites affected", value: "every site on this server" }],
+    info: [
+      { name: `Sites affected (${sites.length})`, value: nameList(sites) },
+      { name: "Server", value: found.name ?? String(found.id) },
+      ...(service === "php" ? [{ name: "PHP version", value: found.php_version ?? "unknown" }] : []),
+    ],
   };
 };
 

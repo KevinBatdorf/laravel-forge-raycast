@@ -1,5 +1,6 @@
 import { Tool } from "@raycast/api";
 import { Site } from "../api/Site";
+import { repositoryLabel } from "../lib/url";
 import { findSite } from "./helpers";
 
 type Input = {
@@ -15,7 +16,10 @@ export const confirmation: Tool.Confirmation<Input> = async ({ site }) => {
     message: `Deploy ${found.name}?`,
     info: [
       { name: "Server", value: server.name ?? String(server.id) },
+      { name: "Repository", value: repositoryLabel(found.repository) || "none" },
       { name: "Branch", value: found.repository?.branch ?? "unknown" },
+      { name: "Current status", value: found.deployment_status ?? "idle" },
+      { name: "Quick deploy", value: found.quick_deploy ? "on" : "off" },
     ],
   };
 };
