@@ -22,16 +22,27 @@ export default async function tool({ path, single }: Input) {
   const token = unwrapToken("laravel_forge_api_token");
   if (!token) throw new Error("No Laravel Forge API token is configured.");
 
-  if (single) {
-    const data = await getResource(clean, token);
-    return { path: clean, data: JSON.parse(tail(JSON.stringify(data ?? null), 6_000)) };
-  }
+  try {
+    if (single) {
+      const data = await getResource(clean, token);
+      return { path: clean, data: JSON.parse(tail(JSON.stringify(data ?? null), 6_000)) };
+    }
 
-  const { items, included } = await getCollection(clean, token, { pages: 1 });
-  return {
-    path: clean,
-    count: items.length,
-    items: JSON.parse(tail(JSON.stringify(items), 6_000)),
-    includedTypes: [...new Set(included.map((resource) => resource.type))],
-  };
+    const { items, included } = await getCollection(clean, token, { pages: 1 });
+    return {
+      path: clean,
+      count: items.length,
+      items: JSON.parse(tail(JSON.stringify(items), 6_000)),
+      includedTypes: [...new Set(included.map((resource) => resource.type))],
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    // Forge answers 401 for a route that does not exist, not only for a bad token
+    if (/^401\b|\b401 /.test(message)) {
+      throw new Error(
+        `Forge answered 401 for "${clean}". That is also what it answers for a path that is not a real route: servers and their sites live under orgs/<slug>/, and there is no top-level servers or sites/<id>. Probe "orgs" for the slug, then "orgs/<slug>/servers".`,
+      );
+    }
+    throw error;
+  }
 }

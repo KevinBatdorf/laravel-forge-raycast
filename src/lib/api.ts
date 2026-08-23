@@ -22,7 +22,7 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
       : `Error ${res?.status}: ${res?.statusText}`;
     if (!isBackground) showResetToast({ title });
     captureException(new Error(`${res?.status} ${res?.statusText}: ${url}`));
-    throw new Error(res?.statusText);
+    throw new Error(`${res?.status ?? "network"} ${res?.statusText || "request failed"}: ${url}`);
   }
   return res;
 };
