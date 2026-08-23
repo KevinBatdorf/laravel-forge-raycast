@@ -3,12 +3,11 @@ import { findServer, tail } from "./helpers";
 
 type Input = {
   /**
-   * The server's id from list-servers as a string, for example "678350", or its exact name. Look it
-   * up first; a partial name is refused, and a number is rejected before the tool runs.
+   * The server's id as a string, for example "678350", or its exact name.
    */
   server: string;
   /**
-   * Id of a specific event to read the command output of. Leave empty to list recent events.
+   * Id of one event to read the output of. Leave empty to list recent events.
    */
   eventId?: number;
 };

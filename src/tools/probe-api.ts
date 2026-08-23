@@ -3,13 +3,12 @@ import { unwrapToken } from "../lib/auth";
 
 type Input = {
   /**
-   * A Laravel Forge API v2 path, relative and without a leading slash, for example
-   * `sites?filter[name]=example.com`, `servers` or `servers/<id>/events`. A path starting with
-   * `servers` is scoped to your organizations for you. Read-only: this issues a GET.
+   * A Forge API path without a leading slash, for example `sites?filter[name]=example.com` or
+   * `servers/<id>/events`. A path starting with `servers` is scoped to your org for you.
    */
   path: string;
   /**
-   * Set when the answer is a single resource rather than a list, for example one deployment or a log.
+   * Set when the path returns one resource rather than a list.
    */
   single?: boolean;
 };

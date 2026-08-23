@@ -2,8 +2,7 @@ import { allSites } from "./helpers";
 
 type Input = {
   /**
-   * A server's id as a string, or part of its name, to limit the list to. Leave empty for every
-   * server and account.
+   * A server id, or part of a server name, to filter by. Leave empty for every site.
    */
   server?: string;
 };

@@ -3,12 +3,11 @@ import { findSite, tail } from "./helpers";
 
 type Input = {
   /**
-   * The site's id from list-sites as a string, for example "2882133", or its exact name. Look it up
-   * first; a partial name is refused, and a number is rejected before the tool runs.
+   * The site's id as a string, for example "2882133", or its exact name.
    */
   site: string;
   /**
-   * Id of a specific deployment. Leave empty for the most recent deployment.
+   * Id of one deployment. Leave empty for the latest.
    */
   deploymentId?: number;
 };

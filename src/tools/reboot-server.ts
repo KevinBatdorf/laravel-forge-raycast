@@ -4,13 +4,11 @@ import { nameList, resolveForConfirmation, sitesOnServer, targetServer } from ".
 
 type Input = {
   /**
-   * The server's id from list-servers as a string, for example "678350", or its exact name. Leave
-   * empty if you only know a site on it.
+   * The server's id as a string, or its exact name. Leave empty if you only know a site on it.
    */
   server?: string;
   /**
-   * The site's id from list-sites as a string, for example "2882133", or its exact name. Look it up
-   * first; a partial name is refused, and a number is rejected before the tool runs.
+   * The site's id as a string, for example "2882133", or its exact name.
    */
   site?: string;
 };

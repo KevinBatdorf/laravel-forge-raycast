@@ -3,8 +3,7 @@ import { findValidUrlsFromSite } from "../lib/url";
 
 type Input = {
   /**
-   * The site's id from list-sites as a string, for example "2882133", or its exact name. Look it up
-   * first; a partial name is refused, and a number is rejected before the tool runs.
+   * The site's id as a string, for example "2882133", or its exact name.
    */
   site: string;
 };
