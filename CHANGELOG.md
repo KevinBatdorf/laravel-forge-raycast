@@ -1,17 +1,14 @@
 # Laravel Forge Changelog
 
 ## [Fix] - {PR_MERGE_DATE}
-- Show active deployments again in the menu bar: the Forge API reports "Deploying" while the extension compared against lowercase "deploying"
-- Deployment questions in AI Chat read the site's latest deployment, so a failed deploy is still reported after it ends
-- Deploying, restarting and rebooting now need an exact site or server name, or the id from list-sites: a partial name is refused with the candidates and their servers, since a site name can repeat on another server
-- Deployment status covers Forge's whole status list: a deploy waiting at pending and a build that broke on failed-build were reported as neither deploying nor failed
-- The site list reports the latest deployment's outcome, which Forge leaves blank on the site itself once a deploy has ended
-- Services offer only the actions Forge accepts: there is no start for any of them, reload is php-only, stop is nginx, mysql and postgres, and postgres is now on the list
-- The AI probe tool refuses the environment and credentials endpoints, which return DB passwords, salts and API keys in full inside one field that name-based redaction cannot see
-- Reading a site's env file through the config tool is refused outright, rather than only being absent from the list of files it offers
-- The AI probe tool says when a collection has a further page, instead of reporting the first page's length as the total
-- One database option covers mysql and postgres: Forge's endpoints act on whichever engine the server runs, so naming the wrong one still hit the live database
-- Ask about one site or one server: get-site and get-server return the full record — zero-downtime, isolation, maintenance mode, deploy script — minus the deploy-trigger URL and the SSH key blob
+
+- Show active deployments in the menu bar again, including ones waiting at pending or failed during the build
+- Show the last deploy's outcome in the site list and in AI Chat answers, even after the deploy ends
+- New get-site and get-server AI tools return the full details of one site or server
+- Restart the database under one option — Forge acts on whichever engine the server runs
+- Services only offer the actions Forge accepts; there is no start
+- AI tools ask for an exact site or server name, or the id from list-sites, and suggest the closest matches otherwise
+- AI tools can no longer read env files or credentials, which hold secrets
 
 ## [AI Tools] - 2026-08-20
 - Ask Laravel Forge from AI Chat: what is deploying, why a deploy failed, a site's Nginx config or logs, whether a site is up
