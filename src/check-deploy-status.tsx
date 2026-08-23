@@ -1,8 +1,8 @@
 import { Cache, Image, LaunchType, MenuBarExtra, launchCommand, updateCommandMetadata } from "@raycast/api";
 import { useAllSites } from "./hooks/useAllSites";
 import { ISite } from "./types";
-import { runAppleScript } from "run-applescript";
 import { useEffect } from "react";
+import { notify } from "./notify";
 
 const cache = new Cache();
 if (!cache.get("deploying-ids")) {
@@ -32,8 +32,7 @@ export default function Command() {
 
   if (newDeploying.length > 0) {
     const toShow = newDeploying[0];
-    // Seems the best we can do?
-    runAppleScript(`display notification "Deploying ${toShow.name}" with title "Laravel Forge"`);
+    notify("Laravel Forge", `Deploying ${toShow.name}`);
   }
   if (allSites?.length) cache.set("deploying-last-status", JSON.stringify(allSites));
 

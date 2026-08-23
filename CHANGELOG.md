@@ -1,5 +1,9 @@
 # Laravel Forge Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+- Runs on Raycast for Windows: servers, sites, deploys and every AI tool
+- The menu bar deploy watcher stays macOS only, since Raycast has no menu bar commands on Windows
+
 ## [Fix] - {PR_MERGE_DATE}
 - Show active deployments again in the menu bar: the Forge API reports "Deploying" while the extension compared against lowercase "deploying"
 
