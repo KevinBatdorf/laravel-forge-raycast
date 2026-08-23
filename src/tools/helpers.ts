@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { sortBy } from "lodash";
+import { deploymentStatus } from "../api/Site";
 import { unwrapToken } from "../lib/auth";
 import { flatten, getCollection, relatedId, relatedResource } from "../lib/forge";
 import { IServer, ISite } from "../types";
@@ -83,7 +84,12 @@ export const allSites = once(async (): Promise<SiteMatch[]> => {
           api_token_key: tokenKey,
           ssh_user: sshUser,
         };
-        const site = { ...flatten<ISite>(item), server_id: relatedId(item, "server") ?? id };
+        const flat = flatten<ISite>(item);
+        const site = {
+          ...flat,
+          server_id: relatedId(item, "server") ?? id,
+          deployment_status: deploymentStatus(flat.deployment_status),
+        };
         return [{ site, server, token }];
       });
     }),
