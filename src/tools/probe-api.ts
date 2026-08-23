@@ -23,6 +23,9 @@ const CAP = 6_000;
 // A site's deployment_url embeds a token that triggers a deploy without any auth
 const SECRETS = /token|secret|password|deployment_url|private_key/i;
 
+// Key-name redaction cannot see secrets inside a content string, and these return them
+const FORBIDDEN = /(^|\/)(environment|credentials|server-credentials)(\/|\?|$)/;
+
 const redact = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(redact);
   if (value && typeof value === "object") {
@@ -47,6 +50,11 @@ const scoped = async (path: string, token: string) =>
 export default async function tool({ path, single }: Input) {
   const clean = path.trim().replace(/^\/*(api\/)?/, "");
   if (/^[a-z]+:\/\//i.test(clean)) throw new Error("Pass a path relative to the Forge API, not a full URL.");
+  if (FORBIDDEN.test(clean)) {
+    throw new Error(
+      `"${clean}" returns credentials in full and is not readable through this tool. Read it in the Forge UI.`,
+    );
+  }
 
   const token = unwrapToken("laravel_forge_api_token");
   if (!token) throw new Error("No Laravel Forge API token is configured.");
