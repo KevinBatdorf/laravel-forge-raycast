@@ -9,6 +9,7 @@ export type ServerMatch = { server: IServer; token: string };
 export type SiteMatch = { site: ISite; server: IServer; token: string };
 
 type Account = { tokenKey: string; token: string; sshUser: string };
+type MatchOptions = { strict?: boolean };
 
 // One fetch serves a whole answer: a confirmation and its tool, or two tools the model chains
 const once = <T>(build: () => Promise<T>) => {
@@ -115,37 +116,56 @@ const noMatch = (kind: string, query: string, names: string[]) =>
 const ambiguous = (kind: string, query: string, names: string[]) =>
   new Error(`"${query}" matches several ${kind}s: ${names.join(", ")}. Ask which one.`);
 
-export const findServer = async (query: string) => {
+const notExact = (kind: string, query: string, names: string[]) =>
+  new Error(
+    `No ${kind} is named exactly "${query}". Closest: ${names.join(", ")}. Confirm which one, then pass its id.`,
+  );
+
+// A confirmation that throws cancels the call with nothing shown, so the tool reports the mismatch
+export const resolveForConfirmation = <T>(resolve: () => Promise<T>) => resolve().catch(() => undefined);
+
+export const findServer = async (query: string, { strict = false }: MatchOptions = {}) => {
   const servers = await allServers();
   const search = normalize(query);
-  const label = ({ server }: ServerMatch) => server.name ?? String(server.id);
+  const label = ({ server }: ServerMatch) => `${server.name ?? server.id} (id ${server.id})`;
 
   const exact = servers.filter(({ server }) => normalize(server.name ?? "") === search || String(server.id) === search);
-  const found = exact.length ? exact : servers.filter(({ server }) => normalize(server.name ?? "").includes(search));
+  const partial = servers.filter(({ server }) => normalize(server.name ?? "").includes(search));
+  const found = exact.length ? exact : strict ? [] : partial;
 
-  if (!found.length) throw noMatch("server", query, servers.map(label));
+  if (!found.length) {
+    throw partial.length ? notExact("server", query, partial.map(label)) : noMatch("server", query, servers.map(label));
+  }
   if (found.length > 1) throw ambiguous("server", query, found.map(label));
   return found[0];
 };
 
-export const findSite = async (query: string) => {
+export const findSite = async (query: string, { strict = false }: MatchOptions = {}) => {
   const sites = await allSites();
   const search = normalize(query);
-  const label = ({ site }: SiteMatch) => site.name ?? String(site.id);
+  // A site name can repeat on another server, so only the id identifies one
+  const label = ({ site, server }: SiteMatch) =>
+    `${site.name ?? site.id} (id ${site.id} on ${server.name ?? server.id})`;
   const names = ({ site }: SiteMatch) => [site.name ?? "", ...(site.aliases ?? [])].map(normalize);
 
   const exact = sites.filter((match) => names(match).includes(search) || String(match.site.id) === search);
-  const found = exact.length ? exact : sites.filter((match) => names(match).some((name) => name.includes(search)));
+  const partial = sites.filter((match) => names(match).some((name) => name.includes(search)));
+  const found = exact.length ? exact : strict ? [] : partial;
 
-  if (!found.length) throw noMatch("site", query, sites.map(label));
+  if (!found.length) {
+    throw partial.length ? notExact("site", query, partial.map(label)) : noMatch("site", query, sites.map(label));
+  }
   if (found.length > 1) throw ambiguous("site", query, found.map(label));
   return found[0];
 };
 
-export const targetServer = async ({ server, site }: { server?: string; site?: string }): Promise<ServerMatch> => {
-  if (server) return findServer(server);
+export const targetServer = async (
+  { server, site }: { server?: string; site?: string },
+  options: MatchOptions = {},
+): Promise<ServerMatch> => {
+  if (server) return findServer(server, options);
   if (site) {
-    const match = await findSite(site);
+    const match = await findSite(site, options);
     return { server: match.server, token: match.token };
   }
   throw new Error("Name the server, or a site that runs on it.");

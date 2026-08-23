@@ -1,14 +1,14 @@
 import { Tool } from "@raycast/api";
 import { Server, ServiceAction } from "../api/Server";
-import { nameList, sitesOnServer, targetServer } from "./helpers";
+import { nameList, resolveForConfirmation, sitesOnServer, targetServer } from "./helpers";
 
 type Input = {
   /**
-   * Name of the server, as shown in Forge. Leave empty if you only know a site that runs on it.
+   * The server's id from list-servers, or its exact name. Leave empty if you only know a site on it.
    */
   server?: string;
   /**
-   * Name of a site on the server, used when the server itself was not named.
+   * The site's id from list-sites, or its exact name. Look it up first; a partial name is refused.
    */
   site?: string;
   /**
@@ -22,7 +22,9 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site, service, action = "reboot" }) => {
-  const { server: found } = await targetServer({ server, site });
+  const resolved = await resolveForConfirmation(() => targetServer({ server, site }, { strict: true }));
+  if (!resolved) return { message: `Restart "${server ?? site}"?` };
+  const { server: found } = resolved;
   const sites = await sitesOnServer(found);
   return {
     message: `${action === "reboot" ? "Restart" : action} ${service} on ${found.name}?`,
@@ -35,7 +37,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ server, site, ser
 };
 
 export default async function tool({ server, site, service, action = "reboot" }: Input) {
-  const { server: found, token } = await targetServer({ server, site });
+  const { server: found, token } = await targetServer({ server, site }, { strict: true });
   await Server.runAction({ server: found, token, action, service });
   return { server: found.name, service, action, started: true };
 }

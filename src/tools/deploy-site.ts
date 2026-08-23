@@ -1,17 +1,20 @@
 import { Tool } from "@raycast/api";
 import { Site } from "../api/Site";
 import { repositoryLabel } from "../lib/url";
-import { findSite } from "./helpers";
+import { findSite, resolveForConfirmation } from "./helpers";
 
 type Input = {
   /**
-   * Name of the site to deploy, as shown in Forge (for example "example.com").
+   * The site's id from list-sites, or its exact name as shown in Forge (for example "example.com").
+   * Look it up first: names repeat across servers, and a partial name is refused.
    */
   site: string;
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ site }) => {
-  const { site: found, server } = await findSite(site);
+  const match = await resolveForConfirmation(() => findSite(site, { strict: true }));
+  if (!match) return { message: `Deploy "${site}"?` };
+  const { site: found, server } = match;
   return {
     message: `Deploy ${found.name}?`,
     info: [
@@ -25,7 +28,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ site }) => {
 };
 
 export default async function tool({ site }: Input) {
-  const { site: found, server, token } = await findSite(site);
+  const { site: found, server, token } = await findSite(site, { strict: true });
   await Site.deploy({ orgSlug: server.org_slug, serverId: server.id, siteId: found.id, token });
   return { site: found.name, server: server.name, started: true };
 }
