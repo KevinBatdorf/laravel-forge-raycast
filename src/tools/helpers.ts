@@ -72,7 +72,7 @@ const orgByServerId = async (tokenKey: string) => {
 
 const SITE_INCLUDES = "include=server,latestDeployment";
 
-const siteMatches = async (query: string): Promise<SiteMatch[]> => {
+export const searchSites = async (query: string): Promise<SiteMatch[]> => {
   const slugs = await orgSlugs();
   const perAccount = await Promise.all(
     accounts().map(async ({ tokenKey, token, sshUser }) => {
@@ -109,7 +109,7 @@ const siteMatches = async (query: string): Promise<SiteMatch[]> => {
   return sortBy(perAccount.flat(), ({ site }) => site.name?.toLowerCase());
 };
 
-export const allSites = once(() => siteMatches(""));
+export const allSites = once(() => searchSites(""));
 
 export const sitesOnServer = async (server: IServer) => {
   const sites = await allSites();
@@ -154,7 +154,7 @@ export const findServer = async (query: string) => {
 export const findSite = async (query: string) => {
   const search = normalize(query);
   // filter[name] is a contains match, and it cannot see ids or aliases
-  const narrowed = /^\d+$/.test(search) ? [] : await siteMatches(query);
+  const narrowed = /^\d+$/.test(search) ? [] : await searchSites(query);
   const sites = narrowed.length ? narrowed : await allSites();
   // A site name can repeat on another server, so only the id identifies one
   const label = ({ site, server }: SiteMatch) =>

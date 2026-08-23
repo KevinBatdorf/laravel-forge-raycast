@@ -1,14 +1,18 @@
-import { allSites } from "./helpers";
+import { allSites, searchSites } from "./helpers";
 
 type Input = {
+  /**
+   * Part of a site name to search for. Forge matches on contains, so "6-8" finds 6-8.example.com.
+   */
+  site?: string;
   /**
    * A server id, or part of a server name, to filter by. Leave empty for every site.
    */
   server?: string;
 };
 
-export default async function tool({ server }: Input) {
-  const sites = await allSites();
+export default async function tool({ site, server }: Input) {
+  const sites = site ? await searchSites(site) : await allSites();
   const wanted = server?.trim().toLowerCase();
   return sites
     .filter(
