@@ -12,13 +12,13 @@ type Input = {
    */
   site?: string;
   /**
-   * Which service to act on. A server runs either mysql or postgres, never both, and
-   * list-servers says which one under databaseType.
+   * Which service to act on. database acts on whichever engine the server runs;
+   * list-servers shows it under databaseType.
    */
   service: Service;
   /**
    * What to do with the service. Defaults to a restart. Forge has no start at all: only
-   * php takes reload, and only nginx, mysql and postgres take stop.
+   * php takes reload, and only nginx and database take stop.
    */
   action?: ServiceAction;
 };
@@ -46,6 +46,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ server, site, ser
       { name: `Sites affected (${sites.length})`, value: nameList(sites) },
       { name: "Server", value: found.name ?? String(found.id) },
       ...(service === "php" ? [{ name: "PHP version", value: found.php_version ?? "unknown" }] : []),
+      ...(service === "database" ? [{ name: "Database", value: found.database_type || "none installed" }] : []),
     ],
   };
 };

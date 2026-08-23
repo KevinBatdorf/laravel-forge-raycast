@@ -12,9 +12,8 @@ const verbs: Record<ServiceAction, { verb: string; running: string }> = {
 };
 
 const services: { key: Service; label: string }[] = [
-  { key: "mysql", label: "MySQL" },
+  { key: "database", label: "Database" },
   { key: "nginx", label: "Nginx" },
-  { key: "postgres", label: "Postgres" },
   { key: "php", label: "PHP" },
 ];
 
