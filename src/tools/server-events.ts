@@ -3,7 +3,8 @@ import { findServer, tail } from "./helpers";
 
 type Input = {
   /**
-   * The server's id from list-servers, or its exact name. Look it up first; a partial name is refused.
+   * The server's id from list-servers as a string, for example "678350", or its exact name. Look it
+   * up first; a partial name is refused, and a number is rejected before the tool runs.
    */
   server: string;
   /**

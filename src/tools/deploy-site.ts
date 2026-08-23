@@ -5,8 +5,9 @@ import { findSite, resolveForConfirmation } from "./helpers";
 
 type Input = {
   /**
-   * The site's id from list-sites, or its exact name as shown in Forge (for example "example.com").
-   * Look it up first: names repeat across servers, and a partial name is refused.
+   * The site's id from list-sites as a string, for example "2882133", or its exact name as shown in
+   * Forge. Look it up first: names repeat across servers, a partial name is refused, and a number is
+   * rejected before the tool runs.
    */
   site: string;
 };

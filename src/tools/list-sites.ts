@@ -2,7 +2,8 @@ import { allSites } from "./helpers";
 
 type Input = {
   /**
-   * Name of a server to limit the list to. Leave empty to list sites across every server and account.
+   * A server's id as a string, or part of its name, to limit the list to. Leave empty for every
+   * server and account.
    */
   server?: string;
 };
@@ -11,7 +12,10 @@ export default async function tool({ server }: Input) {
   const sites = await allSites();
   const wanted = server?.trim().toLowerCase();
   return sites
-    .filter((match) => !wanted || (match.server.name ?? "").toLowerCase().includes(wanted))
+    .filter(
+      (match) =>
+        !wanted || (match.server.name ?? "").toLowerCase().includes(wanted) || String(match.server.id) === wanted,
+    )
     .map(({ site, server: owner }) => ({
       id: site.id,
       name: site.name,
