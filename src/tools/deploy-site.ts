@@ -12,7 +12,7 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ site }) => {
-  const match = await resolveForConfirmation(() => findSite(site, { strict: true }));
+  const match = await resolveForConfirmation(() => findSite(site));
   if (!match) return { message: `Deploy "${site}"?` };
   const { site: found, server } = match;
   return {
@@ -28,7 +28,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ site }) => {
 };
 
 export default async function tool({ site }: Input) {
-  const { site: found, server, token } = await findSite(site, { strict: true });
+  const { site: found, server, token } = await findSite(site);
   await Site.deploy({ orgSlug: server.org_slug, serverId: server.id, siteId: found.id, token });
   return { site: found.name, server: server.name, started: true };
 }

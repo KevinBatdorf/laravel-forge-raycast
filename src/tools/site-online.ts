@@ -3,7 +3,7 @@ import { findValidUrlsFromSite } from "../lib/url";
 
 type Input = {
   /**
-   * Name of the site, as shown in Forge (for example "example.com").
+   * The site's id from list-sites, or its exact name. Look it up first; a partial name is refused.
    */
   site: string;
 };

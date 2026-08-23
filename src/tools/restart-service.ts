@@ -22,7 +22,7 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site, service, action = "reboot" }) => {
-  const resolved = await resolveForConfirmation(() => targetServer({ server, site }, { strict: true }));
+  const resolved = await resolveForConfirmation(() => targetServer({ server, site }));
   if (!resolved) return { message: `Restart "${server ?? site}"?` };
   const { server: found } = resolved;
   const sites = await sitesOnServer(found);
@@ -37,7 +37,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ server, site, ser
 };
 
 export default async function tool({ server, site, service, action = "reboot" }: Input) {
-  const { server: found, token } = await targetServer({ server, site }, { strict: true });
+  const { server: found, token } = await targetServer({ server, site });
   await Server.runAction({ server: found, token, action, service });
   return { server: found.name, service, action, started: true };
 }

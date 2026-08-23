@@ -3,7 +3,7 @@ import { findServer, tail } from "./helpers";
 
 type Input = {
   /**
-   * Name of the server, as shown in Forge.
+   * The server's id from list-servers, or its exact name. Look it up first; a partial name is refused.
    */
   server: string;
   /**

@@ -96,6 +96,11 @@
       "name": "reboot-server",
       "title": "Reboot a Server",
       "description": "Reboot a Laravel Forge server, named directly or by a site running on it, taking every site on it down until it comes back. Look the server up with list-servers first and pass the id it returns."
+    },
+    {
+      "name": "probe-api",
+      "title": "Probe the Forge API",
+      "description": "Read any Laravel Forge API v2 path directly with a GET. Use it when no other tool answers the question, or to check what an endpoint returns. Sites accept filter[name]; a page holds 30 items."
     }
   ],
   "preferences": [
