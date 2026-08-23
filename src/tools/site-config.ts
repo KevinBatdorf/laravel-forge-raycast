@@ -11,11 +11,14 @@ type Input = {
   /**
    * Which file to read.
    */
-  type: "nginx" | "application-log" | "nginx-error-log" | "nginx-access-log";
+  type: "nginx" | "deployment-script" | "application-log" | "nginx-error-log" | "nginx-access-log";
 };
 
 export default async function tool({ site, type }: Input) {
   const { site: found, server, token } = await findSite(site);
+  if (type === "deployment-script") {
+    return { site: found.name, type, content: tail(found.deployment_script ?? "") };
+  }
   const content = await Site.getConfig({
     orgSlug: server.org_slug,
     serverId: server.id,

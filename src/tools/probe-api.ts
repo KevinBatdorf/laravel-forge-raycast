@@ -21,6 +21,19 @@ const orgSlugs = async (token: string) => {
 
 const CAP = 6_000;
 
+// A site's deployment_url embeds a token that triggers a deploy without any auth
+const SECRETS = /token|secret|password|deployment_url|private_key/i;
+
+const redact = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(redact);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [key, SECRETS.test(key) ? "[redacted]" : redact(nested)]),
+    );
+  }
+  return value;
+};
+
 // The whole result is fed to the model, and one page of anything can run past its context
 const fitting = <T>(items: T[]) => {
   let kept = items;
@@ -44,14 +57,16 @@ export default async function tool({ path, single }: Input) {
   try {
     if (single) {
       const data = await getResource(paths[0], token);
-      const json = JSON.stringify(data ?? null);
-      return json.length <= CAP ? { path: paths[0], data } : { path: paths[0], truncated: json.slice(0, CAP) };
+      const json = JSON.stringify(redact(data ?? null));
+      return json.length <= CAP
+        ? { path: paths[0], data: redact(data ?? null) }
+        : { path: paths[0], truncated: json.slice(0, CAP) };
     }
 
     const pages = await Promise.all(paths.map((one) => getCollection(one, token, { pages: 1 })));
     const items = pages.flatMap((page) => page.items);
     const included = pages.flatMap((page) => page.included);
-    const shown = fitting(items);
+    const shown = fitting(items.map(redact));
     return {
       paths,
       count: items.length,
