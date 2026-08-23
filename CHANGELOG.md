@@ -9,6 +9,7 @@
 - Services only offer the actions Forge accepts; there is no start
 - AI tools ask for an exact site or server name, or the id from list-sites, and suggest the closest matches otherwise
 - AI tools can no longer read env files or credentials, which hold secrets
+- Searching sites also matches aliases and server names, and a miss lists every site instead of answering with nothing
 
 ## [AI Tools] - 2026-08-20
 - Ask Laravel Forge from AI Chat: what is deploying, why a deploy failed, a site's Nginx config or logs, whether a site is up
