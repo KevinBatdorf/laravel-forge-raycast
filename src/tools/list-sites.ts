@@ -27,13 +27,5 @@ export default async function tool({ server }: Input) {
       repository: site.repository?.url,
       branch: site.repository?.branch,
       quickDeploy: site.quick_deploy,
-      zeroDowntimeDeployments: site.zero_downtime_deployments,
-      usesEnvoyer: site.uses_envoyer,
-      isolated: site.isolated,
-      appType: site.app_type,
-      webDirectory: site.web_directory,
-      healthcheckUrl: site.healthcheck_url,
-      maintenanceMode: site.maintenance_mode?.enabled,
-      aliases: site.aliases,
     }));
 }
