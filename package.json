@@ -90,7 +90,7 @@
     {
       "name": "restart-service",
       "title": "Restart a Service",
-      "description": "Start, stop or restart php, nginx, mysql or redis on a server. Pass the id from list-servers."
+      "description": "Restart, reload or stop php, nginx, mysql, postgres or redis on a server. Pass the id from list-servers."
     },
     {
       "name": "reboot-server",

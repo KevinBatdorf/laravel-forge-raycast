@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { Server, ServiceAction } from "../api/Server";
+import { SERVICE_ACTIONS, Server, Service, ServiceAction } from "../api/Server";
 import { nameList, resolveForConfirmation, sitesOnServer, targetServer } from "./helpers";
 
 type Input = {
@@ -12,13 +12,27 @@ type Input = {
    */
   site?: string;
   /**
-   * Which service to act on.
+   * Which service to act on. A server runs either mysql or postgres, never both, and
+   * list-servers says which one under databaseType.
    */
-  service: "php" | "nginx" | "mysql" | "redis";
+  service: Service;
   /**
-   * What to do with the service. Defaults to a restart.
+   * What to do with the service. Defaults to a restart. Forge has no start at all: only
+   * php takes reload, and only nginx, mysql and postgres take stop.
    */
   action?: ServiceAction;
+};
+
+// Forge answers 422 with no detail on an action a service does not take
+const allowedFor = (service: Service, action: ServiceAction) => {
+  const allowed = SERVICE_ACTIONS[service];
+  if (!allowed) {
+    throw new Error(`This tool acts on ${Object.keys(SERVICE_ACTIONS).join(", ")}, not "${service}".`);
+  }
+  if (!allowed.includes(action)) {
+    throw new Error(`Forge only takes ${allowed.join(" or ")} on ${service}, not ${action}.`);
+  }
+  return action;
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site, service, action = "reboot" }) => {
@@ -38,6 +52,6 @@ export const confirmation: Tool.Confirmation<Input> = async ({ server, site, ser
 
 export default async function tool({ server, site, service, action = "reboot" }: Input) {
   const { server: found, token } = await targetServer({ server, site });
-  await Server.runAction({ server: found, token, action, service });
+  await Server.runAction({ server: found, token, action: allowedFor(service, action), service });
   return { server: found.name, service, action, started: true };
 }

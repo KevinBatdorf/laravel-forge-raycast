@@ -4,13 +4,23 @@ import { IEvent, IServer, ISite } from "../types";
 import { flatten, getCollection, getResource, postAction } from "../lib/forge";
 import { Site } from "./Site";
 
-export type ServiceAction = "reboot" | "start" | "stop";
+export type ServiceAction = "reboot" | "reload" | "stop";
+export type Service = "php" | "nginx" | "mysql" | "postgres" | "redis";
+
+// Forge has no start: a stopped service comes back with reboot, and anything else 422s
+export const SERVICE_ACTIONS: Record<Service, ServiceAction[]> = {
+  php: ["reboot", "reload"],
+  nginx: ["reboot", "stop"],
+  mysql: ["reboot", "stop"],
+  postgres: ["reboot", "stop"],
+  redis: ["reboot"],
+};
 
 type RunAction = {
   server: IServer;
   token: string;
   action?: ServiceAction;
-  service?: string;
+  service?: Service;
 };
 
 type ServerWithToken = { server: IServer; token: string };
