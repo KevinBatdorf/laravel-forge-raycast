@@ -1,17 +1,24 @@
-import { allSites } from "./helpers";
+import { allSites, searchSites, siteDeploymentStatus } from "./helpers";
 
 type Input = {
   /**
-   * Name of a server to limit the list to. Leave empty to list sites across every server and account.
+   * Part of a site name to search for. Forge matches on contains, so "6-8" finds 6-8.example.com.
+   */
+  site?: string;
+  /**
+   * A server id, or part of a server name, to filter by. Leave empty for every site.
    */
   server?: string;
 };
 
-export default async function tool({ server }: Input) {
-  const sites = await allSites();
+export default async function tool({ site, server }: Input) {
+  const sites = site ? await searchSites(site) : await allSites();
   const wanted = server?.trim().toLowerCase();
   return sites
-    .filter((match) => !wanted || (match.server.name ?? "").toLowerCase().includes(wanted))
+    .filter(
+      (match) =>
+        !wanted || (match.server.name ?? "").toLowerCase().includes(wanted) || String(match.server.id) === wanted,
+    )
     .map(({ site, server: owner }) => ({
       id: site.id,
       name: site.name,
@@ -19,7 +26,7 @@ export default async function tool({ server }: Input) {
       url: site.url,
       phpVersion: site.php_version,
       status: site.status,
-      deploymentStatus: site.deployment_status,
+      deploymentStatus: siteDeploymentStatus(site),
       repository: site.repository?.url,
       branch: site.repository?.branch,
       quickDeploy: site.quick_deploy,
