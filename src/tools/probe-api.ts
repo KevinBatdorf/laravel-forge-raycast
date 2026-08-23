@@ -1,19 +1,36 @@
 import { getCollection, getResource } from "../lib/forge";
 import { unwrapToken } from "../lib/auth";
-import { tail } from "./helpers";
 
 type Input = {
   /**
    * A Laravel Forge API v2 path, relative and without a leading slash, for example
-   * `sites?filter[name]=example.com` or `orgs/<slug>/servers/<id>/events`. Read-only: this issues a
-   * GET. Use it when no other tool covers the question, or to find out what an endpoint returns.
+   * `sites?filter[name]=example.com`, `servers` or `servers/<id>/events`. A path starting with
+   * `servers` is scoped to your organizations for you. Read-only: this issues a GET.
    */
   path: string;
   /**
-   * Set when the answer is a single resource rather than a list, for example a deployment or a log.
+   * Set when the answer is a single resource rather than a list, for example one deployment or a log.
    */
   single?: boolean;
 };
+
+const orgSlugs = async (token: string) => {
+  const { items } = await getCollection("orgs", token, { pages: 1 });
+  return items.map((org) => String(org.attributes?.slug ?? "")).filter(Boolean);
+};
+
+const CAP = 6_000;
+
+// The whole result is fed to the model, and one page of anything can run past its context
+const fitting = <T>(items: T[]) => {
+  let kept = items;
+  while (kept.length > 1 && JSON.stringify(kept).length > CAP) kept = kept.slice(0, Math.floor(kept.length / 2));
+  return kept;
+};
+
+// Forge has no top-level /servers; server paths only exist under an org
+const scoped = async (path: string, token: string) =>
+  /^servers(\/|\?|$)/.test(path) ? (await orgSlugs(token)).map((slug) => `orgs/${slug}/${path}`) : [path];
 
 export default async function tool({ path, single }: Input) {
   const clean = path.trim().replace(/^\/*(api\/)?/, "");
@@ -22,25 +39,31 @@ export default async function tool({ path, single }: Input) {
   const token = unwrapToken("laravel_forge_api_token");
   if (!token) throw new Error("No Laravel Forge API token is configured.");
 
+  const paths = await scoped(clean, token);
+
   try {
     if (single) {
-      const data = await getResource(clean, token);
-      return { path: clean, data: JSON.parse(tail(JSON.stringify(data ?? null), 6_000)) };
+      const data = await getResource(paths[0], token);
+      const json = JSON.stringify(data ?? null);
+      return json.length <= CAP ? { path: paths[0], data } : { path: paths[0], truncated: json.slice(0, CAP) };
     }
 
-    const { items, included } = await getCollection(clean, token, { pages: 1 });
+    const pages = await Promise.all(paths.map((one) => getCollection(one, token, { pages: 1 })));
+    const items = pages.flatMap((page) => page.items);
+    const included = pages.flatMap((page) => page.included);
+    const shown = fitting(items);
     return {
-      path: clean,
+      paths,
       count: items.length,
-      items: JSON.parse(tail(JSON.stringify(items), 6_000)),
+      shown: shown.length,
+      items: shown,
       includedTypes: [...new Set(included.map((resource) => resource.type))],
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    // Forge answers 401 for a route that does not exist, not only for a bad token
     if (/^401\b|\b401 /.test(message)) {
       throw new Error(
-        `Forge answered 401 for "${clean}". That is also what it answers for a path that is not a real route: servers and their sites live under orgs/<slug>/, and there is no top-level servers or sites/<id>. Probe "orgs" for the slug, then "orgs/<slug>/servers".`,
+        `Forge answered 401 for "${paths.join(", ")}". It answers 401 for a path that is not a real route as well as for a bad token: there is no /sites/<id>, and a site lives under orgs/<slug>/servers/<serverId>/sites/<siteId>. Probe "orgs" for the slugs.`,
       );
     }
     throw error;
