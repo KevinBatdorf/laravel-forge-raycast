@@ -23,7 +23,22 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
       : `Error ${res?.status}: ${res?.statusText}`;
     if (!silent) showResetToast({ title });
     captureException(new Error(`${res?.status} ${res?.statusText}: ${url}`));
-    throw new Error(`${res?.status ?? "network"} ${res?.statusText || "request failed"}: ${url}`);
+    // Forge explains itself in the body: a 400 names the filters it does allow
+    const detail = await res
+      ?.text()
+      .then((body) => {
+        try {
+          return String((JSON.parse(body) as { message?: string }).message ?? body);
+        } catch {
+          return body;
+        }
+      })
+      .catch(() => "");
+    throw new Error(
+      [`${res?.status ?? "network"} ${res?.statusText || "request failed"}: ${url}`, detail?.slice(0, 300)]
+        .filter(Boolean)
+        .join(" — "),
+    );
   }
   return res;
 };

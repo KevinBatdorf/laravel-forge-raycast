@@ -75,16 +75,18 @@ export default async function tool({ path, single }: Input) {
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    const shapes =
+      "Paths that work: orgs, orgs/<slug>/servers, orgs/<slug>/servers/<id>, sites?filter[name]=<name>, orgs/<slug>/servers/<id>/sites/<id>/deployments, orgs/<slug>/servers/<id>/events.";
     if (/\b405\b/.test(message)) {
       throw new Error(
-        `Forge does not allow GET on "${paths[0]}". A single site is only readable through the collection: sites?filter[name]=<name>. A single server does allow GET.`,
+        `Forge does not allow GET on "${paths[0]}". A single site is only readable through the collection: sites?filter[name]=<name>, and a single server does allow GET. ${shapes}`,
       );
     }
     if (/^401\b|\b401 /.test(message)) {
       throw new Error(
-        `Forge answered 401 for "${paths.join(", ")}". It answers 401 for a path that is not a real route as well as for a bad token: there is no /sites/<id>, and a site lives under orgs/<slug>/servers/<serverId>/sites/<siteId>. Probe "orgs" for the slugs.`,
+        `Forge answered 401 for "${paths.join(", ")}". It answers 401 for a path that is not a real route as well as for a bad token. ${shapes}`,
       );
     }
-    throw error;
+    throw new Error(`${message} ${shapes}`);
   }
 }
