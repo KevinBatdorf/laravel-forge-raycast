@@ -111,6 +111,10 @@ export const searchSites = async (query: string): Promise<SiteMatch[]> => {
 
 export const allSites = once(() => searchSites(""));
 
+// Forge only fills a site's own deployment_status while a deploy is running
+export const siteDeploymentStatus = (site: ISite) =>
+  site.deployment_status ?? deploymentStatus(site.latest_deployment?.status);
+
 export const sitesOnServer = async (server: IServer) => {
   const sites = await allSites();
   return sites

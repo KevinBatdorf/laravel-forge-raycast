@@ -1,4 +1,4 @@
-import { allSites, searchSites } from "./helpers";
+import { allSites, searchSites, siteDeploymentStatus } from "./helpers";
 
 type Input = {
   /**
@@ -26,7 +26,7 @@ export default async function tool({ site, server }: Input) {
       url: site.url,
       phpVersion: site.php_version,
       status: site.status,
-      deploymentStatus: site.deployment_status,
+      deploymentStatus: siteDeploymentStatus(site),
       repository: site.repository?.url,
       branch: site.repository?.branch,
       quickDeploy: site.quick_deploy,

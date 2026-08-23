@@ -1,18 +1,19 @@
-import { deploymentStatus } from "../api/Site";
-import { allSites, SiteMatch } from "./helpers";
+import { allSites, siteDeploymentStatus } from "./helpers";
 
-// Forge only fills a site's own deployment_status while a deploy is running
-const statusOf = ({ site }: SiteMatch) => site.deployment_status ?? deploymentStatus(site.latest_deployment?.status);
-
-// A deploy sits at queued until the server picks it up
-const IN_FLIGHT = ["deploying", "queued"];
+// A deploy waits at pending before queued, and a broken build lands on failed-build
+const IN_FLIGHT = ["pending", "queued", "deploying"];
+const FAILED = ["failed", "failed-build"];
 
 export default async function tool() {
   const sites = await allSites();
   const listed = (wanted: string[]) =>
     sites
-      .filter((match) => wanted.includes(statusOf(match) ?? ""))
-      .map((match) => ({ site: match.site.name, server: match.server.name, status: statusOf(match) }));
+      .filter((match) => wanted.includes(siteDeploymentStatus(match.site) ?? ""))
+      .map((match) => ({
+        site: match.site.name,
+        server: match.server.name,
+        status: siteDeploymentStatus(match.site),
+      }));
 
-  return { deploying: listed(IN_FLIGHT), failed: listed(["failed"]) };
+  return { deploying: listed(IN_FLIGHT), failed: listed(FAILED) };
 }

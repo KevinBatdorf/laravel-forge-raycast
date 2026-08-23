@@ -4,6 +4,8 @@
 - Show active deployments again in the menu bar: the Forge API reports "Deploying" while the extension compared against lowercase "deploying"
 - Deployment questions in AI Chat read the site's latest deployment, so a failed deploy is still reported after it ends
 - Deploying, restarting and rebooting now need an exact site or server name, or the id from list-sites: a partial name is refused with the candidates and their servers, since a site name can repeat on another server
+- Deployment status covers Forge's whole status list: a deploy waiting at pending and a build that broke on failed-build were reported as neither deploying nor failed
+- The site list reports the latest deployment's outcome, which Forge leaves blank on the site itself once a deploy has ended
 
 ## [AI Tools] - 2026-08-20
 - Ask Laravel Forge from AI Chat: what is deploying, why a deploy failed, a site's Nginx config or logs, whether a site is up
