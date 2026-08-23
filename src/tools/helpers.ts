@@ -3,7 +3,7 @@ import { sortBy } from "lodash";
 import { deploymentStatus } from "../api/Site";
 import { unwrapToken } from "../lib/auth";
 import { flatten, getCollection, relatedId, relatedResource } from "../lib/forge";
-import { IServer, ISite } from "../types";
+import { IDeployment, IServer, ISite } from "../types";
 
 export type ServerMatch = { server: IServer; token: string };
 export type SiteMatch = { site: ISite; server: IServer; token: string };
@@ -69,7 +69,7 @@ export const allSites = once(async (): Promise<SiteMatch[]> => {
   const slugs = await orgSlugs();
   const perAccount = await Promise.all(
     accounts().map(async ({ tokenKey, token, sshUser }) => {
-      const { items, included } = await getCollection("sites?include=server", token);
+      const { items, included } = await getCollection("sites?include=server,latestDeployment", token);
       const orgs = slugs.get(tokenKey) ?? [];
       // The site list carries its server; only the org slug needs the server walk
       const owners = orgs.length > 1 ? await orgByServerId(tokenKey) : undefined;
@@ -85,10 +85,12 @@ export const allSites = once(async (): Promise<SiteMatch[]> => {
           ssh_user: sshUser,
         };
         const flat = flatten<ISite>(item);
+        const deployment = relatedResource(item, "latestDeployment", included);
         const site = {
           ...flat,
           server_id: relatedId(item, "server") ?? id,
           deployment_status: deploymentStatus(flat.deployment_status),
+          latest_deployment: deployment && flatten<IDeployment>(deployment),
         };
         return [{ site, server, token }];
       });
