@@ -76,8 +76,9 @@ export default async function tool({ path, single }: Input) {
     const shown = fitting(items.map(redact));
     return {
       paths,
-      count: items.length,
+      onPage: items.length,
       shown: shown.length,
+      morePages: pages.some((page) => page.nextCursor),
       items: shown,
       includedTypes: [...new Set(included.map((resource) => resource.type))],
     };

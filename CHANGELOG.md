@@ -9,6 +9,7 @@
 - Services offer only the actions Forge accepts: there is no start for any of them, reload is php-only, stop is nginx, mysql and postgres, and postgres is now on the list
 - The AI probe tool refuses the environment and credentials endpoints, which return DB passwords, salts and API keys in full inside one field that name-based redaction cannot see
 - Reading a site's env file through the config tool is refused outright, rather than only being absent from the list of files it offers
+- The AI probe tool says when a collection has a further page, instead of reporting the first page's length as the total
 
 ## [AI Tools] - 2026-08-20
 - Ask Laravel Forge from AI Chat: what is deploying, why a deploy failed, a site's Nginx config or logs, whether a site is up
