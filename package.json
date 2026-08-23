@@ -53,6 +53,16 @@
       "description": "Search your Forge sites by part of a name, or list them all, or list one server's."
     },
     {
+      "name": "get-site",
+      "title": "Get a Site",
+      "description": "Everything Forge knows about one site. Pass the id or exact name from list-sites."
+    },
+    {
+      "name": "get-server",
+      "title": "Get a Server",
+      "description": "Everything Forge knows about one server, and the sites on it."
+    },
+    {
       "name": "deployment-status",
       "title": "Check Deployment Status",
       "description": "Which sites are deploying now and which have a failed deploy."

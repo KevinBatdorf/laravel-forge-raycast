@@ -11,6 +11,7 @@
 - Reading a site's env file through the config tool is refused outright, rather than only being absent from the list of files it offers
 - The AI probe tool says when a collection has a further page, instead of reporting the first page's length as the total
 - One database option covers mysql and postgres: Forge's endpoints act on whichever engine the server runs, so naming the wrong one still hit the live database
+- Ask about one site or one server: get-site and get-server return the full record — zero-downtime, isolation, maintenance mode, deploy script — minus the deploy-trigger URL and the SSH key blob
 
 ## [AI Tools] - 2026-08-20
 - Ask Laravel Forge from AI Chat: what is deploying, why a deploy failed, a site's Nginx config or logs, whether a site is up

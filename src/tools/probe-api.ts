@@ -88,7 +88,7 @@ export default async function tool({ path, single }: Input) {
       "Paths that work: orgs, orgs/<slug>/servers, orgs/<slug>/servers/<id>, sites?filter[name]=<name>, orgs/<slug>/servers/<id>/sites/<id>/deployments, orgs/<slug>/servers/<id>/events.";
     if (/\b405\b/.test(message)) {
       throw new Error(
-        `Forge does not allow GET on "${paths[0]}". A single site is only readable through the collection: sites?filter[name]=<name>, and a single server does allow GET. ${shapes}`,
+        `Forge does not allow GET on "${paths[0]}". A single site is readable at orgs/<slug>/sites/<id>, or through the collection sites?filter[name]=<name>. ${shapes}`,
       );
     }
     if (/^401\b|\b401 /.test(message)) {

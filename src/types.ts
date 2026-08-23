@@ -64,6 +64,7 @@ export interface ISite {
   maintenance_mode?: { enabled?: boolean; status?: string | null };
   zero_downtime_deployments?: boolean;
   deployment_script?: string | null;
+  deployment_retention?: number | null;
   wildcards?: boolean;
   app_type?: string;
   uses_envoyer?: boolean;
