@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { Server } from "../api/Server";
-import { nameList, resolveForConfirmation, sitesOnServer, targetServer } from "./helpers";
+import { nameList, sitesOnServer, targetServer } from "./helpers";
 
 type Input = {
   /**
@@ -14,12 +14,7 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site }) => {
-  const resolved = await resolveForConfirmation(() => targetServer({ server, site }));
-  if (!resolved)
-    return {
-      message: `Reboot "${server ?? site}"? Its details could not be loaded, so the sites it would take down are unverified.`,
-    };
-  const { server: found } = resolved;
+  const { server: found } = await targetServer({ server, site });
   const sites = await sitesOnServer(found);
   return {
     message: `Reboot ${found.name}? Every site on it goes down until it comes back.`,

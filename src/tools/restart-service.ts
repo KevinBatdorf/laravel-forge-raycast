@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { SERVICE_ACTIONS, Server, Service, ServiceAction } from "../api/Server";
-import { nameList, resolveForConfirmation, sitesOnServer, targetServer } from "./helpers";
+import { nameList, sitesOnServer, targetServer } from "./helpers";
 
 type Input = {
   /**
@@ -36,12 +36,7 @@ const allowedFor = (service: Service, action: ServiceAction) => {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site, service, action = "reboot" }) => {
-  const resolved = await resolveForConfirmation(() => targetServer({ server, site }));
-  if (!resolved)
-    return {
-      message: `Restart "${server ?? site}"? Its details could not be loaded, so the sites it would affect are unverified.`,
-    };
-  const { server: found } = resolved;
+  const { server: found } = await targetServer({ server, site });
   const sites = await sitesOnServer(found);
   return {
     message: `${action === "reboot" ? "Restart" : action} ${service} on ${found.name}?`,
