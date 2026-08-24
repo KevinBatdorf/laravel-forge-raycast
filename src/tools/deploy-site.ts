@@ -1,7 +1,7 @@
 import { Tool } from "@raycast/api";
 import { Site } from "../api/Site";
 import { repositoryLabel } from "../lib/url";
-import { findSite, resolveForConfirmation } from "./helpers";
+import { findSite } from "./helpers";
 
 type Input = {
   /**
@@ -12,9 +12,8 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ site }) => {
-  const match = await resolveForConfirmation(() => findSite(site));
-  if (!match) return { message: `Deploy "${site}"?` };
-  const { site: found, server } = match;
+  // An unresolved name throws here rather than confirming a target we could not verify
+  const { site: found, server } = await findSite(site);
   return {
     message: `Deploy ${found.name}?`,
     info: [

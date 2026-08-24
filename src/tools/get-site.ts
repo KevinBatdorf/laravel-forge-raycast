@@ -7,7 +7,7 @@ type Input = {
   site: string;
 };
 
-// deployment_url embeds a token that triggers a deploy with no auth
+// deployment_url embeds a no-auth deploy token, and deployment_script is free-form and may hold secrets
 export default async function tool({ site }: Input) {
   const { site: found, server } = await findSite(site);
   const deployment = found.latest_deployment;
@@ -34,7 +34,6 @@ export default async function tool({ site }: Input) {
     deploymentRetention: found.deployment_retention,
     usesEnvoyer: found.uses_envoyer,
     deploymentStatus: siteDeploymentStatus(found),
-    deploymentScript: found.deployment_script,
     maintenanceMode: found.maintenance_mode,
     healthcheckUrl: found.healthcheck_url,
     createdAt: found.created_at,
