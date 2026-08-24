@@ -52,36 +52,24 @@
                 "name": "acme-store.com",
                 "server": "web-1",
                 "url": "https://acme-store.com",
-                "phpVersion": "PHP 8.3",
                 "status": "installed",
-                "deploymentStatus": "finished",
-                "repository": "acme/store",
-                "branch": "main",
-                "quickDeploy": true
+                "deploymentStatus": "finished"
               },
               {
                 "id": 5002,
                 "name": "acme-blog.com",
                 "server": "web-1",
                 "url": "https://acme-blog.com",
-                "phpVersion": "PHP 8.3",
                 "status": "installed",
-                "deploymentStatus": "finished",
-                "repository": "acme/store",
-                "branch": "main",
-                "quickDeploy": true
+                "deploymentStatus": "finished"
               },
               {
                 "id": 5003,
                 "name": "shop.example.test",
                 "server": "web-2",
                 "url": "https://shop.example.test",
-                "phpVersion": "PHP 8.3",
                 "status": "installed",
-                "deploymentStatus": "finished",
-                "repository": "acme/store",
-                "branch": "main",
-                "quickDeploy": true
+                "deploymentStatus": "finished"
               }
             ]
           },
@@ -114,15 +102,14 @@
             "target": "site",
             "id": 5001,
             "name": "acme-store.com",
-            "links": {
-              "site": "https://forge.laravel.com/acme-org/web-1/5001",
-              "environment": "https://forge.laravel.com/acme-org/web-1/5001/environment",
-              "deploymentSettings": "https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+            "fields": {
+              "status": "Where the site is in its install, like installed or installing.",
+              "php_version": "The PHP version the site runs, like php83.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "deployment_script": "The commands Forge runs on each deploy. Not handed over; the get tool returns a Forge link for it.",
+              "environment": "The site's env file, which Forge keeps on its own endpoint rather than on the site record. Not handed over; the get tool returns a Forge link for it."
             },
-            "values": {
-              "zero_downtime_deployments": false
-            },
-            "handling": {}
+            "note": "Name any of these in list-sites fields, or get-site include. Spelling of the name does not matter. These are names, not values."
           }
         },
         "expected": [
@@ -140,22 +127,12 @@
               {
                 "id": 9001,
                 "name": "web-1",
-                "provider": "ocean2",
-                "region": "nyc1",
-                "ipAddress": "10.0.0.1",
-                "phpVersion": "php83",
-                "databaseType": "mysql8",
                 "connectionStatus": "successful",
                 "isReady": true
               },
               {
                 "id": 9002,
                 "name": "web-2",
-                "provider": "ocean2",
-                "region": "nyc1",
-                "ipAddress": "10.0.0.2",
-                "phpVersion": "php84",
-                "databaseType": "postgres16",
                 "connectionStatus": "successful",
                 "isReady": true
               }
@@ -180,13 +157,12 @@
             "target": "server",
             "id": 9002,
             "name": "web-2",
-            "links": {
-              "server": "https://forge.laravel.com/acme-org/web-2"
+            "fields": {
+              "ubuntu_version": "The Ubuntu release on the server.",
+              "database_type": "The database engine installed, like mysql8 or postgres16.",
+              "local_public_key": "The server's own SSH public key, the one a git host takes as a deploy key. Only by name on include."
             },
-            "values": {
-              "ubuntu_version": "22.04"
-            },
-            "handling": {}
+            "note": "Name any of these in list-servers fields, or get-server include. Spelling of the name does not matter. These are names, not values."
           }
         },
         "expected": [
@@ -204,22 +180,12 @@
               {
                 "id": 9001,
                 "name": "web-1",
-                "provider": "ocean2",
-                "region": "nyc1",
-                "ipAddress": "10.0.0.1",
-                "phpVersion": "php83",
-                "databaseType": "mysql8",
                 "connectionStatus": "successful",
                 "isReady": true
               },
               {
                 "id": 9002,
                 "name": "web-2",
-                "provider": "ocean2",
-                "region": "nyc1",
-                "ipAddress": "10.0.0.2",
-                "phpVersion": "php84",
-                "databaseType": "postgres16",
                 "connectionStatus": "successful",
                 "isReady": true
               }
@@ -273,36 +239,24 @@
                 "name": "acme-store.com",
                 "server": "web-1",
                 "url": "https://acme-store.com",
-                "phpVersion": "PHP 8.3",
                 "status": "installed",
-                "deploymentStatus": "finished",
-                "repository": "acme/store",
-                "branch": "main",
-                "quickDeploy": true
+                "deploymentStatus": "finished"
               },
               {
                 "id": 5002,
                 "name": "acme-blog.com",
                 "server": "web-1",
                 "url": "https://acme-blog.com",
-                "phpVersion": "PHP 8.3",
                 "status": "installed",
-                "deploymentStatus": "finished",
-                "repository": "acme/store",
-                "branch": "main",
-                "quickDeploy": true
+                "deploymentStatus": "finished"
               },
               {
                 "id": 5003,
                 "name": "shop.example.test",
                 "server": "web-2",
                 "url": "https://shop.example.test",
-                "phpVersion": "PHP 8.3",
                 "status": "installed",
-                "deploymentStatus": "finished",
-                "repository": "acme/store",
-                "branch": "main",
-                "quickDeploy": true
+                "deploymentStatus": "finished"
               }
             ]
           },
@@ -329,12 +283,8 @@
                 "name": "acme-store.com",
                 "server": "web-1",
                 "url": "https://acme-store.com",
-                "phpVersion": "PHP 8.3",
                 "status": "installed",
-                "deploymentStatus": "finished",
-                "repository": "acme/store",
-                "branch": "main",
-                "quickDeploy": true
+                "deploymentStatus": "finished"
               }
             ]
           },
@@ -384,12 +334,8 @@
                 "name": "acme-store.com",
                 "server": "web-1",
                 "url": "https://acme-store.com",
-                "phpVersion": "PHP 8.3",
                 "status": "installed",
-                "deploymentStatus": "finished",
-                "repository": "acme/store",
-                "branch": "main",
-                "quickDeploy": true
+                "deploymentStatus": "finished"
               }
             ]
           },
@@ -437,22 +383,12 @@
               {
                 "id": 9001,
                 "name": "web-1",
-                "provider": "ocean2",
-                "region": "nyc1",
-                "ipAddress": "10.0.0.1",
-                "phpVersion": "php83",
-                "databaseType": "mysql8",
                 "connectionStatus": "successful",
                 "isReady": true
               },
               {
                 "id": 9002,
                 "name": "web-2",
-                "provider": "ocean2",
-                "region": "nyc1",
-                "ipAddress": "10.0.0.2",
-                "phpVersion": "php84",
-                "databaseType": "postgres16",
                 "connectionStatus": "successful",
                 "isReady": true
               }
@@ -461,36 +397,86 @@
           "get-server": {
             "id": 9002,
             "name": "web-2",
-            "provider": "ocean2",
-            "region": "nyc1",
-            "phpVersion": "php84",
             "ubuntuVersion": "22.04",
             "connectionStatus": "successful",
             "isReady": true,
+            "forgeUrl": "https://forge.laravel.com/acme-org/web-2",
+            "localPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADforge",
             "sites": [
               "shop.example.test"
-            ],
-            "forgeUrl": "https://forge.laravel.com/acme-org/web-2"
+            ]
           },
           "probe-api": {
             "target": "server",
             "id": 9002,
             "name": "web-2",
-            "links": {
-              "server": "https://forge.laravel.com/acme-org/web-2"
+            "fields": {
+              "ubuntu_version": "The Ubuntu release on the server.",
+              "database_type": "The database engine installed, like mysql8 or postgres16.",
+              "local_public_key": "The server's own SSH public key, the one a git host takes as a deploy key. Only by name on include."
             },
-            "values": {
-              "local_public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADforge"
-            },
-            "handling": {}
+            "note": "Name any of these in list-servers fields, or get-server include. Spelling of the name does not matter. These are names, not values."
           }
         },
         "expected": [
           {
-            "callsTool": "probe-api"
+            "callsTool": "get-server"
           },
           {
             "includes": "ssh-rsa"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge which sites have zero downtime deploys turned off?",
+        "mocks": {
+          "list-sites": {
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "server": "web-1",
+                "url": "https://acme-store.com",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "zeroDowntimeDeployments": false
+              },
+              {
+                "id": 5002,
+                "name": "shop.example.test",
+                "server": "web-2",
+                "url": "https://shop.example.test",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "zeroDowntimeDeployments": true
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "site",
+            "id": 5001,
+            "name": "acme-store.com",
+            "fields": {
+              "status": "Where the site is in its install, like installed or installing.",
+              "php_version": "The PHP version the site runs, like php83.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "deployment_script": "The commands Forge runs on each deploy. Not handed over; the get tool returns a Forge link for it.",
+              "environment": "The site's env file, which Forge keeps on its own endpoint rather than on the site record. Not handed over; the get tool returns a Forge link for it."
+            },
+            "note": "Name any of these in list-sites fields, or get-site include. Spelling of the name does not matter. These are names, not values."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-sites"
+          },
+          {
+            "includes": "acme-store.com"
+          },
+          {
+            "not": {
+              "includes": "shop.example.test"
+            }
           }
         ]
       }
@@ -500,22 +486,22 @@
     {
       "name": "list-servers",
       "title": "List Servers",
-      "description": "List your Forge servers. Returns a summary row per server."
+      "description": "List your Forge servers. Rows are a summary; add fields for more."
     },
     {
       "name": "list-sites",
       "title": "List Sites",
-      "description": "Search your Forge sites by part of a name, or list them all, or list one server's. Returns a summary row per site."
+      "description": "Search your Forge sites by part of a name, or list them all, or list one server's. Rows are a summary; add fields for more."
     },
     {
       "name": "get-site",
       "title": "Get a Site",
-      "description": "One site's common fields: status, PHP version, repository, deploy settings and its latest deployment."
+      "description": "One site's common fields, its latest deployment, and Forge links for what is not returned."
     },
     {
       "name": "get-server",
       "title": "Get a Server",
-      "description": "One server's common fields — provider, region, PHP, database, connection status — and the sites on it."
+      "description": "One server's common fields and the sites on it. Pass include for a field it holds back."
     },
     {
       "name": "deployment-status",
@@ -565,7 +551,7 @@
     {
       "name": "probe-api",
       "title": "Probe the Forge API",
-      "description": "List the fields Forge holds for one site or server, then read the values you need. The list tools return a summary row, so probe for anything they leave out."
+      "description": "Name every field Forge holds for one site or server, so you can ask the list and get tools for the ones you need."
     }
   ],
   "preferences": [
@@ -602,15 +588,6 @@
       "default": "forge",
       "description": "Change the SSH user to login with on the second account",
       "placeholder": "SSH User"
-    },
-    {
-      "name": "laravel_forge_ai_protected_values",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "title": "AI Access",
-      "label": "Let AI read protected values",
-      "description": "Allow probe-api to return values it otherwise withholds, like the deploy script and the deploy URL that needs no sign-in."
     }
   ],
   "dependencies": {

@@ -1,6 +1,8 @@
+import { namesAsked, pick, siteRowExtras } from "./fields";
 import { allSites, searchSites, siteDeploymentStatus } from "./helpers";
 
-const TRUNCATED = "Each row is a summary, not the whole record. For any other field, probe-api the site.";
+const TRUNCATED =
+  "Each row is a summary. probe-api a site to see every field it holds, then name the ones you need in fields.";
 
 type Input = {
   /**
@@ -11,9 +13,13 @@ type Input = {
    * A server id, or part of a server name, to filter by. Leave empty for every site.
    */
   server?: string;
+  /**
+   * Extra field names to add to every row, comma separated. probe-api a site to see what it holds.
+   */
+  fields?: string;
 };
 
-export default async function tool({ site, server }: Input) {
+export default async function tool({ site, server, fields }: Input) {
   let sites = site ? await searchSites(site) : await allSites();
   let note;
   if (site && !sites.length) {
@@ -30,23 +36,30 @@ export default async function tool({ site, server }: Input) {
       note = `Nothing matches "${site}" by site name, alias or server name. Every site follows instead.`;
     }
   }
+
+  const asked = namesAsked(fields);
+  const unknown = new Set<string>();
   const wanted = server?.trim().toLowerCase();
   const listed = sites
     .filter(
       (match) =>
         !wanted || (match.server.name ?? "").toLowerCase().includes(wanted) || String(match.server.id) === wanted,
     )
-    .map(({ site, server: owner }) => ({
-      id: site.id,
-      name: site.name,
-      server: owner.name,
-      url: site.url,
-      phpVersion: site.php_version,
-      status: site.status,
-      deploymentStatus: siteDeploymentStatus(site),
-      repository: site.repository?.url,
-      branch: site.repository?.branch,
-      quickDeploy: site.quick_deploy,
-    }));
-  return { note: note ? `${note} ${TRUNCATED}` : TRUNCATED, sites: listed };
+    .map(({ site, server: owner }) => {
+      const extra = pick(siteRowExtras(site), asked);
+      extra.unknown.forEach((name) => unknown.add(name));
+      return {
+        id: site.id,
+        name: site.name,
+        server: owner.name,
+        url: site.url,
+        status: site.status,
+        deploymentStatus: siteDeploymentStatus(site),
+        ...extra.picked,
+      };
+    });
+
+  const notes = [note, asked.length ? undefined : TRUNCATED].filter(Boolean);
+  if (unknown.size) notes.push(`No site field matches ${[...unknown].join(", ")}. probe-api a site for its names.`);
+  return { ...(notes.length ? { note: notes.join(" ") } : {}), sites: listed };
 }

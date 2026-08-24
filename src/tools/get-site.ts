@@ -1,15 +1,19 @@
 import { forgeSiteUrl } from "../lib/url";
+import { included, siteIncludable, siteLinks } from "./fields";
 import { findSite, siteDeploymentStatus } from "./helpers";
-import { siteRestrictions } from "./restricted";
 
 type Input = {
   /**
    * The site's id as a string, for example "2882133", or its exact name.
    */
   site: string;
+  /**
+   * Extra field names to add to the answer, comma separated. probe-api the site to see what it holds.
+   */
+  include?: string;
 };
 
-export default async function tool({ site }: Input) {
+export default async function tool({ site, include }: Input) {
   const { site: found, server } = await findSite(site);
   const deployment = found.latest_deployment;
   return {
@@ -40,7 +44,8 @@ export default async function tool({ site }: Input) {
     createdAt: found.created_at,
     updatedAt: found.updated_at,
     forgeUrl: forgeSiteUrl(server, found.id),
-    ...siteRestrictions(server, found.id),
+    ...siteLinks(server, found.id),
+    ...included(siteIncludable(), include),
     latestDeployment: deployment && {
       id: deployment.id,
       status: deployment.status,

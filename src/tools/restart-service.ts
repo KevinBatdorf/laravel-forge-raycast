@@ -13,7 +13,7 @@ type Input = {
   site?: string;
   /**
    * Which service to act on. database acts on whichever engine the server runs;
-   * list-servers shows it under databaseType.
+   * get-server shows it under databaseType.
    */
   service: Service;
   /**
