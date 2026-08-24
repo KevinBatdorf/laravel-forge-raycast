@@ -100,8 +100,6 @@
           },
           "probe-api": {
             "target": "site",
-            "id": 5001,
-            "name": "acme-store.com",
             "fields": {
               "status": "Where the site is in its install, like installed or installing.",
               "php_version": "The PHP version the site runs, like php83.",
@@ -155,8 +153,6 @@
           },
           "probe-api": {
             "target": "server",
-            "id": 9002,
-            "name": "web-2",
             "fields": {
               "ubuntu_version": "The Ubuntu release on the server.",
               "database_type": "The database engine installed, like mysql8 or postgres16.",
@@ -408,8 +404,6 @@
           },
           "probe-api": {
             "target": "server",
-            "id": 9002,
-            "name": "web-2",
             "fields": {
               "ubuntu_version": "The Ubuntu release on the server.",
               "database_type": "The database engine installed, like mysql8 or postgres16.",
@@ -454,8 +448,6 @@
           },
           "probe-api": {
             "target": "site",
-            "id": 5001,
-            "name": "acme-store.com",
             "fields": {
               "status": "Where the site is in its install, like installed or installing.",
               "php_version": "The PHP version the site runs, like php83.",
@@ -551,7 +543,7 @@
     {
       "name": "probe-api",
       "title": "Probe the Forge API",
-      "description": "Name every field Forge holds for one site or server, so you can ask the list and get tools for the ones you need."
+      "description": "Name every field Forge holds for a site or a server, so you can ask the list and get tools for the ones you need."
     }
   ],
   "preferences": [
