@@ -1,3 +1,4 @@
+import { forgeSiteUrl } from "../lib/url";
 import { findSite, siteDeploymentStatus } from "./helpers";
 
 type Input = {
@@ -11,6 +12,7 @@ type Input = {
 export default async function tool({ site }: Input) {
   const { site: found, server } = await findSite(site);
   const deployment = found.latest_deployment;
+  const forgeUrl = forgeSiteUrl(server, found.id);
   return {
     id: found.id,
     name: found.name,
@@ -39,6 +41,9 @@ export default async function tool({ site }: Input) {
     healthcheckUrl: found.healthcheck_url,
     createdAt: found.created_at,
     updatedAt: found.updated_at,
+    forgeUrl,
+    // The file's contents are not returned; this is where a person edits them in Forge
+    environmentUrl: forgeUrl && `${forgeUrl}/environment`,
     latestDeployment: deployment && {
       id: deployment.id,
       status: deployment.status,
