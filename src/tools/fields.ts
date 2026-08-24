@@ -10,12 +10,16 @@ export const namesAsked = (input?: string) =>
     .map((name) => name.trim())
     .filter(Boolean);
 
+// Forge's own name for a field a row labels differently
+const ALIASES: Record<string, string> = { identifier: "providerId" };
+
 export const pick = (available: Record<string, unknown>, asked: string[]) => {
   const byKey = new Map(Object.keys(available).map((name) => [key(name), name]));
   const picked: Record<string, unknown> = {};
   const unknown: string[] = [];
   for (const name of asked) {
-    const match = byKey.get(key(name));
+    const asked_ = key(name);
+    const match = byKey.get(asked_) ?? byKey.get(key(ALIASES[asked_] ?? ""));
     if (match) picked[match] = available[match];
     else unknown.push(name);
   }
