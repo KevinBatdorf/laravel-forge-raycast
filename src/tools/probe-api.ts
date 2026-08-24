@@ -11,6 +11,8 @@ type Target = {
   fields: Record<string, string>;
   inForgeOnly: string[];
   onRequest: string[];
+  filters: string[];
+  sorts: string[];
 };
 
 const ASKS: Record<string, string> = {
@@ -19,7 +21,7 @@ const ASKS: Record<string, string> = {
 };
 
 export default async function tool({ target }: Input) {
-  const { fields, inForgeOnly, onRequest } = forgeFields[target] as Target;
+  const { fields, inForgeOnly, onRequest, filters, sorts } = forgeFields[target] as Target;
   const describe = (name: string, description: string) => {
     if (inForgeOnly.includes(name)) return `${description} Not handed over; the get tool returns a Forge link for it.`;
     if (onRequest.includes(name)) return `${description} Only by name on include.`;
@@ -29,6 +31,16 @@ export default async function tool({ target }: Input) {
   return {
     target,
     fields: Object.fromEntries(Object.entries(fields).map(([name, text]) => [name, describe(name, text)])),
-    note: `${ASKS[target]} Spelling of the name does not matter. These are names, not values.`,
+    filters,
+    sorts,
+    note: [
+      `${ASKS[target]} Spelling of the name does not matter. These are names, not values.`,
+      filters.length
+        ? `Forge narrows the list itself on ${filters.join(", ")}, so pass those to the list tool rather than reading every page.`
+        : "",
+      sorts.length ? `It sorts on ${sorts.join(", ")}, and a leading minus reverses.` : "",
+    ]
+      .filter(Boolean)
+      .join(" "),
   };
 }

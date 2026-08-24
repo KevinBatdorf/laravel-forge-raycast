@@ -45,7 +45,7 @@
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
         "mocks": {
           "list-sites": {
-            "note": "Showing sites 1 to 3 of 3. Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "note": "One Forge page of 3 sites. Forge reports no total.",
             "sites": [
               {
                 "id": 5001,
@@ -71,10 +71,7 @@
                 "status": "installed",
                 "deploymentStatus": "finished"
               }
-            ],
-            "perPage": 30,
-            "offset": 0,
-            "total": 3
+            ]
           },
           "get-site": {
             "id": 5001,
@@ -110,7 +107,11 @@
               "deployment_script": "The commands Forge runs on each deploy. Not handed over; the get tool returns a Forge link for it.",
               "environment": "The site's env file, which Forge keeps on its own endpoint rather than on the site record. Not handed over; the get tool returns a Forge link for it."
             },
-            "note": "Name any of these in list-sites fields, or get-site include. Spelling of the name does not matter. These are names, not values."
+            "note": "Name any of these in list-sites fields, or get-site include. Spelling of the name does not matter. These are names, not values.",
+            "filters": [
+              "name"
+            ],
+            "sorts": []
           }
         },
         "expected": [
@@ -123,7 +124,7 @@
         "input": "@laravel-forge what ubuntu version is web-2 on?",
         "mocks": {
           "list-servers": {
-            "note": "Showing servers 1 to 2 of 2. Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "note": "One Forge page of 2 servers. Forge reports no total.",
             "servers": [
               {
                 "id": 9001,
@@ -137,10 +138,7 @@
                 "connectionStatus": "successful",
                 "isReady": true
               }
-            ],
-            "perPage": 30,
-            "offset": 0,
-            "total": 2
+            ]
           },
           "get-server": {
             "id": 9002,
@@ -164,7 +162,18 @@
               "database_type": "The database engine installed, like mysql8 or postgres16.",
               "local_public_key": "The server's own SSH public key, the one a git host takes as a deploy key. Only by name on include."
             },
-            "note": "Name any of these in list-servers fields, or get-server include. Spelling of the name does not matter. These are names, not values."
+            "note": "Name any of these in list-servers fields, or get-server include. Spelling of the name does not matter. These are names, not values.",
+            "filters": [
+              "name",
+              "region",
+              "provider",
+              "php_version",
+              "database_type"
+            ],
+            "sorts": [
+              "name",
+              "created_at"
+            ]
           }
         },
         "expected": [
@@ -177,7 +186,7 @@
         "input": "@laravel-forge restart the database on web-2",
         "mocks": {
           "list-servers": {
-            "note": "Showing servers 1 to 2 of 2. Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "note": "One Forge page of 2 servers. Forge reports no total.",
             "servers": [
               {
                 "id": 9001,
@@ -191,10 +200,7 @@
                 "connectionStatus": "successful",
                 "isReady": true
               }
-            ],
-            "perPage": 30,
-            "offset": 0,
-            "total": 2
+            ]
           },
           "restart-service": {
             "server": "web-2",
@@ -237,7 +243,7 @@
         "input": "@laravel-forge deploy acme-store",
         "mocks": {
           "list-sites": {
-            "note": "Showing sites 1 to 3 of 3. Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "note": "One Forge page of 3 sites. Forge reports no total.",
             "sites": [
               {
                 "id": 5001,
@@ -263,10 +269,7 @@
                 "status": "installed",
                 "deploymentStatus": "finished"
               }
-            ],
-            "perPage": 30,
-            "offset": 0,
-            "total": 3
+            ]
           },
           "deploy-site": {
             "site": "acme-store.com",
@@ -284,7 +287,7 @@
         "input": "@laravel-forge show me the env for acme-store",
         "mocks": {
           "list-sites": {
-            "note": "Showing sites 1 to 1 of 1. Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "note": "One Forge page of 1 sites. Forge reports no total.",
             "sites": [
               {
                 "id": 5001,
@@ -294,10 +297,7 @@
                 "status": "installed",
                 "deploymentStatus": "finished"
               }
-            ],
-            "perPage": 30,
-            "offset": 0,
-            "total": 1
+            ]
           },
           "get-site": {
             "id": 5001,
@@ -338,7 +338,7 @@
         "input": "@laravel-forge show me the deploy script for acme-store",
         "mocks": {
           "list-sites": {
-            "note": "Showing sites 1 to 1 of 1. Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "note": "One Forge page of 1 sites. Forge reports no total.",
             "sites": [
               {
                 "id": 5001,
@@ -348,10 +348,7 @@
                 "status": "installed",
                 "deploymentStatus": "finished"
               }
-            ],
-            "perPage": 30,
-            "offset": 0,
-            "total": 1
+            ]
           },
           "get-site": {
             "id": 5001,
@@ -392,7 +389,7 @@
         "input": "@laravel-forge what is the ssh public key for web-2?",
         "mocks": {
           "list-servers": {
-            "note": "Showing servers 1 to 2 of 2. Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "note": "One Forge page of 2 servers. Forge reports no total.",
             "servers": [
               {
                 "id": 9001,
@@ -406,10 +403,7 @@
                 "connectionStatus": "successful",
                 "isReady": true
               }
-            ],
-            "perPage": 30,
-            "offset": 0,
-            "total": 2
+            ]
           },
           "get-server": {
             "id": 9002,
@@ -430,7 +424,18 @@
               "database_type": "The database engine installed, like mysql8 or postgres16.",
               "local_public_key": "The server's own SSH public key, the one a git host takes as a deploy key. Only by name on include."
             },
-            "note": "Name any of these in list-servers fields, or get-server include. Spelling of the name does not matter. These are names, not values."
+            "note": "Name any of these in list-servers fields, or get-server include. Spelling of the name does not matter. These are names, not values.",
+            "filters": [
+              "name",
+              "region",
+              "provider",
+              "php_version",
+              "database_type"
+            ],
+            "sorts": [
+              "name",
+              "created_at"
+            ]
           }
         },
         "expected": [
@@ -446,6 +451,7 @@
         "input": "@laravel-forge which sites have zero downtime deploys turned off?",
         "mocks": {
           "list-sites": {
+            "note": "One Forge page of 2 sites. Forge reports no total.",
             "sites": [
               {
                 "id": 5001,
@@ -465,11 +471,7 @@
                 "deploymentStatus": "finished",
                 "zeroDowntimeDeployments": true
               }
-            ],
-            "perPage": 30,
-            "offset": 0,
-            "total": 2,
-            "note": "Showing sites 1 to 2 of 2."
+            ]
           },
           "probe-api": {
             "target": "site",
@@ -480,7 +482,11 @@
               "deployment_script": "The commands Forge runs on each deploy. Not handed over; the get tool returns a Forge link for it.",
               "environment": "The site's env file, which Forge keeps on its own endpoint rather than on the site record. Not handed over; the get tool returns a Forge link for it."
             },
-            "note": "Name any of these in list-sites fields, or get-site include. Spelling of the name does not matter. These are names, not values."
+            "note": "Name any of these in list-sites fields, or get-site include. Spelling of the name does not matter. These are names, not values.",
+            "filters": [
+              "name"
+            ],
+            "sorts": []
           }
         },
         "expected": [
@@ -503,12 +509,12 @@
     {
       "name": "list-servers",
       "title": "List Servers",
-      "description": "List your Forge servers. Rows are a summary and paged; add fields for more."
+      "description": "List your Forge servers, narrowed by region, provider, PHP, database, Ubuntu, size or IP, and sorted. Returns one Forge page."
     },
     {
       "name": "list-sites",
       "title": "List Sites",
-      "description": "Search your Forge sites by part of a name, or list them all, or list one server's. Rows are a summary and paged; add fields for more."
+      "description": "Search your Forge sites by part of a name, or list one server's. Returns one Forge page; rows are a summary, add fields for more."
     },
     {
       "name": "get-site",
@@ -568,7 +574,7 @@
     {
       "name": "probe-api",
       "title": "Probe the Forge API",
-      "description": "Name every field Forge holds for a site or a server, so you can ask the list and get tools for the ones you need."
+      "description": "Name every field Forge holds for a site or a server, plus the filters and sorts Forge accepts, so you can ask the list and get tools for them."
     }
   ],
   "preferences": [

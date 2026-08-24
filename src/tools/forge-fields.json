@@ -32,7 +32,10 @@
       "created_at": "When the site was created.",
       "updated_at": "When the site last changed.",
       "environment": "The site's env file, which Forge keeps on its own endpoint rather than on the site record."
-    }
+    },
+    "listPath": "/sites",
+    "filters": ["name"],
+    "sorts": []
   },
   "server": {
     "schema": "ServerResource",
@@ -66,7 +69,10 @@
       "local_public_key": "The server's own SSH public key, the one a git host takes as a deploy key.",
       "created_at": "When the server was created.",
       "updated_at": "When the server last changed."
-    }
+    },
+    "listPath": "/orgs/{organization}/servers",
+    "filters": ["ip_address", "name", "region", "size", "provider", "ubuntu_version", "php_version", "database_type"],
+    "sorts": ["name", "provider", "ubuntu_version", "region", "php_version", "created_at", "updated_at"]
   },
   "deployment": {
     "schema": "DeploymentResource",
@@ -81,7 +87,10 @@
       "ended_at": "When the deploy ended.",
       "created_at": "When Forge recorded the deploy.",
       "updated_at": "When the deploy record last changed."
-    }
+    },
+    "listPath": "/orgs/{organization}/servers/{server}/sites/{site}/deployments",
+    "filters": ["commit_hash", "commit_message", "commit_author"],
+    "sorts": ["created_at"]
   },
   "event": {
     "schema": "EventResource",
@@ -93,6 +102,9 @@
       "ran_as": "The server user the event ran as.",
       "created_at": "When the event was recorded.",
       "updated_at": "When the event record last changed."
-    }
+    },
+    "listPath": "/orgs/{organization}/servers/{server}/events",
+    "filters": ["initiated_by", "ran_as"],
+    "sorts": ["created_at", "updated_at"]
   }
 }
