@@ -1,4 +1,6 @@
+import { forgeSiteUrl } from "../lib/url";
 import { findSite, siteDeploymentStatus } from "./helpers";
+import { siteRestrictions } from "./restricted";
 
 type Input = {
   /**
@@ -7,7 +9,6 @@ type Input = {
   site: string;
 };
 
-// deployment_url deploys with no auth and deployment_script can hold secrets; probe-api gates both
 export default async function tool({ site }: Input) {
   const { site: found, server } = await findSite(site);
   const deployment = found.latest_deployment;
@@ -38,6 +39,8 @@ export default async function tool({ site }: Input) {
     healthcheckUrl: found.healthcheck_url,
     createdAt: found.created_at,
     updatedAt: found.updated_at,
+    forgeUrl: forgeSiteUrl(server, found.id),
+    ...siteRestrictions(server, found.id),
     latestDeployment: deployment && {
       id: deployment.id,
       status: deployment.status,

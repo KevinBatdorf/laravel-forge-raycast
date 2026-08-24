@@ -39,49 +39,52 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nOne site's common fields: get-site. One server's common fields and its sites: get-server. To find or list sites: list-sites.\nOnly deploy, restart or reboot when asked. Quick deploy off means Forge will not deploy on push by itself.\nLook a site or server up first and pass the id it returns, as a string: \"2882133\", never 2882133. Given a partial name, search for it with list-sites rather than asking the user which site they mean.\nIf the user asks for something you do not see in these tools or their fields, you must use probe-api to find it. Given a target and an id it lists the fields Forge holds for that site or server and what each one is, values left out; probe again with fields set to the ones you need to read their values. A field the extension does not describe yet is still real, so read it rather than dismissing it. Never tell the user Forge does not have something until you have probed for it. Hand over any link it returns as a markdown link, and follow its handling notes.",
+    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nOne site's common fields: get-site. One server's common fields and its sites: get-server. To find or list sites: list-sites.\nOnly deploy, restart or reboot when asked. Quick deploy off means Forge will not deploy on push by itself.\nLook a site or server up first and pass the id it returns, as a string: \"2882133\", never 2882133. Given a partial name, search for it with list-sites rather than asking the user which site they mean.\nHand over any Forge link a tool returns as a markdown link, like [Deploy script](url), and never open or read the page yourself: it needs the user's own sign-in.",
     "evals": [
       {
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
         "mocks": {
-          "list-sites": [
-            {
-              "id": 5001,
-              "name": "acme-store.com",
-              "server": "web-1",
-              "url": "https://acme-store.com",
-              "phpVersion": "PHP 8.3",
-              "status": "installed",
-              "deploymentStatus": "finished",
-              "repository": "acme/store",
-              "branch": "main",
-              "quickDeploy": true
-            },
-            {
-              "id": 5002,
-              "name": "acme-blog.com",
-              "server": "web-1",
-              "url": "https://acme-blog.com",
-              "phpVersion": "PHP 8.3",
-              "status": "installed",
-              "deploymentStatus": "finished",
-              "repository": "acme/store",
-              "branch": "main",
-              "quickDeploy": true
-            },
-            {
-              "id": 5003,
-              "name": "shop.example.test",
-              "server": "web-2",
-              "url": "https://shop.example.test",
-              "phpVersion": "PHP 8.3",
-              "status": "installed",
-              "deploymentStatus": "finished",
-              "repository": "acme/store",
-              "branch": "main",
-              "quickDeploy": true
-            }
-          ],
+          "list-sites": {
+            "note": "Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "server": "web-1",
+                "url": "https://acme-store.com",
+                "phpVersion": "PHP 8.3",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "repository": "acme/store",
+                "branch": "main",
+                "quickDeploy": true
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "server": "web-1",
+                "url": "https://acme-blog.com",
+                "phpVersion": "PHP 8.3",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "repository": "acme/store",
+                "branch": "main",
+                "quickDeploy": true
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "server": "web-2",
+                "url": "https://shop.example.test",
+                "phpVersion": "PHP 8.3",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "repository": "acme/store",
+                "branch": "main",
+                "quickDeploy": true
+              }
+            ]
+          },
           "get-site": {
             "id": 5001,
             "name": "acme-store.com",
@@ -101,7 +104,11 @@
               "status": "installed"
             },
             "quickDeploy": true,
-            "deploymentStatus": "finished"
+            "deploymentStatus": "finished",
+            "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
+            "environment": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
+            "deploymentScript": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
+            "deploymentUrl": "Not returned. Find or rotate it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
           },
           "probe-api": {
             "target": "site",
@@ -127,30 +134,33 @@
       {
         "input": "@laravel-forge what ubuntu version is web-2 on?",
         "mocks": {
-          "list-servers": [
-            {
-              "id": 9001,
-              "name": "web-1",
-              "provider": "ocean2",
-              "region": "nyc1",
-              "ipAddress": "10.0.0.1",
-              "phpVersion": "php83",
-              "databaseType": "mysql8",
-              "connectionStatus": "successful",
-              "isReady": true
-            },
-            {
-              "id": 9002,
-              "name": "web-2",
-              "provider": "ocean2",
-              "region": "nyc1",
-              "ipAddress": "10.0.0.2",
-              "phpVersion": "php84",
-              "databaseType": "postgres16",
-              "connectionStatus": "successful",
-              "isReady": true
-            }
-          ],
+          "list-servers": {
+            "note": "Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "servers": [
+              {
+                "id": 9001,
+                "name": "web-1",
+                "provider": "ocean2",
+                "region": "nyc1",
+                "ipAddress": "10.0.0.1",
+                "phpVersion": "php83",
+                "databaseType": "mysql8",
+                "connectionStatus": "successful",
+                "isReady": true
+              },
+              {
+                "id": 9002,
+                "name": "web-2",
+                "provider": "ocean2",
+                "region": "nyc1",
+                "ipAddress": "10.0.0.2",
+                "phpVersion": "php84",
+                "databaseType": "postgres16",
+                "connectionStatus": "successful",
+                "isReady": true
+              }
+            ]
+          },
           "get-server": {
             "id": 9002,
             "name": "web-2",
@@ -163,7 +173,8 @@
             "isReady": true,
             "sites": [
               "shop.example.test"
-            ]
+            ],
+            "forgeUrl": "https://forge.laravel.com/acme-org/web-2"
           },
           "probe-api": {
             "target": "server",
@@ -187,30 +198,33 @@
       {
         "input": "@laravel-forge restart the database on web-2",
         "mocks": {
-          "list-servers": [
-            {
-              "id": 9001,
-              "name": "web-1",
-              "provider": "ocean2",
-              "region": "nyc1",
-              "ipAddress": "10.0.0.1",
-              "phpVersion": "php83",
-              "databaseType": "mysql8",
-              "connectionStatus": "successful",
-              "isReady": true
-            },
-            {
-              "id": 9002,
-              "name": "web-2",
-              "provider": "ocean2",
-              "region": "nyc1",
-              "ipAddress": "10.0.0.2",
-              "phpVersion": "php84",
-              "databaseType": "postgres16",
-              "connectionStatus": "successful",
-              "isReady": true
-            }
-          ],
+          "list-servers": {
+            "note": "Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "servers": [
+              {
+                "id": 9001,
+                "name": "web-1",
+                "provider": "ocean2",
+                "region": "nyc1",
+                "ipAddress": "10.0.0.1",
+                "phpVersion": "php83",
+                "databaseType": "mysql8",
+                "connectionStatus": "successful",
+                "isReady": true
+              },
+              {
+                "id": 9002,
+                "name": "web-2",
+                "provider": "ocean2",
+                "region": "nyc1",
+                "ipAddress": "10.0.0.2",
+                "phpVersion": "php84",
+                "databaseType": "postgres16",
+                "connectionStatus": "successful",
+                "isReady": true
+              }
+            ]
+          },
           "restart-service": {
             "server": "web-2",
             "service": "database",
@@ -251,44 +265,47 @@
       {
         "input": "@laravel-forge deploy acme-store",
         "mocks": {
-          "list-sites": [
-            {
-              "id": 5001,
-              "name": "acme-store.com",
-              "server": "web-1",
-              "url": "https://acme-store.com",
-              "phpVersion": "PHP 8.3",
-              "status": "installed",
-              "deploymentStatus": "finished",
-              "repository": "acme/store",
-              "branch": "main",
-              "quickDeploy": true
-            },
-            {
-              "id": 5002,
-              "name": "acme-blog.com",
-              "server": "web-1",
-              "url": "https://acme-blog.com",
-              "phpVersion": "PHP 8.3",
-              "status": "installed",
-              "deploymentStatus": "finished",
-              "repository": "acme/store",
-              "branch": "main",
-              "quickDeploy": true
-            },
-            {
-              "id": 5003,
-              "name": "shop.example.test",
-              "server": "web-2",
-              "url": "https://shop.example.test",
-              "phpVersion": "PHP 8.3",
-              "status": "installed",
-              "deploymentStatus": "finished",
-              "repository": "acme/store",
-              "branch": "main",
-              "quickDeploy": true
-            }
-          ],
+          "list-sites": {
+            "note": "Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "server": "web-1",
+                "url": "https://acme-store.com",
+                "phpVersion": "PHP 8.3",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "repository": "acme/store",
+                "branch": "main",
+                "quickDeploy": true
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "server": "web-1",
+                "url": "https://acme-blog.com",
+                "phpVersion": "PHP 8.3",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "repository": "acme/store",
+                "branch": "main",
+                "quickDeploy": true
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "server": "web-2",
+                "url": "https://shop.example.test",
+                "phpVersion": "PHP 8.3",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "repository": "acme/store",
+                "branch": "main",
+                "quickDeploy": true
+              }
+            ]
+          },
           "deploy-site": {
             "site": "acme-store.com",
             "server": "web-1",
@@ -304,33 +321,22 @@
       {
         "input": "@laravel-forge show me the env for acme-store",
         "mocks": {
-          "list-sites": [
-            {
-              "id": 5001,
-              "name": "acme-store.com",
-              "server": "web-1",
-              "url": "https://acme-store.com",
-              "phpVersion": "PHP 8.3",
-              "status": "installed",
-              "deploymentStatus": "finished",
-              "repository": "acme/store",
-              "branch": "main",
-              "quickDeploy": true
-            }
-          ],
-          "probe-api": {
-            "target": "site",
-            "id": 5001,
-            "name": "acme-store.com",
-            "links": {
-              "site": "https://forge.laravel.com/acme-org/web-1/5001",
-              "environment": "https://forge.laravel.com/acme-org/web-1/5001/environment",
-              "deploymentSettings": "https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
-            },
-            "values": {},
-            "handling": {
-              "environment": "Contents not returned. Give the user links.environment as a markdown link to view or edit it in Forge."
-            }
+          "list-sites": {
+            "note": "Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "server": "web-1",
+                "url": "https://acme-store.com",
+                "phpVersion": "PHP 8.3",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "repository": "acme/store",
+                "branch": "main",
+                "quickDeploy": true
+              }
+            ]
           },
           "get-site": {
             "id": 5001,
@@ -341,12 +347,16 @@
             },
             "status": "installed",
             "phpVersion": "PHP 8.3",
-            "zeroDowntimeDeployments": false
+            "zeroDowntimeDeployments": false,
+            "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
+            "environment": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
+            "deploymentScript": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
+            "deploymentUrl": "Not returned. Find or rotate it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
           }
         },
         "expected": [
           {
-            "callsTool": "probe-api"
+            "callsTool": "get-site"
           },
           {
             "not": {
@@ -355,39 +365,33 @@
           },
           {
             "matches": "\\[[^\\]]+\\]\\(https://forge\\.laravel\\.com/\\S*/environment\\)"
+          },
+          {
+            "not": {
+              "callsTool": "probe-api"
+            }
           }
         ]
       },
       {
         "input": "@laravel-forge show me the deploy script for acme-store",
         "mocks": {
-          "list-sites": [
-            {
-              "id": 5001,
-              "name": "acme-store.com",
-              "server": "web-1",
-              "url": "https://acme-store.com",
-              "phpVersion": "PHP 8.3",
-              "status": "installed",
-              "deploymentStatus": "finished",
-              "repository": "acme/store",
-              "branch": "main",
-              "quickDeploy": true
-            }
-          ],
-          "probe-api": {
-            "target": "site",
-            "id": 5001,
-            "name": "acme-store.com",
-            "links": {
-              "site": "https://forge.laravel.com/acme-org/web-1/5001",
-              "environment": "https://forge.laravel.com/acme-org/web-1/5001/environment",
-              "deploymentSettings": "https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
-            },
-            "values": {},
-            "handling": {
-              "deployment_script": "Contents not returned. Give the user links.deploymentSettings as a markdown link to view or edit it in Forge."
-            }
+          "list-sites": {
+            "note": "Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "server": "web-1",
+                "url": "https://acme-store.com",
+                "phpVersion": "PHP 8.3",
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "repository": "acme/store",
+                "branch": "main",
+                "quickDeploy": true
+              }
+            ]
           },
           "get-site": {
             "id": 5001,
@@ -398,12 +402,16 @@
             },
             "status": "installed",
             "phpVersion": "PHP 8.3",
-            "zeroDowntimeDeployments": false
+            "zeroDowntimeDeployments": false,
+            "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
+            "environment": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
+            "deploymentScript": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
+            "deploymentUrl": "Not returned. Find or rotate it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
           }
         },
         "expected": [
           {
-            "callsTool": "probe-api"
+            "callsTool": "get-site"
           },
           {
             "not": {
@@ -412,36 +420,44 @@
           },
           {
             "matches": "\\[[^\\]]+\\]\\(https://forge\\.laravel\\.com/\\S*/settings/deployments\\)"
+          },
+          {
+            "not": {
+              "callsTool": "probe-api"
+            }
           }
         ]
       },
       {
         "input": "@laravel-forge what is the ssh public key for web-2?",
         "mocks": {
-          "list-servers": [
-            {
-              "id": 9001,
-              "name": "web-1",
-              "provider": "ocean2",
-              "region": "nyc1",
-              "ipAddress": "10.0.0.1",
-              "phpVersion": "php83",
-              "databaseType": "mysql8",
-              "connectionStatus": "successful",
-              "isReady": true
-            },
-            {
-              "id": 9002,
-              "name": "web-2",
-              "provider": "ocean2",
-              "region": "nyc1",
-              "ipAddress": "10.0.0.2",
-              "phpVersion": "php84",
-              "databaseType": "postgres16",
-              "connectionStatus": "successful",
-              "isReady": true
-            }
-          ],
+          "list-servers": {
+            "note": "Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "servers": [
+              {
+                "id": 9001,
+                "name": "web-1",
+                "provider": "ocean2",
+                "region": "nyc1",
+                "ipAddress": "10.0.0.1",
+                "phpVersion": "php83",
+                "databaseType": "mysql8",
+                "connectionStatus": "successful",
+                "isReady": true
+              },
+              {
+                "id": 9002,
+                "name": "web-2",
+                "provider": "ocean2",
+                "region": "nyc1",
+                "ipAddress": "10.0.0.2",
+                "phpVersion": "php84",
+                "databaseType": "postgres16",
+                "connectionStatus": "successful",
+                "isReady": true
+              }
+            ]
+          },
           "get-server": {
             "id": 9002,
             "name": "web-2",
@@ -453,7 +469,8 @@
             "isReady": true,
             "sites": [
               "shop.example.test"
-            ]
+            ],
+            "forgeUrl": "https://forge.laravel.com/acme-org/web-2"
           },
           "probe-api": {
             "target": "server",
@@ -483,12 +500,12 @@
     {
       "name": "list-servers",
       "title": "List Servers",
-      "description": "List your Forge servers."
+      "description": "List your Forge servers. Returns a summary row per server."
     },
     {
       "name": "list-sites",
       "title": "List Sites",
-      "description": "Search your Forge sites by part of a name, or list them all, or list one server's."
+      "description": "Search your Forge sites by part of a name, or list them all, or list one server's. Returns a summary row per site."
     },
     {
       "name": "get-site",
@@ -548,7 +565,7 @@
     {
       "name": "probe-api",
       "title": "Probe the Forge API",
-      "description": "List the fields Forge holds for one site or server, then read the values you need. Use this whenever you do not already see what the user asked for."
+      "description": "List the fields Forge holds for one site or server, then read the values you need. The list tools return a summary row, so probe for anything they leave out."
     }
   ],
   "preferences": [
