@@ -103,8 +103,7 @@ const SERVER_FIELDS: Record<string, Field> = {
 // Catches a credential Forge adds later that the field list does not name yet
 const SECRET = /token|secret|password|private_key/i;
 
-const UNDESCRIBED =
-  "Forge returned this field and the extension does not describe it yet. Read its value to see what it holds.";
+const UNDESCRIBED = "Unknown: no description for this one. Read its value to see what it holds.";
 
 const PROTECTED = "Withheld: the field name reads as a credential.";
 

@@ -1,5 +1,7 @@
 import { allSites, searchSites, siteDeploymentStatus } from "./helpers";
 
+const TRUNCATED = "Each row is a summary, not the whole record. For any other field, probe-api the site.";
+
 type Input = {
   /**
    * Part of a site name to search for. Forge matches on contains, so "6-8" finds 6-8.example.com.
@@ -46,5 +48,5 @@ export default async function tool({ site, server }: Input) {
       branch: site.repository?.branch,
       quickDeploy: site.quick_deploy,
     }));
-  return note ? { note, sites: listed } : listed;
+  return { note: note ? `${note} ${TRUNCATED}` : TRUNCATED, sites: listed };
 }
