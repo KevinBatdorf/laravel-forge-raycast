@@ -41,8 +41,9 @@ export default async function tool({ site }: Input) {
     createdAt: found.created_at,
     updatedAt: found.updated_at,
     forgeUrl,
-    // The file's contents are not returned; this is where a person edits them in Forge
+    // Contents are withheld; these are where a person reads or edits them in Forge
     environmentUrl: forgeUrl && `${forgeUrl}/environment`,
+    deploymentSettingsUrl: forgeUrl && `${forgeUrl}/settings/deployments`,
     latestDeployment: deployment && {
       id: deployment.id,
       status: deployment.status,
