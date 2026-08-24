@@ -16,15 +16,17 @@ type Target = {
 };
 
 const ASKS: Record<string, string> = {
-  site: "Name any of these in list-sites fields, or get-site include.",
-  server: "Name any of these in list-servers fields, or get-server include.",
+  site: "These are field names, not values. Pass the ones you want to list-sites in fields, or to get-site in include.",
+  server:
+    "These are field names, not values. Pass the ones you want to list-servers in fields, or to get-server in include.",
 };
 
 export default async function tool({ target }: Input) {
   const { fields, inForgeOnly, onRequest, filters, sorts } = forgeFields[target] as Target;
   const describe = (name: string, description: string) => {
-    if (inForgeOnly.includes(name)) return `${description} Not handed over; the get tool returns a Forge link for it.`;
-    if (onRequest.includes(name)) return `${description} Only by name on include.`;
+    if (inForgeOnly.includes(name))
+      return `${description} You cannot read this. The get tool gives a Forge link instead.`;
+    if (onRequest.includes(name)) return `${description} Ask for it by name in include.`;
     return description;
   };
 
@@ -33,14 +35,10 @@ export default async function tool({ target }: Input) {
     fields: Object.fromEntries(Object.entries(fields).map(([name, text]) => [name, describe(name, text)])),
     filters,
     sorts,
-    note: [
-      `${ASKS[target]} Spelling of the name does not matter. These are names, not values.`,
-      filters.length
-        ? `Forge narrows the list itself on ${filters.join(", ")}, so pass those to the list tool rather than reading every page.`
-        : "",
-      sorts.length ? `It sorts on ${sorts.join(", ")}, and a leading minus reverses.` : "",
-    ]
-      .filter(Boolean)
-      .join(" "),
+    note: ASKS[target],
+    ...(filters.length
+      ? { filterNote: "Forge can filter on these. Pass one to the list tool. Forge does the work." }
+      : {}),
+    ...(sorts.length ? { sortNote: "Forge can sort on these. Add a minus to reverse, like -created_at." } : {}),
   };
 }

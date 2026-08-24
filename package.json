@@ -39,7 +39,7 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nOne site's common fields: get-site. One server's common fields and its sites: get-server. To find or list sites: list-sites.\nOnly deploy, restart or reboot when asked. Quick deploy off means Forge will not deploy on push by itself.\nLook a site or server up first and pass the id it returns, as a string: \"2882133\", never 2882133. Given a partial name, search for it with list-sites rather than asking the user which site they mean.\nHand over any Forge link a tool returns as a markdown link, like [Deploy script](url), and never open or read the page yourself: it needs the user's own sign-in.",
+    "instructions": "Deployments belong to sites, not servers.\nDeploy failed? Call deployment-status, then deployment-log.\nSite down or erroring? Call site-online, then site-config.\nServer problem? Call server-events.\nPass ids as text: \"2882133\", not 2882133.\nOnly deploy, restart or reboot if the user asks.\nA tool may return a Forge link. Give it to the user as a markdown link. Do not open it yourself.",
     "evals": [
       {
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
@@ -509,22 +509,22 @@
     {
       "name": "list-servers",
       "title": "List Servers",
-      "description": "List your Forge servers, narrowed by region, provider, PHP, database, Ubuntu, size or IP, and sorted. Returns one Forge page."
+      "description": "List your Forge servers. Filter by region, provider, PHP, database, Ubuntu, size or IP. Returns one page of short rows."
     },
     {
       "name": "list-sites",
       "title": "List Sites",
-      "description": "Search your Forge sites by part of a name, or list one server's. Returns one Forge page; rows are a summary, add fields for more."
+      "description": "List or search your Forge sites. Returns one page of short rows."
     },
     {
       "name": "get-site",
       "title": "Get a Site",
-      "description": "One site's common fields, its latest deployment, and Forge links for what is not returned."
+      "description": "Get one site's details."
     },
     {
       "name": "get-server",
       "title": "Get a Server",
-      "description": "One server's common fields and the sites on it. Pass include for a field it holds back."
+      "description": "Get one server's details and its sites."
     },
     {
       "name": "deployment-status",
@@ -574,7 +574,7 @@
     {
       "name": "probe-api",
       "title": "Probe the Forge API",
-      "description": "Name every field Forge holds for a site or a server, plus the filters and sorts Forge accepts, so you can ask the list and get tools for them."
+      "description": "List every field name a site or server has, and what Forge can filter and sort on."
     }
   ],
   "preferences": [

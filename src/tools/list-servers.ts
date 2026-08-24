@@ -1,8 +1,7 @@
 import { serverPage } from "./browse";
 import { namesAsked, pick, serverRowExtras } from "./fields";
 
-const TRUNCATED =
-  "Each row is a summary. probe-api a server to see every field it holds, then name the ones you need in fields.";
+const TRUNCATED = "Rows are short. Call probe-api to see all field names. Then pass the ones you want in fields.";
 
 type Input = {
   /**
@@ -95,10 +94,11 @@ export default async function tool({ fields, page, sort, ...filters }: Input) {
     };
   });
 
-  const notes = [`One Forge page of ${rows.length} servers. Forge reports no total.`];
-  if (next) notes.push("Pass page for the next one.");
+  const notes = [`This is one page: ${rows.length} servers. Forge does not say how many there are in total.`];
+  if (next) notes.push("Pass page to get the next page.");
   if (!asked.length) notes.push(TRUNCATED);
-  if (unknown.size) notes.push(`No server field matches ${[...unknown].join(", ")}. probe-api a server for its names.`);
+  if (unknown.size)
+    notes.push(`There is no server field called ${[...unknown].join(", ")}. Call probe-api for the real names.`);
 
   return { note: notes.join(" "), ...(next ? { page: next } : {}), servers: rows };
 }

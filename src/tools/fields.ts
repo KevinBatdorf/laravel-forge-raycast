@@ -83,7 +83,7 @@ const notice = (available: Record<string, unknown>, picked: Record<string, unkno
   Object.fromEntries(
     Object.keys(available)
       .filter((name) => !(name in picked))
-      .map((name) => [name, `Not returned. Pass include: ${name} to get it.`]),
+      .map((name) => [name, `Not returned. Ask for ${name} in include.`]),
   );
 
 export const included = (available: Record<string, unknown>, include?: string) => {
@@ -96,8 +96,8 @@ export const siteLinks = (server: IServer, siteId: number) => {
   const forgeUrl = forgeSiteUrl(server, siteId);
   if (!forgeUrl) return {};
   return {
-    environment: `Not returned. Read or edit it at ${forgeUrl}/environment`,
-    deploymentScript: `Not returned. Read or edit it at ${forgeUrl}/settings/deployments`,
-    deploymentUrl: `Not returned. Find or rotate it at ${forgeUrl}/settings/deployments`,
+    environment: `Not returned. The user can read or edit it at ${forgeUrl}/environment`,
+    deploymentScript: `Not returned. The user can read or edit it at ${forgeUrl}/settings/deployments`,
+    deploymentUrl: `Not returned. The user can find or change it at ${forgeUrl}/settings/deployments`,
   };
 };

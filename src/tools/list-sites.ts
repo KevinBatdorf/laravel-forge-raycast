@@ -2,8 +2,7 @@ import { sitePage } from "./browse";
 import { namesAsked, pick, siteRowExtras } from "./fields";
 import { findServer, siteDeploymentStatus } from "./helpers";
 
-const TRUNCATED =
-  "Each row is a summary. probe-api a site to see every field it holds, then name the ones you need in fields.";
+const TRUNCATED = "Rows are short. Call probe-api to see all field names. Then pass the ones you want in fields.";
 
 type Input = {
   /**
@@ -46,11 +45,12 @@ export default async function tool({ site, server, fields, page }: Input) {
     };
   });
 
-  const notes = [`One Forge page of ${rows.length} sites. Forge reports no total.`];
-  if (next) notes.push("Pass page for the next one.");
-  if (site && !rows.length) notes.push(`Forge matched no site name containing "${site}". It cannot match an alias.`);
+  const notes = [`This is one page: ${rows.length} sites. Forge does not say how many there are in total.`];
+  if (next) notes.push("Pass page to get the next page.");
+  if (site && !rows.length) notes.push(`No site name contains "${site}". Forge cannot match an alias.`);
   if (!asked.length) notes.push(TRUNCATED);
-  if (unknown.size) notes.push(`No site field matches ${[...unknown].join(", ")}. probe-api a site for its names.`);
+  if (unknown.size)
+    notes.push(`There is no site field called ${[...unknown].join(", ")}. Call probe-api for the real names.`);
 
   return { note: notes.join(" "), ...(next ? { page: next } : {}), sites: rows };
 }

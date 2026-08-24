@@ -6,7 +6,7 @@
     "onRequest": [],
     "fields": {
       "name": "The site's primary domain.",
-      "status": "Where the site is in its install, like installed or installing.",
+      "status": "How far the install got, like installed or installing.",
       "url": "The address Forge shows for the site.",
       "user": "The Linux user the site runs as.",
       "https": "Whether Forge has TLS turned on for the site.",
@@ -14,7 +14,7 @@
       "root_directory": "The site's root directory on the server.",
       "aliases": "The other domains pointed at this site.",
       "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
-      "deployment_status": "Filled in only while a deploy is running, otherwise empty.",
+      "deployment_status": "Only set while a deploy is running. Otherwise empty.",
       "quick_deploy": "Whether Forge deploys by itself on every push.",
       "isolated": "Whether the site runs under its own Linux user.",
       "shared_paths": "The directories carried across zero-downtime releases.",
@@ -31,7 +31,7 @@
       "healthcheck_url": "The URL Forge pings to check the site is healthy.",
       "created_at": "When the site was created.",
       "updated_at": "When the site last changed.",
-      "environment": "The site's env file, which Forge keeps on its own endpoint rather than on the site record."
+      "environment": "The site's env file. Forge keeps it on a separate endpoint."
     },
     "listPath": "/sites",
     "filters": ["name"],
@@ -49,7 +49,7 @@
       "type": "What the server is set up as, like app or worker.",
       "provider": "The hosting provider, like ocean2 or a custom VPS.",
       "identifier": "The provider's own id for the machine.",
-      "credential_id": "The stored provider key Forge built the server with. Empty on a custom VPS.",
+      "credential_id": "The saved provider key Forge built the server with. Empty on a custom VPS.",
       "size": "The provider's plan or instance size.",
       "region": "The provider region the server runs in.",
       "ubuntu_version": "The Ubuntu release on the server.",
@@ -66,7 +66,7 @@
       "is_ready": "Whether provisioning has finished.",
       "revoked": "Whether Forge has been disconnected from the server.",
       "timezone": "The server's timezone.",
-      "local_public_key": "The server's own SSH public key, the one a git host takes as a deploy key.",
+      "local_public_key": "The server's own SSH public key. A git host uses it as a deploy key.",
       "created_at": "When the server was created.",
       "updated_at": "When the server last changed."
     },
