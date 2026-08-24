@@ -21,7 +21,7 @@ const orgSlugs = async (token: string) => {
 const CAP = 6_000;
 
 // A site's deployment_url embeds a token that triggers a deploy without any auth
-const SECRETS = /token|secret|password|deployment_url|private_key/i;
+const SECRETS = /token|secret|password|deployment_url|deployment_script|private_key/i;
 
 // Key-name redaction cannot see secrets inside a content string, and these return them
 const FORBIDDEN = /(^|\/)(environment|credentials|server-credentials)(\/|\?|$)/;
@@ -50,7 +50,18 @@ const scoped = async (path: string, token: string) =>
 export default async function tool({ path, single }: Input) {
   const clean = path.trim().replace(/^\/*(api\/)?/, "");
   if (/^[a-z]+:\/\//i.test(clean)) throw new Error("Pass a path relative to the Forge API, not a full URL.");
-  if (FORBIDDEN.test(clean)) {
+  // Forge decodes the path when it routes, so guard the decoded form or environ%6dent slips through
+  let decoded = clean;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+  if (FORBIDDEN.test(decoded)) {
     throw new Error(
       `"${clean}" returns credentials in full and is not readable through this tool. Read it in the Forge UI.`,
     );

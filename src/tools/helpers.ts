@@ -136,9 +136,6 @@ const notExact = (kind: string, query: string, names: string[]) =>
     `No ${kind} is named exactly "${query}". Closest: ${names.join(", ")}. Confirm which one, then pass its id.`,
   );
 
-// A confirmation that throws cancels the call with nothing shown, so the tool reports the mismatch
-export const resolveForConfirmation = <T>(resolve: () => Promise<T>) => resolve().catch(() => undefined);
-
 export const findServer = async (query: string) => {
   const search = normalize(query);
   const narrowed = /^\d+$/.test(search) ? [] : await serverMatches(query);
