@@ -15,7 +15,10 @@ type Input = {
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site }) => {
   const resolved = await resolveForConfirmation(() => targetServer({ server, site }));
-  if (!resolved) return { message: `Reboot "${server ?? site}"?` };
+  if (!resolved)
+    return {
+      message: `Reboot "${server ?? site}"? Its details could not be loaded, so the sites it would take down are unverified.`,
+    };
   const { server: found } = resolved;
   const sites = await sitesOnServer(found);
   return {

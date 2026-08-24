@@ -13,7 +13,7 @@ type Input = {
 
 export const confirmation: Tool.Confirmation<Input> = async ({ site }) => {
   const match = await resolveForConfirmation(() => findSite(site));
-  if (!match) return { message: `Deploy "${site}"?` };
+  if (!match) return { message: `Deploy "${site}"? Its details could not be loaded, so this is unverified.` };
   const { site: found, server } = match;
   return {
     message: `Deploy ${found.name}?`,
