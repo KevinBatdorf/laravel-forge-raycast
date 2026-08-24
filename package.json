@@ -39,7 +39,7 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nOne site's full detail: get-site. One server's full detail and its sites: get-server. To find or list sites: list-sites.\nA site's env file is not available here.\nOnly deploy, restart or reboot when asked. Quick deploy off means Forge will not deploy on push by itself.\nLook a site or server up first and pass the id it returns, as a string: \"2882133\", never 2882133. Given a partial name, search for it with list-sites rather than asking the user which site they mean.\nlist-servers and list-sites return a short row on purpose. For one site's or one server's settings — zero-downtime, isolation, ubuntu version, and the like — call get-site or get-server, which return the full record. Only fall to probe-api for something even those do not return. Do not infer a setting from a config file, and do not say Forge does not know until you have probed.",
+    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nOne site's full detail: get-site. One server's full detail and its sites: get-server. To find or list sites: list-sites.\nA site's env file contents are not available here. When the user asks to see or edit it, call get-site and give them its environmentUrl to open in Forge.\nOnly deploy, restart or reboot when asked. Quick deploy off means Forge will not deploy on push by itself.\nLook a site or server up first and pass the id it returns, as a string: \"2882133\", never 2882133. Given a partial name, search for it with list-sites rather than asking the user which site they mean.\nlist-servers and list-sites return a short row on purpose. For one site's or one server's settings — zero-downtime, isolation, ubuntu version, and the like — call get-site or get-server, which return the full record. Only fall to probe-api for something even those do not return. Do not infer a setting from a config file, and do not say Forge does not know until you have probed.",
     "evals": [
       {
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
@@ -292,6 +292,53 @@
         "expected": [
           {
             "callsTool": "deploy-site"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge show me the env for acme-store",
+        "mocks": {
+          "list-sites": [
+            {
+              "id": 5001,
+              "name": "acme-store.com",
+              "server": "web-1",
+              "url": "https://acme-store.com",
+              "phpVersion": "PHP 8.3",
+              "status": "installed",
+              "deploymentStatus": "finished",
+              "repository": "acme/store",
+              "branch": "main",
+              "quickDeploy": true
+            }
+          ],
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "zeroDowntimeDeployments": false,
+            "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
+            "environmentUrl": "https://forge.laravel.com/acme-org/web-1/5001/environment"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-site"
+          },
+          {
+            "not": {
+              "callsTool": "site-config"
+            }
+          },
+          {
+            "not": {
+              "callsTool": "probe-api"
+            }
           }
         ]
       }
