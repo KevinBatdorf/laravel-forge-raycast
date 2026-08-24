@@ -18,9 +18,7 @@ type Input = {
 
 export default async function tool({ site, type }: Input) {
   if (!READABLE.includes(type)) {
-    throw new Error(
-      `This tool reads ${READABLE.join(", ")}. The environment file holds secrets; use get-site for a link to it in Forge.`,
-    );
+    throw new Error(`This tool reads ${READABLE.join(", ")}. For anything else about the site, probe-api it.`);
   }
   const { site: found, server, token } = await findSite(site);
   const content = await Site.getConfig({
