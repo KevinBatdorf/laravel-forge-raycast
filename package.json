@@ -39,7 +39,261 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nWhich server, PHP version, repository or branch a site uses: list-sites.\nA site's env file is not available here.\nOnly deploy, restart or reboot when asked. Quick deploy off means Forge will not deploy on push by itself.\nLook a site or server up first and pass the id it returns, as a string: \"2882133\", never 2882133. Given a partial name, search for it with list-sites rather than asking the user which site they mean.\nThese tools return a short row on purpose. For any other Forge setting or field, call probe-api and read the attributes. Do not infer a setting from a config file, and do not say Forge does not know until you have probed."
+    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nOne site's full detail (zero-downtime, isolation, maintenance, repository, branch): get-site. One server's full detail and the sites on it: get-server. To find or list sites, or scan several at once: list-sites.\nA site's env file is not available here.\nOnly deploy, restart or reboot when asked. Quick deploy off means Forge will not deploy on push by itself.\nLook a site or server up first and pass the id it returns, as a string: \"2882133\", never 2882133. Given a partial name, search for it with list-sites rather than asking the user which site they mean.\nThese tools return a short row on purpose. For any other Forge setting or field, call probe-api and read the attributes. Do not infer a setting from a config file, and do not say Forge does not know until you have probed.",
+    "evals": [
+      {
+        "input": "@laravel-forge does the acme-store site have zero-downtime deploys enabled?",
+        "mocks": {
+          "list-sites": [
+            {
+              "id": 5001,
+              "name": "acme-store.com",
+              "server": "web-1",
+              "url": "https://acme-store.com",
+              "phpVersion": "PHP 8.3",
+              "status": "installed",
+              "deploymentStatus": "finished",
+              "repository": "acme/store",
+              "branch": "main",
+              "quickDeploy": true
+            },
+            {
+              "id": 5002,
+              "name": "acme-blog.com",
+              "server": "web-1",
+              "url": "https://acme-blog.com",
+              "phpVersion": "PHP 8.3",
+              "status": "installed",
+              "deploymentStatus": "finished",
+              "repository": "acme/store",
+              "branch": "main",
+              "quickDeploy": true
+            },
+            {
+              "id": 5003,
+              "name": "shop.example.test",
+              "server": "web-2",
+              "url": "https://shop.example.test",
+              "phpVersion": "PHP 8.3",
+              "status": "installed",
+              "deploymentStatus": "finished",
+              "repository": "acme/store",
+              "branch": "main",
+              "quickDeploy": true
+            }
+          ],
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "zeroDowntimeDeployments": false,
+            "isolated": true,
+            "repository": {
+              "provider": "GitHub",
+              "url": "https://github.com/acme/store",
+              "branch": "main",
+              "status": "installed"
+            },
+            "quickDeploy": true,
+            "deploymentStatus": "finished"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-site",
+              "arguments": {
+                "site": {
+                  "includes": "acme-store"
+                }
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "probe-api"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge what database engine does the web-2 server run?",
+        "mocks": {
+          "list-servers": [
+            {
+              "id": 9001,
+              "name": "web-1",
+              "provider": "ocean2",
+              "region": "nyc1",
+              "ipAddress": "10.0.0.1",
+              "phpVersion": "php83",
+              "databaseType": "mysql8",
+              "connectionStatus": "successful",
+              "isReady": true
+            },
+            {
+              "id": 9002,
+              "name": "web-2",
+              "provider": "ocean2",
+              "region": "nyc1",
+              "ipAddress": "10.0.0.2",
+              "phpVersion": "php84",
+              "databaseType": "postgres16",
+              "connectionStatus": "successful",
+              "isReady": true
+            }
+          ],
+          "get-server": {
+            "id": 9002,
+            "name": "web-2",
+            "provider": "ocean2",
+            "region": "nyc1",
+            "phpVersion": "php84",
+            "databaseType": "postgres16",
+            "connectionStatus": "successful",
+            "isReady": true,
+            "sites": [
+              "shop.example.test"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-server",
+              "arguments": {
+                "server": {
+                  "includes": "web-2"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge restart the database on web-2",
+        "mocks": {
+          "list-servers": [
+            {
+              "id": 9001,
+              "name": "web-1",
+              "provider": "ocean2",
+              "region": "nyc1",
+              "ipAddress": "10.0.0.1",
+              "phpVersion": "php83",
+              "databaseType": "mysql8",
+              "connectionStatus": "successful",
+              "isReady": true
+            },
+            {
+              "id": 9002,
+              "name": "web-2",
+              "provider": "ocean2",
+              "region": "nyc1",
+              "ipAddress": "10.0.0.2",
+              "phpVersion": "php84",
+              "databaseType": "postgres16",
+              "connectionStatus": "successful",
+              "isReady": true
+            }
+          ],
+          "restart-service": {
+            "server": "web-2",
+            "service": "database",
+            "action": "reboot",
+            "started": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "restart-service",
+              "arguments": {
+                "service": "database"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge is anything deploying right now?",
+        "mocks": {
+          "deployment-status": {
+            "deploying": [],
+            "failed": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "deployment-status"
+          },
+          {
+            "not": {
+              "callsTool": "deploy-site"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge deploy the acme-store site",
+        "mocks": {
+          "list-sites": [
+            {
+              "id": 5001,
+              "name": "acme-store.com",
+              "server": "web-1",
+              "url": "https://acme-store.com",
+              "phpVersion": "PHP 8.3",
+              "status": "installed",
+              "deploymentStatus": "finished",
+              "repository": "acme/store",
+              "branch": "main",
+              "quickDeploy": true
+            },
+            {
+              "id": 5002,
+              "name": "acme-blog.com",
+              "server": "web-1",
+              "url": "https://acme-blog.com",
+              "phpVersion": "PHP 8.3",
+              "status": "installed",
+              "deploymentStatus": "finished",
+              "repository": "acme/store",
+              "branch": "main",
+              "quickDeploy": true
+            },
+            {
+              "id": 5003,
+              "name": "shop.example.test",
+              "server": "web-2",
+              "url": "https://shop.example.test",
+              "phpVersion": "PHP 8.3",
+              "status": "installed",
+              "deploymentStatus": "finished",
+              "repository": "acme/store",
+              "branch": "main",
+              "quickDeploy": true
+            }
+          ],
+          "deploy-site": {
+            "site": "acme-store.com",
+            "server": "web-1",
+            "started": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "deploy-site"
+          }
+        ]
+      }
+    ]
   },
   "tools": [
     {
