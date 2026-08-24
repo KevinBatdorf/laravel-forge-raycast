@@ -63,7 +63,7 @@ export default async function tool({ path, single }: Input) {
   }
   if (FORBIDDEN.test(decoded)) {
     throw new Error(
-      `"${clean}" returns credentials in full and is not readable through this tool. Read it in the Forge UI.`,
+      `"${clean}" returns credentials in full and is not readable through this tool. Use get-site for a link to open it in Forge.`,
     );
   }
 

@@ -19,7 +19,7 @@ type Input = {
 export default async function tool({ site, type }: Input) {
   if (!READABLE.includes(type)) {
     throw new Error(
-      `This tool reads ${READABLE.join(", ")}. The environment file holds secrets and is not one of them.`,
+      `This tool reads ${READABLE.join(", ")}. The environment file holds secrets; use get-site for a link to it in Forge.`,
     );
   }
   const { site: found, server, token } = await findSite(site);
