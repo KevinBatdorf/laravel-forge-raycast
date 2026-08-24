@@ -67,5 +67,32 @@
       "created_at": "When the server was created.",
       "updated_at": "When the server last changed."
     }
+  },
+  "deployment": {
+    "schema": "DeploymentResource",
+    "ours": [],
+    "inForgeOnly": [],
+    "onRequest": [],
+    "fields": {
+      "commit": "The commit deployed, with its hash, branch, message and author.",
+      "type": "How the deploy was started.",
+      "status": "Where the deploy got to: pending, queued, deploying, finished, failed, failed-build or cancelled.",
+      "started_at": "When the deploy started.",
+      "ended_at": "When the deploy ended.",
+      "created_at": "When Forge recorded the deploy.",
+      "updated_at": "When the deploy record last changed."
+    }
+  },
+  "event": {
+    "schema": "EventResource",
+    "ours": [],
+    "inForgeOnly": [],
+    "onRequest": [],
+    "fields": {
+      "description": "What the event did, like Adding database.",
+      "ran_as": "The server user the event ran as.",
+      "created_at": "When the event was recorded.",
+      "updated_at": "When the event record last changed."
+    }
   }
 }
