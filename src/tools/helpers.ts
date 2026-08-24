@@ -5,6 +5,11 @@ import { unwrapToken } from "../lib/auth";
 import { flatten, getCollection, relatedId, relatedResource } from "../lib/forge";
 import { IDeployment, IServer, ISite } from "../types";
 
+// Forge pages at 30 and gives no total, so a walk that hits the cap leaves more behind
+const incomplete = { sites: false, servers: false };
+
+export const walkedEverything = (kind: "sites" | "servers") => !incomplete[kind];
+
 export type ServerMatch = { server: IServer; token: string };
 export type SiteMatch = { site: ISite; server: IServer; token: string };
 
@@ -45,7 +50,8 @@ const serverMatches = async (query: string): Promise<ServerMatch[]> => {
           const path = query
             ? `orgs/${slug}/servers?filter[name]=${encodeURIComponent(query)}`
             : `orgs/${slug}/servers`;
-          const { items } = await getCollection(path, token);
+          const { items, nextCursor } = await getCollection(path, token);
+          if (nextCursor) incomplete.servers = true;
           return items.map((server) => ({
             server: { ...flatten<IServer>(server), org_slug: slug, api_token_key: tokenKey, ssh_user: sshUser },
             token,
@@ -79,7 +85,8 @@ export const searchSites = async (query: string): Promise<SiteMatch[]> => {
       const path = query
         ? `sites?${SITE_INCLUDES}&filter[name]=${encodeURIComponent(query)}`
         : `sites?${SITE_INCLUDES}`;
-      const { items, included } = await getCollection(path, token);
+      const { items, included, nextCursor } = await getCollection(path, token);
+      if (nextCursor) incomplete.sites = true;
       const orgs = slugs.get(tokenKey) ?? [];
       // The site list carries its server; only the org slug needs the server walk
       const owners = orgs.length > 1 ? await orgByServerId(tokenKey) : undefined;

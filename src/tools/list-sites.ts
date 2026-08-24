@@ -1,5 +1,6 @@
 import { namesAsked, pick, siteRowExtras } from "./fields";
-import { allSites, searchSites, siteDeploymentStatus } from "./helpers";
+import { allSites, searchSites, siteDeploymentStatus, walkedEverything } from "./helpers";
+import { paged } from "./paging";
 
 const TRUNCATED =
   "Each row is a summary. probe-api a site to see every field it holds, then name the ones you need in fields.";
@@ -17,9 +18,17 @@ type Input = {
    * Extra field names to add to every row, comma separated. probe-api a site to see what it holds.
    */
   fields?: string;
+  /**
+   * How many sites to return. Defaults to 30.
+   */
+  limit?: number;
+  /**
+   * Where to start, for the page after the one already read. Defaults to 0.
+   */
+  offset?: number;
 };
 
-export default async function tool({ site, server, fields }: Input) {
+export default async function tool({ site, server, fields, limit, offset }: Input) {
   let sites = site ? await searchSites(site) : await allSites();
   let note;
   if (site && !sites.length) {
@@ -59,7 +68,8 @@ export default async function tool({ site, server, fields }: Input) {
       };
     });
 
-  const notes = [note, asked.length ? undefined : TRUNCATED].filter(Boolean);
+  const page = paged(listed, { kind: "sites", offset, limit, complete: walkedEverything("sites") });
+  const notes = [note, page.note, asked.length ? undefined : TRUNCATED].filter(Boolean);
   if (unknown.size) notes.push(`No site field matches ${[...unknown].join(", ")}. probe-api a site for its names.`);
-  return { ...(notes.length ? { note: notes.join(" ") } : {}), sites: listed };
+  return { note: notes.join(" "), perPage: page.perPage, offset: page.offset, total: page.total, sites: page.rows };
 }

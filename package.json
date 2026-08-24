@@ -45,7 +45,7 @@
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
         "mocks": {
           "list-sites": {
-            "note": "Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "note": "Showing sites 1 to 3 of 3. Each row is a summary, not the whole record. For any other field, probe-api the site.",
             "sites": [
               {
                 "id": 5001,
@@ -71,7 +71,10 @@
                 "status": "installed",
                 "deploymentStatus": "finished"
               }
-            ]
+            ],
+            "perPage": 30,
+            "offset": 0,
+            "total": 3
           },
           "get-site": {
             "id": 5001,
@@ -120,7 +123,7 @@
         "input": "@laravel-forge what ubuntu version is web-2 on?",
         "mocks": {
           "list-servers": {
-            "note": "Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "note": "Showing servers 1 to 2 of 2. Each row is a summary, not the whole record. For any other field, probe-api the server.",
             "servers": [
               {
                 "id": 9001,
@@ -134,7 +137,10 @@
                 "connectionStatus": "successful",
                 "isReady": true
               }
-            ]
+            ],
+            "perPage": 30,
+            "offset": 0,
+            "total": 2
           },
           "get-server": {
             "id": 9002,
@@ -171,7 +177,7 @@
         "input": "@laravel-forge restart the database on web-2",
         "mocks": {
           "list-servers": {
-            "note": "Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "note": "Showing servers 1 to 2 of 2. Each row is a summary, not the whole record. For any other field, probe-api the server.",
             "servers": [
               {
                 "id": 9001,
@@ -185,7 +191,10 @@
                 "connectionStatus": "successful",
                 "isReady": true
               }
-            ]
+            ],
+            "perPage": 30,
+            "offset": 0,
+            "total": 2
           },
           "restart-service": {
             "server": "web-2",
@@ -228,7 +237,7 @@
         "input": "@laravel-forge deploy acme-store",
         "mocks": {
           "list-sites": {
-            "note": "Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "note": "Showing sites 1 to 3 of 3. Each row is a summary, not the whole record. For any other field, probe-api the site.",
             "sites": [
               {
                 "id": 5001,
@@ -254,7 +263,10 @@
                 "status": "installed",
                 "deploymentStatus": "finished"
               }
-            ]
+            ],
+            "perPage": 30,
+            "offset": 0,
+            "total": 3
           },
           "deploy-site": {
             "site": "acme-store.com",
@@ -272,7 +284,7 @@
         "input": "@laravel-forge show me the env for acme-store",
         "mocks": {
           "list-sites": {
-            "note": "Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "note": "Showing sites 1 to 1 of 1. Each row is a summary, not the whole record. For any other field, probe-api the site.",
             "sites": [
               {
                 "id": 5001,
@@ -282,7 +294,10 @@
                 "status": "installed",
                 "deploymentStatus": "finished"
               }
-            ]
+            ],
+            "perPage": 30,
+            "offset": 0,
+            "total": 1
           },
           "get-site": {
             "id": 5001,
@@ -323,7 +338,7 @@
         "input": "@laravel-forge show me the deploy script for acme-store",
         "mocks": {
           "list-sites": {
-            "note": "Each row is a summary, not the whole record. For any other field, probe-api the site.",
+            "note": "Showing sites 1 to 1 of 1. Each row is a summary, not the whole record. For any other field, probe-api the site.",
             "sites": [
               {
                 "id": 5001,
@@ -333,7 +348,10 @@
                 "status": "installed",
                 "deploymentStatus": "finished"
               }
-            ]
+            ],
+            "perPage": 30,
+            "offset": 0,
+            "total": 1
           },
           "get-site": {
             "id": 5001,
@@ -374,7 +392,7 @@
         "input": "@laravel-forge what is the ssh public key for web-2?",
         "mocks": {
           "list-servers": {
-            "note": "Each row is a summary, not the whole record. For any other field, probe-api the server.",
+            "note": "Showing servers 1 to 2 of 2. Each row is a summary, not the whole record. For any other field, probe-api the server.",
             "servers": [
               {
                 "id": 9001,
@@ -388,7 +406,10 @@
                 "connectionStatus": "successful",
                 "isReady": true
               }
-            ]
+            ],
+            "perPage": 30,
+            "offset": 0,
+            "total": 2
           },
           "get-server": {
             "id": 9002,
@@ -444,7 +465,11 @@
                 "deploymentStatus": "finished",
                 "zeroDowntimeDeployments": true
               }
-            ]
+            ],
+            "perPage": 30,
+            "offset": 0,
+            "total": 2,
+            "note": "Showing sites 1 to 2 of 2."
           },
           "probe-api": {
             "target": "site",
@@ -478,12 +503,12 @@
     {
       "name": "list-servers",
       "title": "List Servers",
-      "description": "List your Forge servers. Rows are a summary; add fields for more."
+      "description": "List your Forge servers. Rows are a summary and paged; add fields for more."
     },
     {
       "name": "list-sites",
       "title": "List Sites",
-      "description": "Search your Forge sites by part of a name, or list them all, or list one server's. Rows are a summary; add fields for more."
+      "description": "Search your Forge sites by part of a name, or list them all, or list one server's. Rows are a summary and paged; add fields for more."
     },
     {
       "name": "get-site",
