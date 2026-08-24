@@ -1,4 +1,3 @@
-import { forgeServerUrl } from "../lib/url";
 import { findServer, sitesOnServer } from "./helpers";
 
 type Input = {
@@ -36,7 +35,6 @@ export default async function tool({ server }: Input) {
     revoked: found.revoked,
     createdAt: found.created_at,
     updatedAt: found.updated_at,
-    forgeUrl: forgeServerUrl(found),
     sites,
   };
 }
