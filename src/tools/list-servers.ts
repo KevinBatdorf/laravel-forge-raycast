@@ -91,13 +91,12 @@ export default async function tool({ fields, page, sort, limit, includeRevoked, 
     },
   });
 
-  const asked = askedFor("server", fields);
+  const asked = askedFor("server", fields, { ensure: includeRevoked ? ["revoked"] : [] });
   const rows = servers.map((server) => ({
     id: server.id,
     name: server.name,
     connectionStatus: server.connection_status,
     isReady: server.is_ready,
-    ...(includeRevoked ? { revoked: server.revoked } : {}),
     ...asked.from(serverRowExtras(server)),
   }));
 

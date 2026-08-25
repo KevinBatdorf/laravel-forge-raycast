@@ -96,7 +96,7 @@ const GET_TOOL: Record<Target, string> = { site: "get-site", server: "get-server
 const and = (names: string[]) => names.join(", ");
 
 // One "no such field" for every miss loops the model back to probe-api
-export const askedFor = (target: Target, input?: string) => {
+export const askedFor = (target: Target, input?: string, { ensure = [] as string[] } = {}) => {
   const asked = namesAsked(input);
   const { fields, inForgeOnly, onRequest } = forgeFields[target] as Catalog;
   const rows = new Map(ROW_KEYS[target].map((name) => [key(name), name]));
@@ -120,6 +120,11 @@ export const askedFor = (target: Target, input?: string) => {
     else if (linkOnly.has(key(name))) linked.push(name);
     else if (held.has(key(name))) unwired.push(name);
     else unknown.push(name);
+  }
+
+  for (const name of ensure) {
+    const match = resolve(rows, name);
+    if (match && !names.includes(match)) names.push(match);
   }
 
   const notes: string[] = [];
