@@ -55,20 +55,25 @@ const serverFrom = (item: ForgeResource, slug: string, { token, tokenKey, sshUse
   token,
 });
 
+// Resolving a revoked id would hand its record to a model that never asked includeRevoked
+const live = <T extends { server: IServer }>(match: T) => (match.server.revoked ? [] : [match]);
+
 // Forge filters match names, never ids, so an id is fetched from each org directly
 const serverById = async (id: string): Promise<ServerMatch[]> => {
   const known = await cachedOwner("server", id);
   if (known) {
     const account = accounts().find(({ tokenKey }) => tokenKey === known.tokenKey);
     const body = account && (await probeResource(`orgs/${known.slug}/servers/${id}`, account.token));
-    if (account && body?.data) return [serverFrom(body.data, known.slug, account)];
+    const matches = account && body?.data ? live(serverFrom(body.data, known.slug, account)) : [];
+    if (matches.length) return matches;
     await forgetOwner("server", id);
   }
   return eachOrg(async (slug, token, account) => {
     const body = await probeResource(`orgs/${slug}/servers/${id}`, token);
     if (!body?.data) return [];
-    await rememberOwner("server", id, { slug, tokenKey: account.tokenKey });
-    return [serverFrom(body.data, slug, account)];
+    const matches = live(serverFrom(body.data, slug, account));
+    if (matches.length) await rememberOwner("server", id, { slug, tokenKey: account.tokenKey });
+    return matches;
   });
 };
 
@@ -123,20 +128,39 @@ const siteMatch = (item: ForgeResource, included: ForgeResource[], server: IServ
   };
 };
 
-const siteById = (id: string): Promise<SiteMatch[]> =>
-  eachOrg(async (slug, token, { tokenKey, sshUser }) => {
+const siteFrom = (
+  body: { data?: ForgeResource; included?: ForgeResource[] } | undefined,
+  slug: string,
+  account: Account,
+) => {
+  if (!body?.data) return [];
+  const resource = relatedResource(body.data, "server", body.included ?? []);
+  if (!resource) return [];
+  const server: IServer = {
+    ...flatten<IServer>(resource),
+    org_slug: slug,
+    api_token_key: account.tokenKey,
+    ssh_user: account.sshUser,
+  };
+  return live({ ...siteMatch(body.data, body.included ?? [], server, account.token) });
+};
+
+const siteById = async (id: string): Promise<SiteMatch[]> => {
+  const known = await cachedOwner("site", id);
+  if (known) {
+    const account = accounts().find(({ tokenKey }) => tokenKey === known.tokenKey);
+    const body = account && (await probeResource(`orgs/${known.slug}/sites/${id}?${SITE_INCLUDES}`, account.token));
+    const matches = account ? siteFrom(body || undefined, known.slug, account) : [];
+    if (matches.length) return matches;
+    await forgetOwner("site", id);
+  }
+  return eachOrg(async (slug, token, account) => {
     const body = await probeResource(`orgs/${slug}/sites/${id}?${SITE_INCLUDES}`, token);
-    if (!body?.data) return [];
-    const resource = relatedResource(body.data, "server", body.included ?? []);
-    if (!resource) return [];
-    const server: IServer = {
-      ...flatten<IServer>(resource),
-      org_slug: slug,
-      api_token_key: tokenKey,
-      ssh_user: sshUser,
-    };
-    return [siteMatch(body.data, body.included ?? [], server, token)];
+    const matches = siteFrom(body, slug, account);
+    if (matches.length) await rememberOwner("site", id, { slug, tokenKey: account.tokenKey });
+    return matches;
   });
+};
 
 export const searchSites = async (query: string): Promise<SiteMatch[]> => {
   const slugs = await orgSlugs();
