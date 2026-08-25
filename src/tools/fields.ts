@@ -159,10 +159,14 @@ export const included = (available: Record<string, unknown>, include?: string) =
 // Never returned: Forge holds these off the record, or handing one over hands over the site
 export const siteLinks = (server: IServer, siteId: number) => {
   const forgeUrl = forgeSiteUrl(server, siteId);
-  if (!forgeUrl) return {};
+  // Without the name, the model reads a withheld field as one Forge does not hold
+  const at = (path: string, verb: string) =>
+    forgeUrl
+      ? `Not returned. The user can ${verb} it at ${forgeUrl}${path}`
+      : `Not returned. The user can ${verb} it in Forge.`;
   return {
-    environment: `Not returned. The user can read or edit it at ${forgeUrl}/environment`,
-    deploymentScript: `Not returned. The user can read or edit it at ${forgeUrl}/settings/deployments`,
-    deploymentUrl: `Not returned. The user can find or change it at ${forgeUrl}/settings/deployments`,
+    environment: at("/environment", "read or edit"),
+    deploymentScript: at("/settings/deployments", "read or edit"),
+    deploymentUrl: at("/settings/deployments", "find or change"),
   };
 };
