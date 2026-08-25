@@ -85,17 +85,17 @@ const ROW_KEYS: Record<Target, string[]> = {
   server: Object.keys(serverRowExtras({} as IServer)),
 };
 
-// The columns both list tools hardcode; a name here is redundant, not unknown
+// The columns the list tools already return; a name here is redundant, not unknown
 const ALWAYS: Record<Target, string[]> = {
-  site: ["id", "name", "server", "url", "status", "deployment_status"],
-  server: ["id", "name", "connection_status", "is_ready"],
+  site: ["id", "name", "server_id", "status", "deployment_status"],
+  server: ["id", "name", "connection_status"],
 };
 
 const GET_TOOL: Record<Target, string> = { site: "get-site", server: "get-server" };
 
 const and = (names: string[]) => names.join(", ");
 
-// One "no such field" for every miss loops the model back to probe-api
+// A blanket "no such field" would send the model back to probe-api for a name it has
 export const askedFor = (target: Target, input?: string, { ensure = [] as string[] } = {}) => {
   const asked = namesAsked(input);
   const { fields, inForgeOnly, onRequest } = forgeFields[target] as Catalog;
@@ -129,9 +129,9 @@ export const askedFor = (target: Target, input?: string, { ensure = [] as string
 
   const notes: string[] = [];
   if (redundant.length) notes.push(`Every row carries ${and(redundant)} already.`);
-  if (gated.length) notes.push(`Forge holds ${and(gated)} back. Ask ${GET_TOOL[target]} for it by name in include.`);
+  if (gated.length) notes.push(`${and(gated)} is withheld unless asked for. Name it in ${GET_TOOL[target]}'s include.`);
   if (linked.length)
-    notes.push(`Forge does not hand over ${and(linked)}. ${GET_TOOL[target]} answers with a Forge link.`);
+    notes.push(`${and(linked)} is never returned by this extension. ${GET_TOOL[target]} answers with a Forge link.`);
   if (unwired.length)
     notes.push(`Forge has ${and(unwired)} but this tool does not return it. Ask ${GET_TOOL[target]}.`);
   if (unknown.length)
@@ -140,7 +140,8 @@ export const askedFor = (target: Target, input?: string, { ensure = [] as string
   return {
     notes,
     requested: asked.length > 0,
-    from: (extras: Record<string, unknown>) => Object.fromEntries(names.map((name) => [name, extras[name]])),
+    // undefined would be dropped by JSON.stringify and read as a field Forge lacks
+    from: (extras: Record<string, unknown>) => Object.fromEntries(names.map((name) => [name, extras[name] ?? null])),
   };
 };
 
@@ -153,7 +154,7 @@ const notice = (available: Record<string, unknown>, picked: Record<string, unkno
   Object.fromEntries(
     Object.keys(available)
       .filter((name) => !(name in picked))
-      .map((name) => [name, `Not returned. Ask for ${name} in include.`]),
+      .map((name) => [name, `Withheld unless asked for. Name ${name} in include.`]),
   );
 
 export const included = (available: Record<string, unknown>, include?: string) => {
@@ -161,14 +162,13 @@ export const included = (available: Record<string, unknown>, include?: string) =
   return { ...notice(available, picked), ...picked, ...(unknown.length ? { unknownInclude: unknown } : {}) };
 };
 
-// Never returned: Forge holds these off the record, or handing one over hands over the site
+// The env file and deploy script hold secrets, and deployment_url deploys with no auth
 export const siteLinks = (server: IServer, siteId: number) => {
   const forgeUrl = forgeSiteUrl(server, siteId);
-  // Without the name, the model reads a withheld field as one Forge does not hold
   const at = (path: string, verb: string, label: string) =>
     forgeUrl
-      ? `Not returned. The user can ${verb} it at [${label}](${forgeUrl}${path}).`
-      : `Not returned. The user can ${verb} it in Forge.`;
+      ? `Not returned by this extension. The user can ${verb} it at [${label}](${forgeUrl}${path}).`
+      : `Not returned by this extension. The user can ${verb} it in Forge.`;
   return {
     environment: at("/environment", "read or edit", "Environment"),
     deploymentScript: at("/settings/deployments", "read or edit", "Deployment settings"),

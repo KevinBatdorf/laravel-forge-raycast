@@ -33,9 +33,10 @@
       "updated_at": "When the site last changed.",
       "environment": "The site's env file. Forge keeps it on a separate endpoint."
     },
-    "listPath": "/sites",
+    "listPath": "/orgs/{organization}/sites",
     "filters": ["name"],
-    "sorts": []
+    "sorts": ["name", "created_at", "updated_at"],
+    "sortPath": "/orgs/{organization}/servers/{server}/sites"
   },
   "server": {
     "schema": "ServerResource",
@@ -72,7 +73,8 @@
     },
     "listPath": "/orgs/{organization}/servers",
     "filters": ["ip_address", "name", "region", "size", "provider", "ubuntu_version", "php_version", "database_type"],
-    "sorts": ["name", "provider", "ubuntu_version", "region", "php_version", "created_at", "updated_at"]
+    "sorts": ["name", "provider", "ubuntu_version", "region", "php_version", "created_at", "updated_at"],
+    "sortPath": "/orgs/{organization}/servers"
   },
   "deployment": {
     "schema": "DeploymentResource",
@@ -90,7 +92,8 @@
     },
     "listPath": "/orgs/{organization}/servers/{server}/sites/{site}/deployments",
     "filters": ["commit_hash", "commit_message", "commit_author"],
-    "sorts": ["created_at"]
+    "sorts": ["created_at"],
+    "sortPath": "/orgs/{organization}/servers/{server}/sites/{site}/deployments"
   },
   "event": {
     "schema": "EventResource",
@@ -105,6 +108,7 @@
     },
     "listPath": "/orgs/{organization}/servers/{server}/events",
     "filters": ["initiated_by", "ran_as"],
-    "sorts": ["created_at", "updated_at"]
+    "sorts": ["created_at", "updated_at"],
+    "sortPath": "/orgs/{organization}/servers/{server}/events"
   }
 }

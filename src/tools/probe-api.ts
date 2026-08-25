@@ -7,6 +7,8 @@ type Input = {
   target: "site" | "server";
 };
 
+const TARGETS = ["site", "server"] as const;
+
 type Target = {
   fields: Record<string, string>;
   inForgeOnly: string[];
@@ -22,11 +24,15 @@ const ASKS: Record<string, string> = {
 };
 
 export default async function tool({ target }: Input) {
+  // An off-enum target would otherwise throw a raw TypeError at the model
+  if (!TARGETS.includes(target)) {
+    throw new Error(`probe-api describes ${TARGETS.join(" or ")}, not "${target}".`);
+  }
   const { fields, inForgeOnly, onRequest, filters, sorts } = forgeFields[target] as Target;
   const describe = (name: string, description: string) => {
     if (inForgeOnly.includes(name))
-      return `${description} You cannot read this. The get tool gives a Forge link instead.`;
-    if (onRequest.includes(name)) return `${description} Ask for it by name in include.`;
+      return `${description} This extension never returns it; the get tool gives a Forge link instead.`;
+    if (onRequest.includes(name)) return `${description} Withheld unless you name it in include.`;
     return description;
   };
 
@@ -39,6 +45,13 @@ export default async function tool({ target }: Input) {
     ...(filters.length
       ? { filterNote: "Forge can filter on these. Pass one to the list tool. Forge does the work." }
       : {}),
-    ...(sorts.length ? { sortNote: "Forge can sort on these. Add a minus to reverse, like -created_at." } : {}),
+    ...(sorts.length
+      ? {
+          sortNote:
+            target === "site"
+              ? "Forge sorts sites only within one server. Pass serverId to list-sites with sort. Add a minus to reverse, like -created_at."
+              : "Forge can sort on these. Add a minus to reverse, like -created_at.",
+        }
+      : {}),
   };
 }

@@ -13,8 +13,11 @@ const spec = await response.json();
 
 let drifted = false;
 
+// Blind-slicing the last character turns filter[tag][] into "tag][" and reports it twice
 const declared = (params, prefix) =>
-  params.filter((name) => name.startsWith(prefix)).map((name) => name.slice(prefix.length, -1));
+  params
+    .filter((name) => name.startsWith(prefix) && name.endsWith("]"))
+    .map((name) => name.slice(prefix.length, -1));
 
 const compare = (label, ours, theirs, fix) => {
   const missing = theirs.filter((name) => !ours.includes(name));
@@ -25,7 +28,7 @@ const compare = (label, ours, theirs, fix) => {
   return !missing.length && !stale.length;
 };
 
-for (const [target, { schema, ours, fields, listPath, filters, sorts }] of Object.entries(forgeFields)) {
+for (const [target, { schema, ours, fields, listPath, sortPath, filters, sorts }] of Object.entries(forgeFields)) {
   if (listPath) {
     const op = spec.paths?.[listPath]?.get;
     if (!op) {
@@ -33,11 +36,19 @@ for (const [target, { schema, ours, fields, listPath, filters, sorts }] of Objec
       drifted = true;
     } else {
       const params = (op.parameters ?? []).map((param) => param.name);
-      const sortable = (op.parameters ?? []).find((param) => param.name === "sort");
-      const enumerated = [...new Set((sortable?.schema?.items?.enum ?? []).map((name) => name.replace(/^-/, "")))];
       if (!compare(`${target} filters`, filters, declared(params, "filter["), "Wire them into the list tool."))
         drifted = true;
-      if (!compare(`${target} sorts`, sorts, enumerated, "Wire them into the list tool.")) drifted = true;
+
+      // Forge sorts sites only under the server-scoped route, not the org one
+      const sortOp = spec.paths?.[sortPath ?? listPath]?.get;
+      if (!sortOp) {
+        console.error(`${target}: ${sortPath ?? listPath} has no GET in the spec. Renamed?`);
+        drifted = true;
+      } else {
+        const sortable = (sortOp.parameters ?? []).find((param) => param.name === "sort");
+        const enumerated = [...new Set((sortable?.schema?.items?.enum ?? []).map((name) => name.replace(/^-/, "")))];
+        if (!compare(`${target} sorts`, sorts, enumerated, "Wire them into the list tool.")) drifted = true;
+      }
     }
   }
 
