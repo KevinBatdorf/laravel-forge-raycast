@@ -39,7 +39,7 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers.\nDeploy failed? Call deployment-status, then deployment-log.\nSite down or erroring? Call site-online, then site-config.\nServer problem? Call server-events.\nPass ids as text: \"2882133\", not 2882133.\nOnly deploy, restart or reboot if the user asks.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields.\nA tool may return a Forge link. Give it to the user as a markdown link. Do not open it yourself.",
+    "instructions": "Deployments belong to sites, not servers.\nDeploy failed? Call deployment-status, then deployment-log.\nSite down or erroring? Call site-online, then site-config.\nServer problem? Call server-events.\nPass ids as text: \"2882133\", not 2882133.\nOnly deploy, restart or reboot if the user asks.\nEnv file or deploy settings? get-site answers with a Forge link. site-config cannot read them.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields.\nA tool may return a Forge link. Give it to the user as a markdown link. Do not open it yourself.",
     "evals": [
       {
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
@@ -313,6 +313,26 @@
             "environment": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
             "deploymentScript": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
             "deploymentUrl": "Not returned. The user can find or change it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "deployment_script": "The commands Forge runs on each deploy. You cannot read this. The get tool gives a Forge link instead.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. You cannot read this. The get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": []
+          },
+          "site-config": {
+            "site": "acme-store.com",
+            "type": "nginx",
+            "content": "server { listen 80; server_name acme-store.com; root /home/forge/acme-store.com/public; }"
           }
         },
         "expected": [
@@ -326,11 +346,6 @@
           },
           {
             "matches": "\\[[^\\]]+\\]\\(https://forge\\.laravel\\.com/\\S*/environment\\)"
-          },
-          {
-            "not": {
-              "callsTool": "probe-api"
-            }
           }
         ]
       },
@@ -364,6 +379,21 @@
             "environment": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
             "deploymentScript": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
             "deploymentUrl": "Not returned. The user can find or change it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "deployment_script": "The commands Forge runs on each deploy. You cannot read this. The get tool gives a Forge link instead.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. You cannot read this. The get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": []
           }
         },
         "expected": [
@@ -377,11 +407,6 @@
           },
           {
             "matches": "\\[[^\\]]+\\]\\(https://forge\\.laravel\\.com/\\S*/settings/deployments\\)"
-          },
-          {
-            "not": {
-              "callsTool": "probe-api"
-            }
           }
         ]
       },
@@ -443,24 +468,14 @@
             "callsTool": "probe-api"
           },
           {
-            "or": [
-              {
-                "callsTool": {
-                  "name": "get-server",
-                  "arguments": {
-                    "include": "local_public_key"
-                  }
-                }
-              },
-              {
-                "callsTool": {
-                  "name": "get-server",
-                  "arguments": {
-                    "include": "localPublicKey"
-                  }
+            "callsTool": {
+              "name": "get-server",
+              "arguments": {
+                "include": {
+                  "matches": "public_?[kK]ey"
                 }
               }
-            ]
+            }
           },
           {
             "includes": "ssh-rsa"
@@ -514,24 +529,14 @@
             "callsTool": "probe-api"
           },
           {
-            "or": [
-              {
-                "callsTool": {
-                  "name": "list-sites",
-                  "arguments": {
-                    "fields": "zero_downtime_deployments"
-                  }
-                }
-              },
-              {
-                "callsTool": {
-                  "name": "list-sites",
-                  "arguments": {
-                    "fields": "zeroDowntimeDeployments"
-                  }
+            "callsTool": {
+              "name": "list-sites",
+              "arguments": {
+                "fields": {
+                  "matches": "[dD]owntime"
                 }
               }
-            ]
+            }
           },
           {
             "includes": "acme-store.com"
