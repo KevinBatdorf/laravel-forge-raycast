@@ -93,10 +93,10 @@
             },
             "quickDeploy": true,
             "deploymentStatus": "finished",
-            "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
-            "environment": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
-            "deploymentScript": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
-            "deploymentUrl": "Not returned. The user can find or change it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-org/web-1/5001)",
+            "environment": "Not returned. The user can read or edit it at [Environment](https://forge.laravel.com/acme-org/web-1/5001/environment).",
+            "deploymentScript": "Not returned. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-org/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-org/web-1/5001/settings/deployments)."
           },
           "probe-api": {
             "target": "site",
@@ -153,7 +153,7 @@
             "sites": [
               "shop.example.test"
             ],
-            "forgeUrl": "https://forge.laravel.com/acme-org/web-2"
+            "forgeUrl": "[web-2 on Forge](https://forge.laravel.com/acme-org/web-2)"
           },
           "probe-api": {
             "target": "server",
@@ -309,10 +309,10 @@
             "status": "installed",
             "phpVersion": "PHP 8.3",
             "zeroDowntimeDeployments": false,
-            "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
-            "environment": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
-            "deploymentScript": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
-            "deploymentUrl": "Not returned. The user can find or change it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-org/web-1/5001)",
+            "environment": "Not returned. The user can read or edit it at [Environment](https://forge.laravel.com/acme-org/web-1/5001/environment).",
+            "deploymentScript": "Not returned. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-org/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-org/web-1/5001/settings/deployments)."
           },
           "probe-api": {
             "target": "site",
@@ -375,10 +375,10 @@
             "status": "installed",
             "phpVersion": "PHP 8.3",
             "zeroDowntimeDeployments": false,
-            "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
-            "environment": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
-            "deploymentScript": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
-            "deploymentUrl": "Not returned. The user can find or change it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-org/web-1/5001)",
+            "environment": "Not returned. The user can read or edit it at [Environment](https://forge.laravel.com/acme-org/web-1/5001/environment).",
+            "deploymentScript": "Not returned. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-org/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-org/web-1/5001/settings/deployments)."
           },
           "probe-api": {
             "target": "site",
@@ -436,7 +436,7 @@
             "ubuntuVersion": "22.04",
             "connectionStatus": "successful",
             "isReady": true,
-            "forgeUrl": "https://forge.laravel.com/acme-org/web-2",
+            "forgeUrl": "[web-2 on Forge](https://forge.laravel.com/acme-org/web-2)",
             "localPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADforge",
             "sites": [
               "shop.example.test"

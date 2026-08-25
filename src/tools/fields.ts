@@ -165,13 +165,13 @@ export const included = (available: Record<string, unknown>, include?: string) =
 export const siteLinks = (server: IServer, siteId: number) => {
   const forgeUrl = forgeSiteUrl(server, siteId);
   // Without the name, the model reads a withheld field as one Forge does not hold
-  const at = (path: string, verb: string) =>
+  const at = (path: string, verb: string, label: string) =>
     forgeUrl
-      ? `Not returned. The user can ${verb} it at ${forgeUrl}${path}`
+      ? `Not returned. The user can ${verb} it at [${label}](${forgeUrl}${path}).`
       : `Not returned. The user can ${verb} it in Forge.`;
   return {
-    environment: at("/environment", "read or edit"),
-    deploymentScript: at("/settings/deployments", "read or edit"),
-    deploymentUrl: at("/settings/deployments", "find or change"),
+    environment: at("/environment", "read or edit", "Environment"),
+    deploymentScript: at("/settings/deployments", "read or edit", "Deployment settings"),
+    deploymentUrl: at("/settings/deployments", "find or change", "Deployment settings"),
   };
 };

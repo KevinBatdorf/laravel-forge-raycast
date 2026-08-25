@@ -1,4 +1,4 @@
-import { forgeSiteUrl } from "../lib/url";
+import { forgeLink, forgeSiteUrl } from "../lib/url";
 import { siteLinks } from "./fields";
 import { findSite, siteDeploymentStatus } from "./helpers";
 
@@ -39,7 +39,7 @@ export default async function tool({ site }: Input) {
     healthcheckUrl: found.healthcheck_url,
     createdAt: found.created_at,
     updatedAt: found.updated_at,
-    forgeUrl: forgeSiteUrl(server, found.id),
+    forgeUrl: forgeLink(forgeSiteUrl(server, found.id), `${found.name} on Forge`),
     ...siteLinks(server, found.id),
     latestDeployment: deployment && {
       id: deployment.id,

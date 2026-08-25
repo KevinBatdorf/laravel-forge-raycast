@@ -1,4 +1,4 @@
-import { forgeServerUrl } from "../lib/url";
+import { forgeLink, forgeServerUrl } from "../lib/url";
 import { included, serverIncludable } from "./fields";
 import { findServer, sitesOnServer } from "./helpers";
 
@@ -41,7 +41,7 @@ export default async function tool({ server, include }: Input) {
     revoked: found.revoked,
     createdAt: found.created_at,
     updatedAt: found.updated_at,
-    forgeUrl: forgeServerUrl(found),
+    forgeUrl: forgeLink(forgeServerUrl(found), `${found.name} on Forge`),
     ...included(serverIncludable(found), include),
     sites,
   };
