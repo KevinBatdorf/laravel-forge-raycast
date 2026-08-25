@@ -105,17 +105,17 @@ export const serverPage = async (options: {
   );
   const { stream, items, next } = await onePage(streams, options.page, ({ slug }) => `orgs/${slug}/servers${search}`);
 
-  const servers = items
-    .map(
-      (item) =>
-        ({
-          ...flatten<IServer>(item),
-          org_slug: stream?.slug,
-          api_token_key: stream?.tokenKey,
-          ssh_user: stream?.sshUser,
-        }) as IServer,
-    )
-    .filter((server) => options.includeRevoked || !server.revoked);
+  const all = items.map(
+    (item) =>
+      ({
+        ...flatten<IServer>(item),
+        org_slug: stream?.slug,
+        api_token_key: stream?.tokenKey,
+        ssh_user: stream?.sshUser,
+      }) as IServer,
+  );
 
-  return { servers, next };
+  const servers = all.filter((server) => options.includeRevoked || !server.revoked);
+
+  return { servers, next, hidden: all.length - servers.length };
 };

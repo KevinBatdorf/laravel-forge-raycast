@@ -73,7 +73,7 @@ type Input = {
 };
 
 export default async function tool({ fields, page, sort, limit, includeRevoked, ...filters }: Input) {
-  const { servers, next } = await serverPage({
+  const { servers, next, hidden } = await serverPage({
     page,
     sort,
     limit,
@@ -106,6 +106,7 @@ export default async function tool({ fields, page, sort, limit, includeRevoked, 
   });
 
   const notes = [`This is one page: ${rows.length} servers. Forge does not say how many there are in total.`];
+  if (hidden) notes.push(`${hidden} more are revoked and not shown. Pass includeRevoked to see them.`);
   if (next) notes.push("Pass page to get the next page.");
   if (!asked.length) notes.push(TRUNCATED);
   if (unknown.size)
