@@ -95,6 +95,7 @@ export const serverPage = async (options: {
   sort?: string;
   page?: string;
   limit?: number;
+  includeRevoked?: boolean;
 }) => {
   const streams = await serverStreams();
   const search = query(
@@ -114,7 +115,7 @@ export const serverPage = async (options: {
           ssh_user: stream?.sshUser,
         }) as IServer,
     )
-    .filter((server) => !server.revoked);
+    .filter((server) => options.includeRevoked || !server.revoked);
 
   return { servers, next };
 };

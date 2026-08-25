@@ -66,13 +66,18 @@ type Input = {
    * How many servers to return. Up to 30. Defaults to 15.
    */
   limit?: number;
+  /**
+   * Set true to also return servers Forge has been disconnected from. Defaults to false.
+   */
+  includeRevoked?: boolean;
 };
 
-export default async function tool({ fields, page, sort, limit, ...filters }: Input) {
+export default async function tool({ fields, page, sort, limit, includeRevoked, ...filters }: Input) {
   const { servers, next } = await serverPage({
     page,
     sort,
     limit,
+    includeRevoked,
     filters: {
       name: filters.name,
       region: filters.region,
@@ -95,6 +100,7 @@ export default async function tool({ fields, page, sort, limit, ...filters }: In
       name: server.name,
       connectionStatus: server.connection_status,
       isReady: server.is_ready,
+      ...(includeRevoked ? { revoked: server.revoked } : {}),
       ...extra.picked,
     };
   });
