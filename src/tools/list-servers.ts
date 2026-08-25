@@ -62,12 +62,17 @@ type Input = {
    * The page value from a previous call, to read the next page. Leave empty for the first.
    */
   page?: string;
+  /**
+   * How many servers to return. Up to 30. Defaults to 15.
+   */
+  limit?: number;
 };
 
-export default async function tool({ fields, page, sort, ...filters }: Input) {
+export default async function tool({ fields, page, sort, limit, ...filters }: Input) {
   const { servers, next } = await serverPage({
     page,
     sort,
+    limit,
     filters: {
       name: filters.name,
       region: filters.region,

@@ -22,12 +22,16 @@ type Input = {
    * The page value from a previous call, to read the next page. Leave empty for the first.
    */
   page?: string;
+  /**
+   * How many sites to return. Up to 30. Defaults to 15.
+   */
+  limit?: number;
 };
 
-export default async function tool({ site, server, fields, page }: Input) {
+export default async function tool({ site, server, fields, page, limit }: Input) {
   const owner = server ? await findServer(server) : undefined;
   const serverPath = owner && `orgs/${owner.server.org_slug}/servers/${owner.server.id}`;
-  const { sites, next } = await sitePage({ name: site, page, serverPath });
+  const { sites, next } = await sitePage({ name: site, page, serverPath, limit });
 
   const asked = namesAsked(fields);
   const unknown = new Set<string>();

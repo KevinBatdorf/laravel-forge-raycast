@@ -3,6 +3,11 @@ import { flatten, getCollection, relatedResource } from "../lib/forge";
 import { IDeployment, IServer, ISite } from "../types";
 import { accounts, orgSlugs } from "./helpers";
 
+const PER_PAGE = 15;
+
+// Forge honours a smaller page[size] but caps it at 30
+const perPage = (limit?: number) => Math.min(30, Math.max(1, Math.trunc(limit ?? PER_PAGE)));
+
 type Stream = { token: string; tokenKey: string; sshUser: string; slug: string };
 
 // A Forge cursor belongs to one stream, and an account with several orgs has several
@@ -46,17 +51,17 @@ const onePage = async (streams: Stream[], page: string | undefined, path: (strea
   return { stream: at, items: fetched.items, included: fetched.included, next };
 };
 
-const query = (filters: Record<string, string | undefined>, extra: string[] = []) => {
-  const parts = [...extra];
+const query = (filters: Record<string, string | undefined>, extra: string[] = [], limit?: number) => {
+  const parts = [...extra, `page[size]=${perPage(limit)}`];
   for (const [name, value] of Object.entries(filters)) {
     if (value?.trim()) parts.push(`filter[${name}]=${encodeURIComponent(value.trim())}`);
   }
   return parts.length ? `?${parts.join("&")}` : "";
 };
 
-export const sitePage = async (options: { name?: string; page?: string; serverPath?: string }) => {
+export const sitePage = async (options: { name?: string; page?: string; serverPath?: string; limit?: number }) => {
   const streams = await siteStreams();
-  const search = query({ name: options.name }, ["include=server,latestDeployment"]);
+  const search = query({ name: options.name }, ["include=server,latestDeployment"], options.limit);
   const { stream, items, included, next } = await onePage(streams, options.page, () =>
     options.serverPath ? `${options.serverPath}/sites${search}` : `sites${search}`,
   );
@@ -89,11 +94,13 @@ export const serverPage = async (options: {
   filters: Record<string, string | undefined>;
   sort?: string;
   page?: string;
+  limit?: number;
 }) => {
   const streams = await serverStreams();
   const search = query(
     options.filters,
     options.sort?.trim() ? [`sort=${encodeURIComponent(options.sort.trim())}`] : [],
+    options.limit,
   );
   const { stream, items, next } = await onePage(streams, options.page, ({ slug }) => `orgs/${slug}/servers${search}`);
 
