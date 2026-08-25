@@ -1,5 +1,10 @@
 import { forgeSiteUrl } from "../lib/url";
 import { IServer, ISite } from "../types";
+import forgeFields from "./forge-fields.json";
+
+export type Target = "site" | "server";
+
+type Catalog = { fields: Record<string, string>; inForgeOnly: string[]; onRequest: string[] };
 
 // probe-api reports Forge's own snake_case, so a name is matched however it is spelled
 const key = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -13,13 +18,15 @@ export const namesAsked = (input?: string) =>
 // Forge's own name for a field a row labels differently
 const ALIASES: Record<string, string> = { identifier: "providerId" };
 
+const resolve = (byKey: Map<string, string>, name: string) =>
+  byKey.get(key(name)) ?? byKey.get(key(ALIASES[key(name)] ?? ""));
+
 export const pick = (available: Record<string, unknown>, asked: string[]) => {
   const byKey = new Map(Object.keys(available).map((name) => [key(name), name]));
   const picked: Record<string, unknown> = {};
   const unknown: string[] = [];
   for (const name of asked) {
-    const asked_ = key(name);
-    const match = byKey.get(asked_) ?? byKey.get(key(ALIASES[asked_] ?? ""));
+    const match = resolve(byKey, name);
     if (match) picked[match] = available[match];
     else unknown.push(name);
   }
@@ -72,12 +79,70 @@ export const serverRowExtras = (server: IServer) => ({
   updatedAt: server.updated_at,
 });
 
+// An empty page has no row to read the key names off
+const ROW_KEYS: Record<Target, string[]> = {
+  site: Object.keys(siteRowExtras({} as ISite)),
+  server: Object.keys(serverRowExtras({} as IServer)),
+};
+
+// The columns both list tools hardcode; a name here is redundant, not unknown
+const ALWAYS: Record<Target, string[]> = {
+  site: ["id", "name", "server", "url", "status", "deployment_status"],
+  server: ["id", "name", "connection_status", "is_ready"],
+};
+
+const GET_TOOL: Record<Target, string> = { site: "get-site", server: "get-server" };
+
+const and = (names: string[]) => names.join(", ");
+
+// One "no such field" for every miss loops the model back to probe-api
+export const askedFor = (target: Target, input?: string) => {
+  const asked = namesAsked(input);
+  const { fields, inForgeOnly, onRequest } = forgeFields[target] as Catalog;
+  const rows = new Map(ROW_KEYS[target].map((name) => [key(name), name]));
+  const always = new Set(ALWAYS[target].map(key));
+  const held = new Set(Object.keys(fields).map(key));
+  const linkOnly = new Set(inForgeOnly.map(key));
+  const includeOnly = new Set(onRequest.map(key));
+
+  const names: string[] = [];
+  const redundant: string[] = [];
+  const linked: string[] = [];
+  const gated: string[] = [];
+  const unwired: string[] = [];
+  const unknown: string[] = [];
+
+  for (const name of asked) {
+    const match = resolve(rows, name);
+    if (match) names.push(match);
+    else if (always.has(key(name))) redundant.push(name);
+    else if (includeOnly.has(key(name))) gated.push(name);
+    else if (linkOnly.has(key(name))) linked.push(name);
+    else if (held.has(key(name))) unwired.push(name);
+    else unknown.push(name);
+  }
+
+  const notes: string[] = [];
+  if (redundant.length) notes.push(`Every row carries ${and(redundant)} already.`);
+  if (gated.length) notes.push(`Forge holds ${and(gated)} back. Ask ${GET_TOOL[target]} for it by name in include.`);
+  if (linked.length)
+    notes.push(`Forge does not hand over ${and(linked)}. ${GET_TOOL[target]} answers with a Forge link.`);
+  if (unwired.length)
+    notes.push(`Forge has ${and(unwired)} but this tool does not return it. Ask ${GET_TOOL[target]}.`);
+  if (unknown.length)
+    notes.push(`There is no ${target} field called ${and(unknown)}. Call probe-api for the real names.`);
+
+  return {
+    notes,
+    requested: asked.length > 0,
+    from: (extras: Record<string, unknown>) => Object.fromEntries(names.map((name) => [name, extras[name]])),
+  };
+};
+
 export const serverIncludable = (server: IServer) => ({
   credentialId: server.credential_id,
   localPublicKey: server.local_public_key,
 });
-
-export const siteIncludable = () => ({});
 
 const notice = (available: Record<string, unknown>, picked: Record<string, unknown>) =>
   Object.fromEntries(

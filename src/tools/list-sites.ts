@@ -1,5 +1,5 @@
 import { sitePage } from "./browse";
-import { namesAsked, pick, siteRowExtras } from "./fields";
+import { askedFor, siteRowExtras } from "./fields";
 import { findServer, siteDeploymentStatus } from "./helpers";
 
 const TRUNCATED = "Rows are short. Call probe-api to see all field names. Then pass the ones you want in fields.";
@@ -33,28 +33,22 @@ export default async function tool({ site, server, fields, page, limit }: Input)
   const serverPath = owner && `orgs/${owner.server.org_slug}/servers/${owner.server.id}`;
   const { sites, next } = await sitePage({ name: site, page, serverPath, limit });
 
-  const asked = namesAsked(fields);
-  const unknown = new Set<string>();
-  const rows = sites.map(({ site: found, server: host }) => {
-    const extra = pick(siteRowExtras(found), asked);
-    extra.unknown.forEach((name) => unknown.add(name));
-    return {
-      id: found.id,
-      name: found.name,
-      server: host.name,
-      url: found.url,
-      status: found.status,
-      deploymentStatus: siteDeploymentStatus(found),
-      ...extra.picked,
-    };
-  });
+  const asked = askedFor("site", fields);
+  const rows = sites.map(({ site: found, server: host }) => ({
+    id: found.id,
+    name: found.name,
+    server: host.name,
+    url: found.url,
+    status: found.status,
+    deploymentStatus: siteDeploymentStatus(found),
+    ...asked.from(siteRowExtras(found)),
+  }));
 
   const notes = [`This is one page: ${rows.length} sites. Forge does not say how many there are in total.`];
   if (next) notes.push("Pass page to get the next page.");
   if (site && !rows.length) notes.push(`No site name contains "${site}". Forge cannot match an alias.`);
-  if (!asked.length) notes.push(TRUNCATED);
-  if (unknown.size)
-    notes.push(`There is no site field called ${[...unknown].join(", ")}. Call probe-api for the real names.`);
+  if (!asked.requested) notes.push(TRUNCATED);
+  notes.push(...asked.notes);
 
   return { note: notes.join(" "), ...(next ? { page: next } : {}), sites: rows };
 }

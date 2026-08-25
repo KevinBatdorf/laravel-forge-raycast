@@ -1,5 +1,5 @@
 import { serverPage } from "./browse";
-import { namesAsked, pick, serverRowExtras } from "./fields";
+import { askedFor, serverRowExtras } from "./fields";
 
 const TRUNCATED = "Rows are short. Call probe-api to see all field names. Then pass the ones you want in fields.";
 
@@ -90,27 +90,21 @@ export default async function tool({ fields, page, sort, limit, includeRevoked, 
     },
   });
 
-  const asked = namesAsked(fields);
-  const unknown = new Set<string>();
-  const rows = servers.map((server) => {
-    const extra = pick(serverRowExtras(server), asked);
-    extra.unknown.forEach((name) => unknown.add(name));
-    return {
-      id: server.id,
-      name: server.name,
-      connectionStatus: server.connection_status,
-      isReady: server.is_ready,
-      ...(includeRevoked ? { revoked: server.revoked } : {}),
-      ...extra.picked,
-    };
-  });
+  const asked = askedFor("server", fields);
+  const rows = servers.map((server) => ({
+    id: server.id,
+    name: server.name,
+    connectionStatus: server.connection_status,
+    isReady: server.is_ready,
+    ...(includeRevoked ? { revoked: server.revoked } : {}),
+    ...asked.from(serverRowExtras(server)),
+  }));
 
   const notes = [`This is one page: ${rows.length} servers. Forge does not say how many there are in total.`];
   if (hidden) notes.push(`${hidden} more are revoked and not shown. Pass includeRevoked to see them.`);
   if (next) notes.push("Pass page to get the next page.");
-  if (!asked.length) notes.push(TRUNCATED);
-  if (unknown.size)
-    notes.push(`There is no server field called ${[...unknown].join(", ")}. Call probe-api for the real names.`);
+  if (!asked.requested) notes.push(TRUNCATED);
+  notes.push(...asked.notes);
 
   return { note: notes.join(" "), ...(next ? { page: next } : {}), servers: rows };
 }

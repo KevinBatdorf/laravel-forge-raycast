@@ -16,7 +16,7 @@ type Target = {
 };
 
 const ASKS: Record<string, string> = {
-  site: "These are field names, not values. Pass the ones you want to list-sites in fields, or to get-site in include.",
+  site: "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
   server:
     "These are field names, not values. Pass the ones you want to list-servers in fields, or to get-server in include.",
 };
