@@ -2,6 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { sortBy } from "lodash";
 import { deploymentStatus } from "../api/Site";
 import { unwrapToken } from "../lib/auth";
+import { cachedOwner, forgetOwner, rememberOwner } from "../lib/org-cache";
 import { ForgeResource, flatten, getCollection, probeResource, relatedResource } from "../lib/forge";
 import { IDeployment, IServer, ISite } from "../types";
 
@@ -49,18 +50,27 @@ const eachOrg = async <T>(probe: (slug: string, token: string, account: Account)
   return perAccount.flat();
 };
 
+const serverFrom = (item: ForgeResource, slug: string, { token, tokenKey, sshUser }: Account): ServerMatch => ({
+  server: { ...flatten<IServer>(item), org_slug: slug, api_token_key: tokenKey, ssh_user: sshUser },
+  token,
+});
+
 // Forge filters match names, never ids, so an id is fetched from each org directly
-const serverById = (id: string): Promise<ServerMatch[]> =>
-  eachOrg(async (slug, token, { tokenKey, sshUser }) => {
+const serverById = async (id: string): Promise<ServerMatch[]> => {
+  const known = await cachedOwner("server", id);
+  if (known) {
+    const account = accounts().find(({ tokenKey }) => tokenKey === known.tokenKey);
+    const body = account && (await probeResource(`orgs/${known.slug}/servers/${id}`, account.token));
+    if (account && body?.data) return [serverFrom(body.data, known.slug, account)];
+    await forgetOwner("server", id);
+  }
+  return eachOrg(async (slug, token, account) => {
     const body = await probeResource(`orgs/${slug}/servers/${id}`, token);
     if (!body?.data) return [];
-    return [
-      {
-        server: { ...flatten<IServer>(body.data), org_slug: slug, api_token_key: tokenKey, ssh_user: sshUser },
-        token,
-      },
-    ];
+    await rememberOwner("server", id, { slug, tokenKey: account.tokenKey });
+    return [serverFrom(body.data, slug, account)];
   });
+};
 
 const serverMatches = async (query: string): Promise<ServerMatch[]> => {
   const slugs = await orgSlugs();
@@ -204,7 +214,12 @@ export const findServer = async (query: string) => {
     throw partial.length ? notExact("server", query, partial.map(label)) : noMatch("server", query, servers.map(label));
   }
   if (exact.length > 1) throw ambiguous("server", query, exact.map(label));
-  return exact[0];
+  const found = exact[0];
+  await rememberOwner("server", found.server.id, {
+    slug: found.server.org_slug,
+    tokenKey: found.server.api_token_key,
+  });
+  return found;
 };
 
 export const findSite = async (query: string) => {
@@ -224,7 +239,12 @@ export const findSite = async (query: string) => {
     throw partial.length ? notExact("site", query, partial.map(label)) : noMatch("site", query, sites.map(label));
   }
   if (exact.length > 1) throw ambiguous("site", query, exact.map(label));
-  return exact[0];
+  const found = exact[0];
+  await rememberOwner("site", found.site.id, {
+    slug: found.server.org_slug,
+    tokenKey: found.server.api_token_key,
+  });
+  return found;
 };
 
 export const targetServer = async ({ server, site }: { server?: string; site?: string }): Promise<ServerMatch> => {
