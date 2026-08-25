@@ -1,5 +1,6 @@
 import { FORGE_API_URL } from "../config";
 import { apiFetch, apiFetchText } from "./api";
+import { politeFetch } from "./limit";
 
 type ForgeIdentifier = { id: string; type: string };
 
@@ -46,7 +47,7 @@ export const getCollection = async (path: string, token: string, { pages = PAGE_
 // Probing each org for an id: most orgs answer 404, and that is data, not an error
 export const probeResource = async (path: string, token: string) => {
   try {
-    const res = await fetch(`${FORGE_API_URL}/${path}`, { method: "get", headers: headers(token) });
+    const res = await politeFetch(`${FORGE_API_URL}/${path}`, { method: "get", headers: headers(token) });
     if (!res.ok) return undefined;
     return (await res.json()) as { data?: ForgeResource; included?: ForgeResource[] };
   } catch {
