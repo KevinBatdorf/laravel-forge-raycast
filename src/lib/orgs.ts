@@ -2,8 +2,7 @@ import { getCollection } from "./forge";
 import { Account, accounts } from "./accounts";
 import { knownOrgs, rememberOrgs } from "./index-cache";
 
-// An org list only ever grows, and a new one is undetectable — nothing 404s.
-// So it is cached without expiry and refreshed when a lookup finds nothing.
+// Nothing 404s for an org that did not exist yet, so it is refreshed, not expired
 const fetchOrgs = async ({ tokenKey, token }: Account) => {
   const { items } = await getCollection("orgs", token);
   const slugs = items.map((org) => String(org.attributes?.slug ?? "")).filter(Boolean);
@@ -17,7 +16,6 @@ export const refreshOrgs = (account: Account) => fetchOrgs(account);
 
 export type OrgRef = { account: Account; org: string };
 
-// Every listing walks these: one entry per org of every configured account
 export const everyOrg = async (): Promise<OrgRef[]> => {
   const perAccount = await Promise.all(
     accounts().map(async (account) => (await orgsFor(account)).map((org) => ({ account, org }))),

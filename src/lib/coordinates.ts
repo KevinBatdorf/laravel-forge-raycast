@@ -6,8 +6,7 @@ export type Located = { account: Account; org: string; serverId?: number };
 const listFirst = (kind: "site" | "server", id: number | string) =>
   new Error(`No cached ${kind} ${id}. Call list-${kind}s first and use an id it returns; ids are not searched for.`);
 
-// Every id the model passes was handed to it by a list or get tool, so its
-// coordinates are already stored. A miss is a stale id, not a cue to search.
+// Ids only come from a list or get tool, so a miss is stale, not a cue to search
 export const locate = async (kind: "site" | "server", id: number | string): Promise<Located> => {
   const where = await lookup(kind, id);
   if (!where) throw listFirst(kind, id);

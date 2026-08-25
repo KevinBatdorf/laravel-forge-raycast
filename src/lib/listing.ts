@@ -11,8 +11,6 @@ export type Cursors = Record<string, string>;
 
 export const cursorKey = ({ account, org }: OrgRef) => `${account.tokenKey}/${org}`;
 
-// The org half of a key lands in the request path, so only a slug we already
-// fetched is ever used. Anything else is dropped rather than trusted.
 export const usableCursors = async (cursors?: Cursors): Promise<Cursors | undefined> => {
   if (!cursors || typeof cursors !== "object") return undefined;
   const entries = await Promise.all(
@@ -38,7 +36,6 @@ export const queryString = (filters: Record<string, string | undefined>, extra: 
 
 export type Page = { rows: Array<{ ref: OrgRef; item: ForgeResource; included: ForgeResource[] }>; next?: Cursors };
 
-// A first call reads every org. A follow-up reads only the orgs that had more.
 export const walkOrgs = async (
   path: (ref: OrgRef) => string,
   search: string,

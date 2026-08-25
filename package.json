@@ -39,7 +39,7 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nOne site's common fields: get-site. One server's common fields and its sites: get-server. To find or list sites: list-sites.\nOnly deploy, restart or reboot when asked. Quick deploy off means Forge will not deploy on push by itself.\nLook a site or server up first and pass the id it returns, as a string: \"2882133\", never 2882133. Given a partial name, search for it with list-sites rather than asking the user which site they mean.\nIf the user asks for something you do not see in these tools or their fields, you must use probe-api to find it. Given a target and an id it lists the fields Forge holds for that site or server and what each one is, values left out; probe again with fields set to the ones you need to read their values. A field the extension does not describe yet is still real, so read it rather than dismissing it. Never tell the user Forge does not have something until you have probed for it. Hand over any link it returns as a markdown link, and follow its handling notes.",
+    "instructions": "Every site and server tool takes an id. Get ids from list-sites or list-servers first — nothing searches by name.\nDeployments belong to sites, not servers.\nDeploy failed? deployment-status, then deployment-log.\nSite down or erroring? site-online, then site-config.\nServer problem? server-events.\nOnly deploy, restart or reboot if the user asks.\nEnv file or deploy settings? get-site answers with a Forge link. site-config cannot read them.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields.\nPass a cursor object back exactly as it was given to get the next page.\nAlways write a URL as a markdown link: [Deployment settings](url), never a bare URL. Do not open links yourself.",
     "evals": [
       {
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
@@ -483,77 +483,77 @@
     {
       "name": "list-orgs",
       "title": "List Organizations",
-      "description": "List the Forge organizations your tokens can reach."
+      "description": "List the Forge organizations your tokens can reach. The other tools use these on their own."
     },
     {
       "name": "list-servers",
       "title": "List Servers",
-      "description": "List your Forge servers."
+      "description": "List or filter your Forge servers and get their ids. Start here for anything about a server."
     },
     {
       "name": "list-sites",
       "title": "List Sites",
-      "description": "Search your Forge sites by part of a name, or list them all, or list one server's."
+      "description": "List or search your Forge sites and get their ids. Start here for anything about a site."
     },
     {
       "name": "get-site",
       "title": "Get a Site",
-      "description": "One site's common fields: status, PHP version, repository, deploy settings and its latest deployment."
+      "description": "Everything Forge knows about one site. Takes a site id from list-sites."
     },
     {
       "name": "get-server",
       "title": "Get a Server",
-      "description": "One server's common fields — provider, region, PHP, database, connection status — and the sites on it."
+      "description": "Everything Forge knows about one server, and the sites on it. Takes a server id from list-servers."
     },
     {
       "name": "deployment-status",
       "title": "Check Deployment Status",
-      "description": "Which sites are deploying now and which have a failed deploy."
+      "description": "Which sites are deploying or have failed, across every organization."
     },
     {
       "name": "deployment-history",
       "title": "Get Deployment History",
-      "description": "Recent deployments of a site, with status, commit and timings."
+      "description": "Recent deploys for one site. Takes a site id."
     },
     {
       "name": "deployment-log",
       "title": "Read Deployment Log",
-      "description": "Output of a site's latest deploy, or of one deploy by id."
+      "description": "The output of one deploy. Takes a site id."
     },
     {
       "name": "server-events",
       "title": "Get Server Events",
-      "description": "Recent events on a server, or the output of one event."
+      "description": "Recent Forge events for one server, and their output. Takes a server id."
     },
     {
       "name": "site-online",
       "title": "Check If a Site Is Online",
-      "description": "Whether a site answers over HTTP."
+      "description": "Check whether one site answers over HTTP. Takes a site id."
     },
     {
       "name": "site-config",
       "title": "Read Site Config or Logs",
-      "description": "Read a site's nginx config, application log, nginx error log or access log."
+      "description": "Read a site nginx config or log file. Takes a site id."
     },
     {
       "name": "deploy-site",
       "title": "Deploy a Site",
-      "description": "Deploy a site's latest commit. Pass the id from list-sites."
+      "description": "Deploy one site now. Takes a site id."
     },
     {
       "name": "restart-service",
       "title": "Restart a Service",
-      "description": "Restart, reload or stop php, nginx, the database or redis on a server. Pass the id from list-servers."
+      "description": "Restart, stop or reload a service on one server. Takes a server id."
     },
     {
       "name": "reboot-server",
       "title": "Reboot a Server",
-      "description": "Reboot a server. Every site on it goes down until it returns. Pass the id from list-servers."
+      "description": "Reboot one server. Takes a server id."
     },
     {
       "name": "probe-api",
       "title": "Probe the Forge API",
-      "description": "List the fields Forge holds for one site or server, then read the values you need. Use this whenever you do not already see what the user asked for."
+      "description": "List every field name a site or server has, and what Forge can filter and sort on."
     }
   ],
   "preferences": [

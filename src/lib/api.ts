@@ -1,12 +1,13 @@
 import { LaunchType, LocalStorage, Toast, captureException, environment, popToRoot, showToast } from "@raycast/api";
 import { clearCache } from "./cache";
+import { politeFetch } from "./limit";
 
 const doTheFetch = async (url: string, options?: RequestInit) => {
   // A tool's thrown message already reaches the model; a toast on top is noise
   const silent = environment.launchType === LaunchType.Background || environment.entryPointType === "tool";
   let res;
   try {
-    res = await fetch(url, options);
+    res = await politeFetch(url, options);
   } catch (e) {
     if (e instanceof Error) {
       console.error({ error: e, url });

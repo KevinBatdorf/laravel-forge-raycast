@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 
-// One blob, not a key per record: a fleet of thousands stays one read and one write
+// One blob, not a key per record: a fleet of thousands stays one read
 const KEY = "forge:index";
 
 export type Coordinates = { tokenKey: string; org: string; serverId?: number };

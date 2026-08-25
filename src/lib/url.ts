@@ -27,3 +27,6 @@ export const forgeSiteUrl = (server: IServer, siteId: number) => {
   const base = forgeServerUrl(server);
   return base ? `${base}/${siteId}` : undefined;
 };
+
+// Tool payloads carry links pre-formatted; the model copies them more reliably than it formats
+export const forgeLink = (url: string | undefined, label: string) => url && `[${label}](${url})`;
