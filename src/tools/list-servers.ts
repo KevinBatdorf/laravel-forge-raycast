@@ -59,7 +59,8 @@ type Input = {
    */
   fields?: string;
   /**
-   * The page value from a previous call, to read the next page. Leave empty for the first.
+   * The page value from a previous call. It carries that call's filters, sort and limit.
+   * Leave empty for the first page.
    */
   page?: string;
   /**

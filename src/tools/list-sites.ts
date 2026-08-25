@@ -19,7 +19,8 @@ type Input = {
    */
   fields?: string;
   /**
-   * The page value from a previous call, to read the next page. Leave empty for the first.
+   * The page value from a previous call. It carries that call's filters and limit. Leave
+   * empty for the first page.
    */
   page?: string;
   /**
@@ -30,8 +31,7 @@ type Input = {
 
 export default async function tool({ site, server, fields, page, limit }: Input) {
   const owner = server ? await findServer(server) : undefined;
-  const serverPath = owner && `orgs/${owner.server.org_slug}/servers/${owner.server.id}`;
-  const { sites, next } = await sitePage({ name: site, page, serverPath, limit });
+  const { sites, next } = await sitePage({ name: site, page, owner, limit });
 
   const asked = askedFor("site", fields);
   const rows = sites.map(({ site: found, server: host }) => ({
