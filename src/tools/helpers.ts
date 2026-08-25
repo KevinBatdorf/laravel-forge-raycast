@@ -159,7 +159,7 @@ export const searchSites = async (query: string): Promise<SiteMatch[]> => {
           api_token_key: tokenKey,
           ssh_user: sshUser,
         };
-        // A name only finds live sites; an id still reaches one on a revoked server
+        // A revoked server's sites are never findable, same as the server itself
         if (server.revoked) return [];
         return [siteMatch(item, included, server, token)];
       });
