@@ -14,7 +14,7 @@ const dropOnMiss = async <T>(kind: "site" | "server", id: number | string, read:
   } catch (error) {
     if (!isMissing(error)) throw error;
     await forget(kind, id);
-    throw new Error(`Forge no longer has ${kind} ${id}. Call list-${kind}s for the current ids.`);
+    throw new Error(`Forge no longer has ${kind} ${id}. Call list-${kind}s now for the current ids.`);
   }
 };
 

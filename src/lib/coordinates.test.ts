@@ -19,16 +19,16 @@ describe("locate", () => {
   });
 
   it("tells the model to list first rather than searching for an unknown id", async () => {
-    await expect(locate("server", 9001)).rejects.toThrow(/Call list-servers first/);
+    await expect(locate("server", 9001)).rejects.toThrow(/Call list-servers now/);
   });
 
   it("names the right list tool for a site", async () => {
-    await expect(locate("site", 5001)).rejects.toThrow(/Call list-sites first/);
+    await expect(locate("site", 5001)).rejects.toThrow(/Call list-sites now/);
   });
 
   it("drops an entry whose token has since been removed from preferences", async () => {
     await remember("server", 9001, { tokenKey: "laravel_forge_api_token_two", org: "other-co" });
-    await expect(locate("server", 9001)).rejects.toThrow(/Call list-servers first/);
+    await expect(locate("server", 9001)).rejects.toThrow(/Call list-servers now/);
     expect(await lookup("server", 9001)).toBeUndefined();
   });
 });
@@ -41,7 +41,7 @@ describe("locateSite", () => {
 
   it("refuses a site cached without its server, since the path needs one", async () => {
     await remember("site", 5001, { tokenKey: T1, org: "acme-inc" });
-    await expect(locateSite(5001)).rejects.toThrow(/Call list-sites first/);
+    await expect(locateSite(5001)).rejects.toThrow(/Call list-sites now/);
     expect(await lookup("site", 5001)).toBeUndefined();
   });
 });

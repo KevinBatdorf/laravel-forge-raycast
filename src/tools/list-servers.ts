@@ -1,6 +1,6 @@
 import { flatten } from "../lib/forge";
 import { rememberMany } from "../lib/index-cache";
-import { Cursors, queryString, walkOrgs } from "../lib/listing";
+import { asCursorList, asCursors, queryString, walkOrgs } from "../lib/listing";
 import { IServer } from "../types";
 import { askedFor, serverRowExtras } from "./fields";
 
@@ -64,9 +64,9 @@ type Input = {
    */
   limit?: number;
   /**
-   * The cursor object from a previous call. Pass it back as-is for the next page.
+   * The cursor from a previous call. Pass it back exactly as given for the next page.
    */
-  cursor?: Cursors;
+  cursor?: string;
   /**
    * Set true to also return servers Forge has been disconnected from. Defaults to false.
    */
@@ -89,7 +89,7 @@ export default async function tool({ fields, sort, limit, cursor, includeRevoked
     limit,
   );
 
-  const { rows, next } = await walkOrgs((ref) => `orgs/${ref.org}/servers`, search, cursor);
+  const { rows, next } = await walkOrgs((ref) => `orgs/${ref.org}/servers`, search, asCursors(cursor));
 
   const asked = askedFor("server", fields, { ensure: includeRevoked ? ["revoked"] : [] });
   const found = rows.map(({ ref, item }) => ({ ref, server: flatten<IServer>(item) }));
@@ -115,5 +115,5 @@ export default async function tool({ fields, sort, limit, cursor, includeRevoked
   notes.push(...asked.notes);
   notes.push("Pass an id to get-server for the full record, or to any server tool.");
 
-  return { note: notes.join(" "), ...(next ? { cursor: next } : {}), servers };
+  return { note: notes.join(" "), ...(next ? { cursor: asCursorList(next) } : {}), servers };
 }

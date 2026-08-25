@@ -2,7 +2,7 @@ import { deploymentStatus } from "../api/Site";
 import { locate } from "../lib/coordinates";
 import { flatten, relatedId } from "../lib/forge";
 import { rememberMany } from "../lib/index-cache";
-import { Cursors, queryString, walkOrgs } from "../lib/listing";
+import { asCursorList, asCursors, queryString, walkOrgs } from "../lib/listing";
 import { ISite } from "../types";
 import { askedFor, siteRowExtras } from "./fields";
 
@@ -29,9 +29,9 @@ type Input = {
    */
   limit?: number;
   /**
-   * The cursor object from a previous call. Pass it back as-is for the next page.
+   * The cursor from a previous call. Pass it back exactly as given for the next page.
    */
-  cursor?: Cursors;
+  cursor?: string;
 };
 
 export default async function tool({ name, serverId, fields, sort, limit, cursor }: Input) {
@@ -45,7 +45,7 @@ export default async function tool({ name, serverId, fields, sort, limit, cursor
   const { rows, next } = await walkOrgs(
     (ref) => (at ? `orgs/${ref.org}/servers/${serverId}/sites` : `orgs/${ref.org}/sites`),
     search,
-    cursor,
+    asCursors(cursor),
     at ? [{ account: at.account, org: at.org }] : undefined,
   );
 
@@ -79,5 +79,5 @@ export default async function tool({ name, serverId, fields, sort, limit, cursor
   notes.push(...asked.notes);
   notes.push("Pass an id to get-site for the full record, or to any site tool.");
 
-  return { note: notes.join(" "), ...(next ? { cursor: next } : {}), sites: sites.map(({ row }) => row) };
+  return { note: notes.join(" "), ...(next ? { cursor: asCursorList(next) } : {}), sites: sites.map(({ row }) => row) };
 }

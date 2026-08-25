@@ -6,10 +6,29 @@ const PER_PAGE = 15;
 // Forge honours a smaller page[size] but caps it at 30
 export const perPage = (limit?: number) => Math.min(30, Math.max(1, Math.trunc(limit ?? PER_PAGE)));
 
-// One cursor per org, so the key names the account too: two accounts can hold the same slug
+// Raycast's schema extractor resolves plain scalars only, so cursors travel as one string
 export type Cursors = Record<string, string>;
 
+// The key names the account as well as the org: two accounts can hold the same slug
 export const cursorKey = ({ account, org }: OrgRef) => `${account.tokenKey}/${org}`;
+
+export const asCursors = (input?: string): Cursors | undefined => {
+  if (typeof input !== "string" || !input.trim()) return undefined;
+  const pairs = input
+    .split(";")
+    .map((entry) => {
+      // Forge cursors are base64 and can carry "=" padding, so only the first splits
+      const at = entry.indexOf("=");
+      return at > 0 ? ([entry.slice(0, at).trim(), entry.slice(at + 1).trim()] as const) : undefined;
+    })
+    .filter((pair) => pair && pair[1]) as Array<readonly [string, string]>;
+  return pairs.length ? Object.fromEntries(pairs) : undefined;
+};
+
+export const asCursorList = (cursors?: Cursors): string | undefined => {
+  const entries = Object.entries(cursors ?? {});
+  return entries.length ? entries.map(([key, after]) => `${key}=${after}`).join(";") : undefined;
+};
 
 export const usableCursors = async (cursors?: Cursors): Promise<Cursors | undefined> => {
   if (!cursors || typeof cursors !== "object") return undefined;

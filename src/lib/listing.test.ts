@@ -4,7 +4,7 @@ import { __resetStorage, __setPreferences } from "../test/raycast-stub";
 const getCollection = vi.hoisted(() => vi.fn());
 vi.mock("./forge", async (original) => ({ ...(await original<object>()), getCollection }));
 
-import { cursorKey, perPage, queryString, usableCursors, walkOrgs } from "./listing";
+import { asCursorList, asCursors, cursorKey, perPage, queryString, usableCursors, walkOrgs } from "./listing";
 import { rememberOrgs } from "./index-cache";
 
 const T1 = "laravel_forge_api_token";
@@ -121,5 +121,39 @@ describe("cursorKey", () => {
   it("names the account as well as the org, since two accounts can share a slug", () => {
     const account = { tokenKey: T1, token: "tok-1", sshUser: "forge" };
     expect(cursorKey({ account, org: "acme-inc" })).toBe(`${T1}/acme-inc`);
+  });
+});
+
+describe("cursor round-trip", () => {
+  it("survives being handed out and passed back", () => {
+    const out = asCursorList({ [`${T1}/acme-inc`]: "abc", [`${T1}/side-project`]: "def" });
+    expect(asCursors(out)).toEqual({ [`${T1}/acme-inc`]: "abc", [`${T1}/side-project`]: "def" });
+  });
+
+  it("keeps base64 padding, which would break a split on every equals", () => {
+    const out = asCursorList({ [`${T1}/acme-inc`]: "eyJpZCI6NTAwMX0==" });
+    expect(asCursors(out)).toEqual({ [`${T1}/acme-inc`]: "eyJpZCI6NTAwMX0==" });
+  });
+
+  it("has no cursor at all when nothing is left to read", () => {
+    expect(asCursorList({})).toBeUndefined();
+    expect(asCursorList(undefined)).toBeUndefined();
+  });
+
+  it("ignores junk instead of throwing", () => {
+    expect(asCursors(undefined)).toBeUndefined();
+    expect(asCursors("")).toBeUndefined();
+    expect(asCursors("   ")).toBeUndefined();
+    expect(asCursors("no-equals-here")).toBeUndefined();
+    expect(asCursors("=leading")).toBeUndefined();
+    expect(asCursors("trailing=")).toBeUndefined();
+  });
+
+  it("keeps the readable half of a partly mangled cursor", () => {
+    expect(asCursors(`junk;${T1}/acme-inc=abc`)).toEqual({ [`${T1}/acme-inc`]: "abc" });
+  });
+
+  it("still refuses an org we never fetched, whatever the string looked like", async () => {
+    expect(await usableCursors(asCursors(`${T1}/../../user/credentials=abc`))).toBeUndefined();
   });
 });

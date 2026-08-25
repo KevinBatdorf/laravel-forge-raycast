@@ -9,7 +9,7 @@ type Input = {
    */
   serverId: number;
   /**
-   * Extra field names to add to the answer, comma separated. Call probe-api for the names.
+   * Field names withheld unless asked for, comma separated: local_public_key, credential_id.
    */
   include?: string;
 };

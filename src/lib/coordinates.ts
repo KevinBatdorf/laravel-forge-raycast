@@ -4,7 +4,9 @@ import { Coordinates, forget, lookup } from "./index-cache";
 export type Located = { account: Account; org: string; serverId?: number };
 
 const listFirst = (kind: "site" | "server", id: number | string) =>
-  new Error(`No cached ${kind} ${id}. Call list-${kind}s first and use an id it returns; ids are not searched for.`);
+  new Error(
+    `This extension has no coordinates for ${kind} ${id}. Call list-${kind}s now, then retry with an id it returns.`,
+  );
 
 // Ids only come from a list or get tool, so a miss is stale, not a cue to search
 export const locate = async (kind: "site" | "server", id: number | string): Promise<Located> => {
