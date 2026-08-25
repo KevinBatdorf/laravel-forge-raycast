@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+    paths:
+      - "src/tools/forge-fields.json"
+      - "scripts/check-forge-fields.mjs"
+      - ".github/workflows/forge-fields.yml"
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
@@ -11,6 +15,7 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

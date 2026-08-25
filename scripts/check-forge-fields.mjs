@@ -4,7 +4,7 @@ const SPEC = "https://forge.laravel.com/api/docs.openapi";
 
 const forgeFields = JSON.parse(readFileSync(new URL("../src/tools/forge-fields.json", import.meta.url), "utf8"));
 
-const response = await fetch(SPEC);
+const response = await fetch(SPEC, { signal: AbortSignal.timeout(30_000) });
 if (!response.ok) {
   console.error(`Could not read ${SPEC}: ${response.status}`);
   process.exit(1);
