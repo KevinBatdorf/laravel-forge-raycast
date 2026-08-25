@@ -39,7 +39,7 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers.\nDeploy failed? Call deployment-status, then deployment-log.\nSite down or erroring? Call site-online, then site-config.\nServer problem? Call server-events.\nPass ids as text: \"2882133\", not 2882133.\nOnly deploy, restart or reboot if the user asks.\nEnv file or deploy settings? get-site answers with a Forge link. site-config cannot read them.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields.\nA tool may return a Forge link. Give it to the user as a markdown link. Do not open it yourself.",
+    "instructions": "Deployments belong to sites, not servers.\nDeploy failed? Call deployment-status, then deployment-log.\nSite down or erroring? Call site-online, then site-config.\nServer problem? Call server-events.\nPass ids as text: \"2882133\", not 2882133.\nOnly deploy, restart or reboot if the user asks.\nEnv file or deploy settings? get-site answers with a Forge link. site-config cannot read them.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields.\nAlways write a URL as a markdown link: [Deployment settings](url), never a bare URL. Do not open links yourself.",
     "evals": [
       {
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
