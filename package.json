@@ -39,7 +39,7 @@
     }
   ],
   "ai": {
-    "instructions": "Deployments belong to sites, not servers.\nDeploy failed? Call deployment-status, then deployment-log.\nSite down or erroring? Call site-online, then site-config.\nServer problem? Call server-events.\nPass ids as text: \"2882133\", not 2882133.\nOnly deploy, restart or reboot if the user asks.\nA tool may return a Forge link. Give it to the user as a markdown link. Do not open it yourself.",
+    "instructions": "Deployments belong to sites, not servers.\nDeploy failed? Call deployment-status, then deployment-log.\nSite down or erroring? Call site-online, then site-config.\nServer problem? Call server-events.\nPass ids as text: \"2882133\", not 2882133.\nOnly deploy, restart or reboot if the user asks.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields.\nA tool may return a Forge link. Give it to the user as a markdown link. Do not open it yourself.",
     "evals": [
       {
         "input": "@laravel-forge does acme-store have zero downtime deploys?",
@@ -94,20 +94,20 @@
             "quickDeploy": true,
             "deploymentStatus": "finished",
             "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
-            "environment": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
-            "deploymentScript": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
-            "deploymentUrl": "Not returned. Find or rotate it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+            "environment": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
+            "deploymentScript": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
+            "deploymentUrl": "Not returned. The user can find or change it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
           },
           "probe-api": {
             "target": "site",
             "fields": {
-              "status": "Where the site is in its install, like installed or installing.",
-              "php_version": "The PHP version the site runs, like php83.",
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
               "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
-              "deployment_script": "The commands Forge runs on each deploy. Not handed over; the get tool returns a Forge link for it.",
-              "environment": "The site's env file, which Forge keeps on its own endpoint rather than on the site record. Not handed over; the get tool returns a Forge link for it."
+              "deployment_script": "The commands Forge runs on each deploy. You cannot read this. The get tool gives a Forge link instead.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. You cannot read this. The get tool gives a Forge link instead."
             },
-            "note": "Name any of these in list-sites fields, or get-site include. Spelling of the name does not matter. These are names, not values.",
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
             "filters": [
               "name"
             ],
@@ -160,9 +160,9 @@
             "fields": {
               "ubuntu_version": "The Ubuntu release on the server.",
               "database_type": "The database engine installed, like mysql8 or postgres16.",
-              "local_public_key": "The server's own SSH public key, the one a git host takes as a deploy key. Only by name on include."
+              "local_public_key": "The server's own SSH public key. A git host uses it as a deploy key. Ask for it by name in include."
             },
-            "note": "Name any of these in list-servers fields, or get-server include. Spelling of the name does not matter. These are names, not values.",
+            "note": "These are field names, not values. Pass the ones you want to list-servers in fields, or to get-server in include.",
             "filters": [
               "name",
               "region",
@@ -310,9 +310,9 @@
             "phpVersion": "PHP 8.3",
             "zeroDowntimeDeployments": false,
             "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
-            "environment": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
-            "deploymentScript": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
-            "deploymentUrl": "Not returned. Find or rotate it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+            "environment": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
+            "deploymentScript": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
+            "deploymentUrl": "Not returned. The user can find or change it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
           }
         },
         "expected": [
@@ -361,9 +361,9 @@
             "phpVersion": "PHP 8.3",
             "zeroDowntimeDeployments": false,
             "forgeUrl": "https://forge.laravel.com/acme-org/web-1/5001",
-            "environment": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
-            "deploymentScript": "Not returned. Read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
-            "deploymentUrl": "Not returned. Find or rotate it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
+            "environment": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/environment",
+            "deploymentScript": "Not returned. The user can read or edit it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments",
+            "deploymentUrl": "Not returned. The user can find or change it at https://forge.laravel.com/acme-org/web-1/5001/settings/deployments"
           }
         },
         "expected": [
@@ -422,9 +422,9 @@
             "fields": {
               "ubuntu_version": "The Ubuntu release on the server.",
               "database_type": "The database engine installed, like mysql8 or postgres16.",
-              "local_public_key": "The server's own SSH public key, the one a git host takes as a deploy key. Only by name on include."
+              "local_public_key": "The server's own SSH public key. A git host uses it as a deploy key. Ask for it by name in include."
             },
-            "note": "Name any of these in list-servers fields, or get-server include. Spelling of the name does not matter. These are names, not values.",
+            "note": "These are field names, not values. Pass the ones you want to list-servers in fields, or to get-server in include.",
             "filters": [
               "name",
               "region",
@@ -440,7 +440,27 @@
         },
         "expected": [
           {
-            "callsTool": "get-server"
+            "callsTool": "probe-api"
+          },
+          {
+            "or": [
+              {
+                "callsTool": {
+                  "name": "get-server",
+                  "arguments": {
+                    "include": "local_public_key"
+                  }
+                }
+              },
+              {
+                "callsTool": {
+                  "name": "get-server",
+                  "arguments": {
+                    "include": "localPublicKey"
+                  }
+                }
+              }
+            ]
           },
           {
             "includes": "ssh-rsa"
@@ -476,13 +496,13 @@
           "probe-api": {
             "target": "site",
             "fields": {
-              "status": "Where the site is in its install, like installed or installing.",
-              "php_version": "The PHP version the site runs, like php83.",
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
               "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
-              "deployment_script": "The commands Forge runs on each deploy. Not handed over; the get tool returns a Forge link for it.",
-              "environment": "The site's env file, which Forge keeps on its own endpoint rather than on the site record. Not handed over; the get tool returns a Forge link for it."
+              "deployment_script": "The commands Forge runs on each deploy. You cannot read this. The get tool gives a Forge link instead.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. You cannot read this. The get tool gives a Forge link instead."
             },
-            "note": "Name any of these in list-sites fields, or get-site include. Spelling of the name does not matter. These are names, not values.",
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
             "filters": [
               "name"
             ],
@@ -491,7 +511,27 @@
         },
         "expected": [
           {
-            "callsTool": "list-sites"
+            "callsTool": "probe-api"
+          },
+          {
+            "or": [
+              {
+                "callsTool": {
+                  "name": "list-sites",
+                  "arguments": {
+                    "fields": "zero_downtime_deployments"
+                  }
+                }
+              },
+              {
+                "callsTool": {
+                  "name": "list-sites",
+                  "arguments": {
+                    "fields": "zeroDowntimeDeployments"
+                  }
+                }
+              }
+            ]
           },
           {
             "includes": "acme-store.com"
