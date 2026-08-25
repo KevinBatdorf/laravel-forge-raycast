@@ -89,7 +89,13 @@ const query = (filters: Record<string, string | undefined>, extra: string[] = []
   return `?${parts.join("&")}`;
 };
 
-export const sitePage = async (options: { name?: string; page?: string; owner?: ServerMatch; limit?: number }) => {
+export const sitePage = async (options: {
+  name?: string;
+  page?: string;
+  owner?: ServerMatch;
+  limit?: number;
+  includeRevoked?: boolean;
+}) => {
   const { owner } = options;
   const streams: Stream[] = owner
     ? [
@@ -108,7 +114,7 @@ export const sitePage = async (options: { name?: string; page?: string; owner?: 
     search: query({ name: options.name }, ["include=server,latestDeployment"], options.limit),
   });
 
-  const sites = items.flatMap((item) => {
+  const all = items.flatMap((item) => {
     const resource = relatedResource(item, "server", included);
     if (!resource) return [];
     const flat = flatten<ISite>(item);
@@ -129,7 +135,9 @@ export const sitePage = async (options: { name?: string; page?: string; owner?: 
     ];
   });
 
-  return { sites, next };
+  const sites = all.filter(({ server }) => options.includeRevoked || !server.revoked);
+
+  return { sites, next, hidden: all.length - sites.length };
 };
 
 export const serverPage = async (options: {

@@ -27,11 +27,15 @@ type Input = {
    * How many sites to return. Up to 30. Defaults to 15.
    */
   limit?: number;
+  /**
+   * Set true to also return sites on servers Forge has been disconnected from. Defaults to false.
+   */
+  includeRevoked?: boolean;
 };
 
-export default async function tool({ site, server, fields, page, limit }: Input) {
+export default async function tool({ site, server, fields, page, limit, includeRevoked }: Input) {
   const owner = server ? await findServer(server) : undefined;
-  const { sites, next } = await sitePage({ name: site, page, owner, limit });
+  const { sites, next, hidden } = await sitePage({ name: site, page, owner, limit, includeRevoked });
 
   const asked = askedFor("site", fields);
   const rows = sites.map(({ site: found, server: host }) => ({
@@ -45,6 +49,7 @@ export default async function tool({ site, server, fields, page, limit }: Input)
   }));
 
   const notes = [`This is one page: ${rows.length} sites. Forge does not say how many there are in total.`];
+  if (hidden) notes.push(`${hidden} more are on revoked servers and not shown. Pass includeRevoked to see them.`);
   if (next) notes.push("Pass page to get the next page.");
   if (site && !rows.length) notes.push(`No site name contains "${site}". Forge cannot match an alias.`);
   if (!asked.requested) notes.push(TRUNCATED);
