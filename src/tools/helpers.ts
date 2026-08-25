@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { sortBy } from "lodash";
 import { deploymentStatus } from "../api/Site";
 import { unwrapToken } from "../lib/auth";
-import { flatten, getCollection, relatedId, relatedResource } from "../lib/forge";
+import { ForgeResource, flatten, getCollection, probeResource, relatedResource } from "../lib/forge";
 import { IDeployment, IServer, ISite } from "../types";
 
 export type ServerMatch = { server: IServer; token: string };
@@ -35,6 +35,32 @@ export const orgSlugs = once(async () => {
   );
   return new Map(entries);
 });
+
+const eachOrg = async <T>(probe: (slug: string, token: string, account: Account) => Promise<T[]>) => {
+  const slugs = await orgSlugs();
+  const perAccount = await Promise.all(
+    accounts().map(async (account) => {
+      const perOrg = await Promise.all(
+        (slugs.get(account.tokenKey) ?? []).map((slug) => probe(slug, account.token, account)),
+      );
+      return perOrg.flat();
+    }),
+  );
+  return perAccount.flat();
+};
+
+// Forge filters match names, never ids, so an id is fetched from each org directly
+const serverById = (id: string): Promise<ServerMatch[]> =>
+  eachOrg(async (slug, token, { tokenKey, sshUser }) => {
+    const body = await probeResource(`orgs/${slug}/servers/${id}`, token);
+    if (!body?.data) return [];
+    return [
+      {
+        server: { ...flatten<IServer>(body.data), org_slug: slug, api_token_key: tokenKey, ssh_user: sshUser },
+        token,
+      },
+    ];
+  });
 
 const serverMatches = async (query: string): Promise<ServerMatch[]> => {
   const slugs = await orgSlugs();
@@ -72,6 +98,36 @@ const orgByServerId = async (tokenKey: string) => {
 
 const SITE_INCLUDES = "include=server,latestDeployment";
 
+const siteMatch = (item: ForgeResource, included: ForgeResource[], server: IServer, token: string): SiteMatch => {
+  const flat = flatten<ISite>(item);
+  const deployment = relatedResource(item, "latestDeployment", included);
+  return {
+    site: {
+      ...flat,
+      server_id: server.id,
+      deployment_status: deploymentStatus(flat.deployment_status),
+      latest_deployment: deployment && flatten<IDeployment>(deployment),
+    },
+    server,
+    token,
+  };
+};
+
+const siteById = (id: string): Promise<SiteMatch[]> =>
+  eachOrg(async (slug, token, { tokenKey, sshUser }) => {
+    const body = await probeResource(`orgs/${slug}/sites/${id}?${SITE_INCLUDES}`, token);
+    if (!body?.data) return [];
+    const resource = relatedResource(body.data, "server", body.included ?? []);
+    if (!resource) return [];
+    const server: IServer = {
+      ...flatten<IServer>(resource),
+      org_slug: slug,
+      api_token_key: tokenKey,
+      ssh_user: sshUser,
+    };
+    return [siteMatch(body.data, body.included ?? [], server, token)];
+  });
+
 export const searchSites = async (query: string): Promise<SiteMatch[]> => {
   const slugs = await orgSlugs();
   const perAccount = await Promise.all(
@@ -87,22 +143,13 @@ export const searchSites = async (query: string): Promise<SiteMatch[]> => {
       return items.flatMap((item) => {
         const resource = relatedResource(item, "server", included);
         if (!resource) return [];
-        const id = Number(resource.id);
         const server: IServer = {
           ...flatten<IServer>(resource),
-          org_slug: owners ? (owners.get(id) ?? "") : (orgs[0] ?? ""),
+          org_slug: owners ? (owners.get(Number(resource.id)) ?? "") : (orgs[0] ?? ""),
           api_token_key: tokenKey,
           ssh_user: sshUser,
         };
-        const flat = flatten<ISite>(item);
-        const deployment = relatedResource(item, "latestDeployment", included);
-        const site = {
-          ...flat,
-          server_id: relatedId(item, "server") ?? id,
-          deployment_status: deploymentStatus(flat.deployment_status),
-          latest_deployment: deployment && flatten<IDeployment>(deployment),
-        };
-        return [{ site, server, token }];
+        return [siteMatch(item, included, server, token)];
       });
     }),
   );
@@ -115,7 +162,15 @@ export const allSites = once(() => searchSites(""));
 export const siteDeploymentStatus = (site: ISite) =>
   site.deployment_status ?? deploymentStatus(site.latest_deployment?.status);
 
-export const sitesOnServer = async (server: IServer) => {
+export const sitesOnServer = async (server: IServer, token: string) => {
+  if (server.org_slug) {
+    try {
+      const { items } = await getCollection(`orgs/${server.org_slug}/servers/${server.id}/sites`, token);
+      return items.map((item) => String(item.attributes?.name ?? item.id));
+    } catch {
+      // A stale slug or revoked token falls back to the full walk
+    }
+  }
   const sites = await allSites();
   return sites
     .filter((match) => match.server.id === server.id && match.server.api_token_key === server.api_token_key)
@@ -138,7 +193,7 @@ const notExact = (kind: string, query: string, names: string[]) =>
 
 export const findServer = async (query: string) => {
   const search = normalize(query);
-  const narrowed = /^\d+$/.test(search) ? [] : await serverMatches(query);
+  const narrowed = /^\d+$/.test(search) ? await serverById(search) : await serverMatches(query);
   const servers = narrowed.length ? narrowed : await allServers();
   const label = ({ server }: ServerMatch) => `${server.name ?? server.id} (id ${server.id})`;
 
@@ -155,7 +210,7 @@ export const findServer = async (query: string) => {
 export const findSite = async (query: string) => {
   const search = normalize(query);
   // filter[name] is a contains match, and it cannot see ids or aliases
-  const narrowed = /^\d+$/.test(search) ? [] : await searchSites(query);
+  const narrowed = /^\d+$/.test(search) ? await siteById(search) : await searchSites(query);
   const sites = narrowed.length ? narrowed : await allSites();
   // A site name can repeat on another server, so only the id identifies one
   const label = ({ site, server }: SiteMatch) =>

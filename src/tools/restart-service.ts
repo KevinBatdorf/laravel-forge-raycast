@@ -36,8 +36,8 @@ const allowedFor = (service: Service, action: ServiceAction) => {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site, service, action = "reboot" }) => {
-  const { server: found } = await targetServer({ server, site });
-  const sites = await sitesOnServer(found);
+  const { server: found, token } = await targetServer({ server, site });
+  const sites = await sitesOnServer(found, token);
   return {
     message: `${action === "reboot" ? "Restart" : action} ${service} on ${found.name}?`,
     info: [

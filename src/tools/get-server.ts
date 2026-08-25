@@ -14,8 +14,8 @@ type Input = {
 };
 
 export default async function tool({ server, include }: Input) {
-  const { server: found } = await findServer(server);
-  const sites = await sitesOnServer(found);
+  const { server: found, token } = await findServer(server);
+  const sites = await sitesOnServer(found, token);
   return {
     id: found.id,
     name: found.name,

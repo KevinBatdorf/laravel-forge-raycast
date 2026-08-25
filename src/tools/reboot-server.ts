@@ -14,8 +14,8 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site }) => {
-  const { server: found } = await targetServer({ server, site });
-  const sites = await sitesOnServer(found);
+  const { server: found, token } = await targetServer({ server, site });
+  const sites = await sitesOnServer(found, token);
   return {
     message: `Reboot ${found.name}? Every site on it goes down until it comes back.`,
     info: [

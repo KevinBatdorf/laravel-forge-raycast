@@ -43,6 +43,17 @@ export const getCollection = async (path: string, token: string, { pages = PAGE_
   return { items, included, nextCursor: cursor };
 };
 
+// Probing each org for an id: most orgs answer 404, and that is data, not an error
+export const probeResource = async (path: string, token: string) => {
+  try {
+    const res = await fetch(`${FORGE_API_URL}/${path}`, { method: "get", headers: headers(token) });
+    if (!res.ok) return undefined;
+    return (await res.json()) as { data?: ForgeResource; included?: ForgeResource[] };
+  } catch {
+    return undefined;
+  }
+};
+
 export const getResource = async (path: string, token: string) => {
   const body = await apiFetch<{ data?: ForgeResource }>(`${FORGE_API_URL}/${path}`, {
     method: "get",
