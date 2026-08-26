@@ -2,7 +2,7 @@ import { Tool } from "@raycast/api";
 import { SERVICE_ACTIONS, Server, Service, ServiceAction } from "../api/Server";
 import { serverRecord } from "../lib/records";
 import { nameList } from "./helpers";
-import { sitesOn } from "./sites-on-server";
+import { siteNames, sitesOn } from "./sites-on-server";
 
 type Input = {
   /**
@@ -39,7 +39,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ serverId, service
   return {
     message: `${action === "reboot" ? "Restart" : action} ${service} on ${at.server.name}?`,
     info: [
-      { name: `Sites affected (${sites.length})`, value: nameList(sites) },
+      { name: `Sites affected (${sites.length})`, value: nameList(siteNames(sites)) },
       { name: "Server", value: at.server.name ?? String(serverId) },
       ...(service === "php" ? [{ name: "PHP version", value: at.server.php_version ?? "unknown" }] : []),
       ...(service === "database" ? [{ name: "Database", value: at.server.database_type || "none installed" }] : []),

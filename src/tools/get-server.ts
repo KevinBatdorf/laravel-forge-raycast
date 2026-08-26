@@ -1,7 +1,7 @@
-import { queryString, walkOrgs } from "../lib/listing";
 import { serverRecord } from "../lib/records";
 import { forgeLink, forgeServerUrl } from "../lib/url";
 import { included, serverIncludable } from "./fields";
+import { sitesOn } from "./sites-on-server";
 
 type Input = {
   /**
@@ -17,10 +17,7 @@ type Input = {
 export default async function tool({ serverId, include }: Input) {
   const { server: found, account, org } = await serverRecord(serverId);
 
-  const { rows } = await walkOrgs(() => `orgs/${org}/servers/${serverId}/sites`, queryString({}, [], 30), undefined, [
-    { account, org },
-  ]);
-  const sites = rows.map(({ item }) => ({ id: Number(item.id), name: String(item.attributes?.name ?? item.id) }));
+  const sites = await sitesOn({ account, org, serverId });
 
   return {
     id: found.id,
