@@ -23,16 +23,18 @@ const release = () => {
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // A 429 was not processed, so retrying any verb is safe
+// Sleeping inside the slot would idle a fifth of the pool for up to 15s
 export const politeFetch = async (url: string, options?: RequestInit): Promise<Response> => {
-  await acquire();
-  try {
-    for (let attempt = 0; ; attempt++) {
-      const res = await fetch(url, options);
-      if (res.status !== 429 || attempt >= RETRIES) return res;
-      const after = Number(res.headers.get("retry-after")) || 2 ** attempt;
-      await wait(Math.min(after, 15) * 1000);
+  for (let attempt = 0; ; attempt++) {
+    await acquire();
+    let res: Response;
+    try {
+      res = await fetch(url, options);
+    } finally {
+      release();
     }
-  } finally {
-    release();
+    if (res.status !== 429 || attempt >= RETRIES) return res;
+    const after = Number(res.headers.get("retry-after")) || 2 ** attempt;
+    await wait(Math.min(after, 15) * 1000);
   }
 };
