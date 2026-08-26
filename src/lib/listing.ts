@@ -1,4 +1,6 @@
+import { isStatus } from "./api";
 import { ForgeResource, getCollection } from "./forge";
+import { forgetOrgs } from "./index-cache";
 import { OrgRef, everyOrg, isKnownOrg } from "./orgs";
 
 const PER_PAGE = 15;
@@ -55,11 +57,19 @@ export const queryString = (filters: Record<string, string | undefined>, extra: 
 
 export type Page = { rows: Array<{ ref: OrgRef; item: ForgeResource; included: ForgeResource[] }>; next?: Cursors };
 
+// Nothing else evicts a cached org list, so a rejected slug drops the whole list
+const stale = async (ref: OrgRef, error: unknown) => {
+  if (!isStatus(error, 403, 404)) return false;
+  await forgetOrgs(ref.account.tokenKey);
+  return true;
+};
+
 export const walkOrgs = async (
   path: (ref: OrgRef) => string,
   search: string,
   cursors?: Cursors,
   only?: OrgRef[],
+  { pages: limit = 1 }: { pages?: number } = {},
 ): Promise<Page> => {
   const refs = only ?? (await everyOrg());
   const resuming = await usableCursors(cursors);
@@ -68,13 +78,24 @@ export const walkOrgs = async (
   const pages = await Promise.all(
     wanted.map(async (ref) => {
       const from = resuming?.[cursorKey(ref)] ?? "";
-      const { items, included, nextCursor } = await getCollection(`${path(ref)}?${search}`, ref.account.token, {
-        pages: 1,
-        from,
-      });
-      return { ref, items, included, nextCursor };
+      try {
+        const { items, included, nextCursor } = await getCollection(`${path(ref)}?${search}`, ref.account.token, {
+          pages: limit,
+          from,
+        });
+        return { ref, items, included, nextCursor, reached: true };
+      } catch (error) {
+        // A pinned org came from a coordinate, not the cached list: let it through
+        if (only || !(await stale(ref, error))) throw error;
+        return { ref, items: [], included: [], nextCursor: undefined, reached: false };
+      }
     }),
   );
+
+  // Every org failing is a real error; one failing must not hide the others
+  if (pages.length && pages.every((page) => !page.reached)) {
+    throw new Error("Forge rejected every organization this extension had cached. Call the same tool again.");
+  }
 
   const rows = pages.flatMap(({ ref, items, included }) => items.map((item) => ({ ref, item, included })));
   const next = Object.fromEntries(
