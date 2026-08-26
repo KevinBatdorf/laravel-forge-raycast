@@ -159,7 +159,8 @@ const notice = (available: Record<string, unknown>, picked: Record<string, unkno
 
 export const included = (available: Record<string, unknown>, include?: string) => {
   const { picked, unknown } = pick(available, namesAsked(include));
-  return { ...notice(available, picked), ...picked, ...(unknown.length ? { unknownInclude: unknown } : {}) };
+  const named = Object.fromEntries(Object.entries(picked).map(([name, value]) => [name, value ?? null]));
+  return { ...notice(available, picked), ...named, ...(unknown.length ? { unknownInclude: unknown } : {}) };
 };
 
 // The env file and deploy script hold secrets, and deployment_url deploys with no auth

@@ -37,7 +37,7 @@ export default async function tool({ siteId }: Input) {
     zeroDowntimeDeployments: found.zero_downtime_deployments,
     deploymentRetention: found.deployment_retention,
     usesEnvoyer: found.uses_envoyer,
-    deploymentStatus: found.deployment_status ?? deploymentStatus(deployment?.status),
+    deploymentStatus: deploymentStatus(found.deployment_status) ?? deploymentStatus(deployment?.status),
     maintenanceMode: found.maintenance_mode,
     healthcheckUrl: found.healthcheck_url,
     createdAt: found.created_at,
