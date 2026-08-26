@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { __resetStorage, __setPreferences } from "../test/raycast-stub";
-import { locate, locateSite, serverPath, sitePath } from "./coordinates";
+import { locate, locateSite, serverPath } from "./coordinates";
 import { lookup, remember } from "./index-cache";
 
 const T1 = "laravel_forge_api_token";
@@ -47,13 +47,6 @@ describe("locateSite", () => {
 });
 
 describe("paths", () => {
-  it("nests a site under its org and server, which is the only route Forge has", () => {
-    expect(sitePath({ org: "acme-inc", serverId: 9001 }, 5001)).toBe("orgs/acme-inc/servers/9001/sites/5001");
-    expect(sitePath({ org: "acme-inc", serverId: 9001 }, 5001, "/deployments")).toBe(
-      "orgs/acme-inc/servers/9001/sites/5001/deployments",
-    );
-  });
-
   it("builds a server path with an optional tail", () => {
     expect(serverPath({ org: "acme-inc" }, 9001)).toBe("orgs/acme-inc/servers/9001");
     expect(serverPath({ org: "acme-inc" }, 9001, "/events")).toBe("orgs/acme-inc/servers/9001/events");

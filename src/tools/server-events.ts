@@ -1,4 +1,5 @@
 import { Server } from "../api/Server";
+import { dropOnMiss } from "../lib/coordinates";
 import { serverRecord } from "../lib/records";
 import { tail } from "./helpers";
 
@@ -17,11 +18,13 @@ export default async function tool({ serverId, eventId }: Input) {
   const { server, account } = await serverRecord(serverId);
 
   if (eventId) {
-    const output = await Server.getEventOutput({ server, token: account.token, eventId });
+    const output = await dropOnMiss("server", serverId, () =>
+      Server.getEventOutput({ server, token: account.token, eventId }),
+    );
     return { server: server.name, eventId, output: tail(output) };
   }
 
-  const events = await Server.getEvents({ server, token: account.token });
+  const events = await dropOnMiss("server", serverId, () => Server.getEvents({ server, token: account.token }));
   return {
     note: events.length
       ? "Pass an id back as eventId to read that event's output."

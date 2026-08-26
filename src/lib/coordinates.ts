@@ -1,5 +1,6 @@
 import { Account, accountFor } from "./accounts";
-import { Coordinates, forget, lookup } from "./index-cache";
+import { isStatus } from "./api";
+import { forget, lookup } from "./index-cache";
 
 export type Located = { account: Account; org: string; serverId?: number };
 
@@ -30,14 +31,17 @@ export const locateSite = async (id: number | string) => {
   return { ...found, serverId: found.serverId };
 };
 
-export const sitePath = (at: { org: string; serverId: number }, siteId: number | string, tail = "") =>
-  `orgs/${at.org}/servers/${at.serverId}/sites/${siteId}${tail}`;
+// Coordinates only ever come from Forge, so a 404 means deleted, not misrouted
+// An entry kept past its 404 is retried forever, so every located read comes here
+export const dropOnMiss = async <T>(kind: "site" | "server", id: number | string, read: () => Promise<T>) => {
+  try {
+    return await read();
+  } catch (error) {
+    if (!isStatus(error, 404)) throw error;
+    await forget(kind, id);
+    throw new Error(`Forge no longer has ${kind} ${id}. Call list-${kind}s now for the current ids.`);
+  }
+};
 
 export const serverPath = (at: { org: string }, serverId: number | string, tail = "") =>
   `orgs/${at.org}/servers/${serverId}${tail}`;
-
-export const asCoordinates = (tokenKey: string, org: string, serverId?: number): Coordinates => ({
-  tokenKey,
-  org,
-  serverId,
-});
