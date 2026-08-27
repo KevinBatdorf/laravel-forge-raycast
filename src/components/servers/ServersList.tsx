@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { useServers } from "../../hooks/useServers";
 import { IServer } from "../../types";
 import { EmptyView } from "../../components/EmptyView";
@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 
 export const ServersList = ({ search }: { search: string }) => {
   const [preLoadedServer, setPreLoadedServer] = useState<IServer>();
-  const { servers: found, loading, error } = useServers();
+  const { servers: found, loading, error, refresh } = useServers();
   const keywords = useServerKeywords();
   const servers = useMemo(
     () => found?.map((server) => ({ ...server, keywords: keywords?.[server.id] ?? [] })),
@@ -36,7 +36,7 @@ export const ServersList = ({ search }: { search: string }) => {
     showToast(Toast.Style.Success, server?.name ? `Now showing: ${server.name}` : `Now showing: #${server.id}`);
     push(<ServerSingle server={server} />);
     setIncomingSearch("");
-  }, [incomingSearch]);
+  }, [incomingSearch, servers]);
 
   const preFetchSites = (serverId: string | null) => {
     const server = servers?.find((server) => server.id.toString() === serverId);
@@ -53,13 +53,13 @@ export const ServersList = ({ search }: { search: string }) => {
   return (
     <List isLoading={loading} searchBarPlaceholder="Search servers..." onSelectionChange={preFetchSites}>
       {servers?.map((server: IServer) => {
-        return <ServerListItem key={server.id} server={server} />;
+        return <ServerListItem key={server.id} server={server} onRefresh={refresh} />;
       })}
     </List>
   );
 };
 
-const ServerListItem = ({ server }: { server: IServer }) => {
+const ServerListItem = ({ server, onRefresh }: { server: IServer; onRefresh: () => void }) => {
   if (!server?.id) return null;
   return (
     <List.Item
@@ -83,6 +83,12 @@ const ServerListItem = ({ server }: { server: IServer }) => {
           </ActionPanel.Section>
           <ActionPanel.Section title="Commands">
             <ServerCommands server={server} />
+            <Action
+              title="Refresh Servers"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={onRefresh}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

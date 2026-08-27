@@ -14,6 +14,20 @@ let preferences: Record<string, string> = {};
 export const __setPreferences = (next: Record<string, string>) => (preferences = next);
 export const __resetStorage = () => store.clear();
 
+const caches = new Map<string, string>();
+export class Cache {
+  get(key: string) {
+    return caches.get(key);
+  }
+  set(key: string, value: string) {
+    caches.set(key, value);
+  }
+  remove(key: string) {
+    return caches.delete(key);
+  }
+}
+export const __resetCache = () => caches.clear();
+
 export const environment = { launchType: "userInitiated", entryPointType: "command", supportPath: "/tmp" };
 export const LaunchType = { Background: "background", UserInitiated: "userInitiated" };
 export const Toast = { Style: { Failure: "failure", Success: "success" } };
