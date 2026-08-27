@@ -6,6 +6,7 @@ import { unwrapToken } from "../lib/auth";
 import { LocalStorage } from "@raycast/api";
 import { USE_FAKE_DATA } from "../config";
 import { MockSite } from "../api/Mock";
+import { forgetServers } from "./useServers";
 
 type key = [IServer["id"], IServer["api_token_key"], IServer["org_slug"]];
 
@@ -17,7 +18,10 @@ const fetcher = async ([serverId, tokenKey, orgSlug]: key) => {
     serverId,
     token: unwrapToken(tokenKey),
   })
-    .then((data) => LocalStorage.setItem(cacheKey, JSON.stringify(data)))
+    .then(({ sites, archived }) => {
+      if (archived) forgetServers();
+      return LocalStorage.setItem(cacheKey, JSON.stringify(sites));
+    })
     .catch(() => LocalStorage.removeItem(cacheKey));
 
   return await backupData(cacheKey);

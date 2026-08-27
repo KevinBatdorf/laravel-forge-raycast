@@ -1,7 +1,8 @@
 import { sortBy } from "lodash";
 import { IEvent, IServer, ISite } from "../types";
-import { Account, accounts } from "../lib/accounts";
-import { flatten, getCollection, getResource, postAction } from "../lib/forge";
+import { accounts } from "../lib/accounts";
+import { ForgeResource, flatten, getCollection, getResource, postAction } from "../lib/forge";
+import { everyOrg } from "../lib/orgs";
 import { Site } from "./Site";
 
 export type ServiceAction = "reboot" | "reload" | "stop";
@@ -30,10 +31,71 @@ type RunAction = {
 
 type ServerWithToken = { server: IServer; token: string };
 
+export type Tail = Record<string, { cursor: string; hash: string }>;
+
+const pageHash = (items: ForgeResource[], nextCursor?: string | null) =>
+  `${items.map((item) => item.id).join(",")}|${nextCursor ? "more" : "end"}`;
+
 export const Server = {
   async getAll() {
-    const perAccount = await Promise.all(accounts().map(getServers));
-    return sortBy(perAccount.flat(), (s) => s?.name?.toLowerCase());
+    const { servers } = await Server.walk();
+    return servers;
+  },
+
+  // Ids ascend, so anything new lands on the final page and nowhere else
+  async walk(): Promise<{ servers: IServer[]; tail: Tail }> {
+    const perOrg = await Promise.all(
+      (await everyOrg()).map(async ({ account, org }) => {
+        const rows: ForgeResource[] = [];
+        let from = "";
+        let opensLastPage = "";
+        let hash = "";
+        for (let page = 0; page < 20; page++) {
+          const { items, nextCursor } = await getCollection(`orgs/${org}/servers`, account.token, { pages: 1, from });
+          rows.push(...items);
+          opensLastPage = from;
+          hash = pageHash(items, nextCursor);
+          if (!nextCursor) break;
+          from = String(nextCursor);
+        }
+        return {
+          key: `${account.tokenKey}/${org}`,
+          cursor: opensLastPage,
+          hash,
+          servers: rows.map((server) => ({
+            ...flatten<IServer>(server),
+            org_slug: org,
+            api_token_key: account.tokenKey,
+            ssh_user: account.sshUser,
+          })),
+        };
+      }),
+    );
+
+    return {
+      servers: sortBy(
+        perOrg.flatMap((entry) => entry.servers).filter((server) => !server.revoked),
+        (server) => server?.name?.toLowerCase(),
+      ),
+      tail: Object.fromEntries(perOrg.map(({ key, cursor, hash }) => [key, { cursor, hash }])),
+    };
+  },
+
+  async tailChanged(tail: Tail) {
+    const refs = await everyOrg();
+    if (refs.length !== Object.keys(tail).length) return true;
+    const checks = await Promise.all(
+      refs.map(async ({ account, org }) => {
+        const held = tail[`${account.tokenKey}/${org}`];
+        if (!held) return true;
+        const { items, nextCursor } = await getCollection(`orgs/${org}/servers`, account.token, {
+          pages: 1,
+          from: held.cursor,
+        });
+        return pageHash(items, nextCursor) !== held.hash;
+      }),
+    );
+    return checks.some(Boolean);
   },
 
   async runAction({ server, token, action = "reboot", service }: RunAction) {
@@ -57,25 +119,6 @@ export const Server = {
     const event = await getResource(endpoint, token);
     return String(event?.attributes?.output ?? "");
   },
-};
-
-const getServers = async ({ token, tokenKey, sshUser }: Account) => {
-  if (!token) return [];
-  const { items: organizations } = await getCollection("orgs", token);
-  const serversByOrg = await Promise.all(
-    organizations.map(async (organization) => {
-      const orgSlug = String(organization?.attributes?.slug ?? "");
-      const { items: servers } = await getCollection(`orgs/${orgSlug}/servers`, token);
-      return servers.map((server) => ({
-        ...flatten<IServer>(server),
-        org_slug: orgSlug,
-        api_token_key: tokenKey,
-        ssh_user: sshUser,
-      }));
-    }),
-  );
-
-  return serversByOrg.flat().filter((s) => !s.revoked);
 };
 
 // Two requests and most of the load time, and only the search bar uses it
