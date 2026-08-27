@@ -1,7 +1,8 @@
 import { sortBy } from "lodash";
 import { IEvent, IServer, ISite } from "../types";
-import { Account, accounts } from "../lib/accounts";
+import { accounts } from "../lib/accounts";
 import { flatten, getCollection, getResource, postAction } from "../lib/forge";
+import { everyOrg } from "../lib/orgs";
 import { Site } from "./Site";
 
 export type ServiceAction = "reboot" | "reload" | "stop";
@@ -32,8 +33,21 @@ type ServerWithToken = { server: IServer; token: string };
 
 export const Server = {
   async getAll() {
-    const perAccount = await Promise.all(accounts().map(getServers));
-    return sortBy(perAccount.flat(), (s) => s?.name?.toLowerCase());
+    const perOrg = await Promise.all(
+      (await everyOrg()).map(async ({ account, org }) => {
+        const { items } = await getCollection(`orgs/${org}/servers`, account.token);
+        return items.map((server) => ({
+          ...flatten<IServer>(server),
+          org_slug: org,
+          api_token_key: account.tokenKey,
+          ssh_user: account.sshUser,
+        }));
+      }),
+    );
+    return sortBy(
+      perOrg.flat().filter((server) => !server.revoked),
+      (server) => server?.name?.toLowerCase(),
+    );
   },
 
   async runAction({ server, token, action = "reboot", service }: RunAction) {
@@ -59,23 +73,18 @@ export const Server = {
   },
 };
 
-const getServers = async ({ token, tokenKey, sshUser }: Account) => {
-  if (!token) return [];
-  const { items: organizations } = await getCollection("orgs", token);
-  const serversByOrg = await Promise.all(
-    organizations.map(async (organization) => {
-      const orgSlug = String(organization?.attributes?.slug ?? "");
-      const { items: servers } = await getCollection(`orgs/${orgSlug}/servers`, token);
-      return servers.map((server) => ({
-        ...flatten<IServer>(server),
-        org_slug: orgSlug,
-        api_token_key: tokenKey,
-        ssh_user: sshUser,
-      }));
+// Archiving bumps updated_at too, so one row covers additions and removals alike
+export const fleetStamp = async () => {
+  const rows = await Promise.all(
+    (await everyOrg()).map(async ({ account, org }) => {
+      const { items } = await getCollection(`orgs/${org}/servers?sort=-updated_at&page[size]=1`, account.token, {
+        pages: 1,
+      });
+      const top = items[0];
+      return `${account.tokenKey}/${org}=${top ? `${top.id}:${top.attributes?.updated_at}` : "none"}`;
     }),
   );
-
-  return serversByOrg.flat().filter((s) => !s.revoked);
+  return rows.sort().join(";");
 };
 
 // Two requests and most of the load time, and only the search bar uses it
