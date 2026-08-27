@@ -1,6 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
 import { sortBy } from "lodash";
 import { IEvent, IServer, ISite } from "../types";
+import { Account, accounts } from "../lib/accounts";
 import { flatten, getCollection, getResource, postAction } from "../lib/forge";
 import { Site } from "./Site";
 
@@ -32,23 +32,8 @@ type ServerWithToken = { server: IServer; token: string };
 
 export const Server = {
   async getAll() {
-    const preferences = getPreferenceValues();
-    // Because we have support for two accounts, pass the key through
-    let servers = await getServers({
-      tokenKey: "laravel_forge_api_token",
-      token: preferences?.laravel_forge_api_token as string,
-      sshUser: (preferences?.laravel_forge_ssh_user as string) || "forge",
-    });
-
-    if (preferences?.laravel_forge_api_token_two) {
-      const serversTwo = await getServers({
-        tokenKey: "laravel_forge_api_token_two",
-        token: preferences?.laravel_forge_api_token_two as string,
-        sshUser: (preferences?.laravel_forge_ssh_user_two as string) || "forge",
-      });
-      servers = [...servers, ...serversTwo];
-    }
-    return sortBy(servers, (s) => s?.name?.toLowerCase()) ?? {};
+    const perAccount = await Promise.all(accounts().map(getServers));
+    return sortBy(perAccount.flat(), (s) => s?.name?.toLowerCase());
   },
 
   async runAction({ server, token, action = "reboot", service }: RunAction) {
@@ -74,7 +59,7 @@ export const Server = {
   },
 };
 
-const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKey: string; sshUser: string }) => {
+const getServers = async ({ token, tokenKey, sshUser }: Account) => {
   if (!token) return [];
   const { items: organizations } = await getCollection("orgs", token);
   const serversByOrg = await Promise.all(
@@ -90,23 +75,16 @@ const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKe
     }),
   );
 
-  // Get site data which will by searchable along with servers
-  let keywordsByServer: Record<number, Set<string>> = {};
-  try {
-    const sites = await Site.getSitesWithoutServer({ token });
-    keywordsByServer = getSiteKeywords(sites ?? []);
-  } catch (error) {
-    console.error(error);
-    // fail gracefully here as it's not critical information
-  }
+  return serversByOrg.flat().filter((s) => !s.revoked);
+};
 
-  return serversByOrg
-    .flat()
-    .map((server) => {
-      server.keywords = server?.id && keywordsByServer[server.id] ? [...keywordsByServer[server.id]] : [];
-      return server;
-    })
-    .filter((s) => !s.revoked);
+// Two requests and most of the load time, and only the search bar uses it
+export const serverKeywords = async (): Promise<Record<number, string[]>> => {
+  const perAccount = await Promise.all(
+    accounts().map(({ token }) => Site.getSitesWithoutServer({ token }).catch(() => [] as ISite[])),
+  );
+  const byServer = getSiteKeywords(perAccount.flat());
+  return Object.fromEntries(Object.entries(byServer).map(([id, names]) => [Number(id), [...names]]));
 };
 
 const getSiteKeywords = (sites: ISite[]) => {

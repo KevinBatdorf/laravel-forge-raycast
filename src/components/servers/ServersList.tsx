@@ -6,11 +6,17 @@ import { ServerSingle } from "./ServerSingle";
 import { ServerCommands } from "../actions/ServerCommands";
 import { getServerColor } from "../../lib/color";
 import { useSites } from "../../hooks/useSites";
-import { useEffect, useState } from "react";
+import { useServerKeywords } from "../../hooks/useServerKeywords";
+import { useEffect, useMemo, useState } from "react";
 
 export const ServersList = ({ search }: { search: string }) => {
   const [preLoadedServer, setPreLoadedServer] = useState<IServer>();
-  const { servers, loading, error } = useServers();
+  const { servers: found, loading, error } = useServers();
+  const keywords = useServerKeywords();
+  const servers = useMemo(
+    () => found?.map((server) => ({ ...server, keywords: keywords?.[server.id] ?? [] })),
+    [found, keywords],
+  );
   const [incomingSearch, setIncomingSearch] = useState(search);
   useSites(preLoadedServer, {
     // Immutable
