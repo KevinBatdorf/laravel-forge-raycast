@@ -10,9 +10,13 @@ const FAILED = ["failed", "failed-build"];
 
 export default async function tool() {
   // This answers "nothing is deploying", so it has to read past the first page
-  const { rows } = await walkOrgs((ref) => `orgs/${ref.org}/sites`, queryString({}, [], 30), undefined, undefined, {
-    pages: 20,
-  });
+  const { rows } = await walkOrgs(
+    (ref) => `orgs/${ref.org}/sites`,
+    queryString({}, ["include=server"], 30),
+    undefined,
+    undefined,
+    { pages: 20 },
+  );
 
   const sites = rows.map(({ ref, item }) => ({
     ref,

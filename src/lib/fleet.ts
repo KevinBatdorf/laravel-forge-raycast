@@ -15,9 +15,15 @@ export const fleetSites = async (tokenKey: string): Promise<ISite[]> => {
   const refs = (await orgsFor(account)).map((org) => ({ account, org }));
   if (!refs.length) return [];
 
-  const { rows } = await walkOrgs((ref) => `orgs/${ref.org}/sites`, queryString({}, [], 30), undefined, refs, {
-    pages: 20,
-  });
+  const { rows } = await walkOrgs(
+    (ref) => `orgs/${ref.org}/sites`,
+    queryString({}, ["include=server"], 30),
+    undefined,
+    refs,
+    {
+      pages: 20,
+    },
+  );
 
   const found = rows.map(({ ref, item }) => ({ ref, site: flatten<ISite>(item), serverId: relatedId(item, "server") }));
 

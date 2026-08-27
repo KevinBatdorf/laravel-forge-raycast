@@ -36,11 +36,10 @@ type Input = {
 
 export default async function tool({ name, serverId, fields, sort, limit, cursor }: Input) {
   const at = serverId === undefined ? undefined : await locate("server", serverId);
-  const search = queryString(
-    { name },
-    serverId !== undefined && sort?.trim() ? [`sort=${encodeURIComponent(sort.trim())}`] : [],
-    limit,
-  );
+  // Forge omits a relationship nobody included, and a site is unreachable without its server
+  const extra = at ? [] : ["include=server"];
+  if (serverId !== undefined && sort?.trim()) extra.push(`sort=${encodeURIComponent(sort.trim())}`);
+  const search = queryString({ name }, extra, limit);
 
   const { rows, next } = await walkOrgs(
     (ref) => (at ? `orgs/${ref.org}/servers/${serverId}/sites` : `orgs/${ref.org}/sites`),
@@ -66,12 +65,16 @@ export default async function tool({ name, serverId, fields, sort, limit, cursor
     };
   });
 
+  const located = sites.filter(({ remember }) => remember[1].serverId);
   await rememberMany(
     "site",
-    sites.filter(({ remember }) => remember[1].serverId).map(({ remember }) => [remember[0], remember[1]]),
+    located.map(({ remember }) => [remember[0], remember[1]]),
   );
+  const stranded = sites.length - located.length;
 
   const notes = [`${sites.length} site${sites.length === 1 ? "" : "s"} on this page.`];
+  // Handing back an id no site tool can reach is worse than saying so
+  if (stranded) notes.push(`${stranded} of them name no server, so the site tools cannot reach those ids.`);
   if (next) notes.push("More to come: pass cursor back exactly as given for the next page.");
   if (name && !sites.length) notes.push(`No site name contains "${name}". Forge cannot match an alias.`);
   if (!asked.requested) notes.push("Rows are short. Call probe-api for the field names, then pass them in fields.");
