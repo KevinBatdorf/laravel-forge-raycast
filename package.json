@@ -39,7 +39,7 @@
     }
   ],
   "ai": {
-    "instructions": "Every site and server tool takes an id. Get ids from list-sites or list-servers first \u2014 nothing searches by name.\nDeployments belong to sites, not servers.\nDeploy failed? deployment-status, then deployment-log.\nSite down or erroring? site-online, then site-config.\nServer problem? server-events.\nOnly deploy, restart or reboot if the user asks.\nEnv file or deploy settings? Call get-site and give the user the Forge link it returns. site-config cannot read them.\nA server's SSH public key or credential id is withheld until you name it in get-server's include.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields. Do not guess a field name; a wrong one returns nothing.\nPass the cursor string back exactly as it was given to get the next page.\nAlways write a URL as a markdown link: [Deployment settings](url), never a bare URL. Do not open links yourself.",
+    "instructions": "Every site and server tool takes an id. Get ids from list-sites or list-servers first. Nothing searches by name.\nDeployments belong to sites, not servers.\nDeploy failed? deployment-status, then deployment-log.\nSite down or erroring? site-online, then site-config.\nServer problem? server-events.\nOnly deploy, restart or reboot if the user asks.\nEnv file or deploy settings? Call get-site and give the user the Forge link it returns. site-config cannot read them.\nA server's SSH public key or credential id is withheld until you name it in get-server's include.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields. Do not guess a field name; a wrong one returns nothing.\nPass the cursor string back exactly as it was given to get the next page.\nAlways write a URL as a markdown link: [Deployment settings](url), never a bare URL. Do not open links yourself.",
     "evals": [
       {
         "input": "@laravel-forge deploy acme-store",
@@ -77,7 +77,7 @@
             "note": "Call deployment-status or deployment-log to follow it."
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -162,7 +162,7 @@
             "started": true
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -265,7 +265,7 @@
             ]
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -374,7 +374,7 @@
             ]
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -440,7 +440,7 @@
             ]
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -550,7 +550,7 @@
             ]
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -623,7 +623,7 @@
             "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -712,7 +712,7 @@
             "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -762,7 +762,7 @@
             "failed": []
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -877,7 +877,7 @@
             ]
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",
@@ -959,7 +959,7 @@
             ]
           },
           "list-orgs": {
-            "note": "Organizations you can reach. The list and get tools use these on their own \u2014 you do not pass one.",
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
             "orgs": [
               {
                 "account": "laravel_forge_api_token",

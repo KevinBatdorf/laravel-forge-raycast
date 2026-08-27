@@ -6,4 +6,4 @@ export const nameList = (names: string[], limit = 8) => {
 
 // Logs run to megabytes and the whole result is fed to the model
 export const tail = (output: string, limit = 4_000) =>
-  output.length > limit ? `…truncated…\n${output.slice(-limit)}` : output;
+  output.length > limit ? `[earlier output truncated]\n${output.slice(-limit)}` : output;

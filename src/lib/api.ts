@@ -44,7 +44,7 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
     throw new Error(
       [`${res?.status ?? "network"} ${res?.statusText || "request failed"}: ${url}`, detail?.slice(0, 300)]
         .filter(Boolean)
-        .join(" — "),
+        .join(". "),
     );
   }
   return res;

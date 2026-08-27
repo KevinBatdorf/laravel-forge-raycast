@@ -20,7 +20,7 @@ type Input = {
 export default async function tool({ siteId, type }: Input) {
   if (!READABLE.includes(type)) {
     throw new Error(
-      `This tool reads ${READABLE.join(", ")}. The env file and deploy script are not readable here — get-site answers with a Forge link.`,
+      `This tool reads ${READABLE.join(", ")}. The env file and deploy script are not readable here. get-site answers with a Forge link.`,
     );
   }
   const at = await locateSite(siteId);

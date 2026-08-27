@@ -18,7 +18,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ serverId }) => {
     message: `Reboot ${at.server.name}? Every site on it goes down until it comes back.`,
     info: [
       { name: `Sites going down (${sites.length})`, value: nameList(siteNames(sites)) },
-      { name: "Provider", value: [at.server.provider, at.server.region].filter(Boolean).join(" · ") || "unknown" },
+      { name: "Provider", value: [at.server.provider, at.server.region].filter(Boolean).join(", ") || "unknown" },
       { name: "IP address", value: at.server.ip_address ?? "unknown" },
     ],
   };
