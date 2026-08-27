@@ -1,6 +1,6 @@
 import { Cache } from "@raycast/api";
 import useSWR from "swr";
-import { Server, fleetStamp } from "../api/Server";
+import { Server } from "../api/Server";
 import { IServer } from "../types";
 import { USE_FAKE_DATA } from "../config";
 import { MockServer } from "../api/Mock";
@@ -8,24 +8,18 @@ import { MockServer } from "../api/Mock";
 const cache = new Cache();
 const KEY = "servers-list";
 
-type Stored = { stamp: string; servers: IServer[] };
-
-const stored = (): Stored | undefined => {
-  try {
-    const raw = cache.get(KEY);
-    return raw ? (JSON.parse(raw) as Stored) : undefined;
-  } catch {
-    return undefined;
-  }
-};
-
+// Forge exposes no count, ETag or timestamp to poll, so staleness is the user's call
 export const loadServers = async () => {
-  const held = stored();
-  const stamp = await fleetStamp().catch(() => "");
-  if (held && stamp && held.stamp === stamp) return held.servers;
-
+  const stored = cache.get(KEY);
+  if (stored) {
+    try {
+      return JSON.parse(stored) as IServer[];
+    } catch {
+      cache.remove(KEY);
+    }
+  }
   const servers = await Server.getAll();
-  cache.set(KEY, JSON.stringify({ stamp, servers }));
+  cache.set(KEY, JSON.stringify(servers));
   return servers;
 };
 
