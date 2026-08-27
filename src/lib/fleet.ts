@@ -2,7 +2,7 @@ import { sortAndFilterSites } from "../api/Site";
 import { ISite } from "../types";
 import { accountFor } from "./accounts";
 import { flatten, relatedId } from "./forge";
-import { rememberMany } from "./index-cache";
+import { rememberSites } from "./index-cache";
 import { queryString, walkOrgs } from "./listing";
 import { orgsFor } from "./orgs";
 
@@ -27,8 +27,7 @@ export const fleetSites = async (tokenKey: string): Promise<ISite[]> => {
 
   const found = rows.map(({ ref, item }) => ({ ref, site: flatten<ISite>(item), serverId: relatedId(item, "server") }));
 
-  await rememberMany(
-    "site",
+  await rememberSites(
     found
       .filter(({ serverId }) => serverId)
       .map(({ ref, site, serverId }) => [site.id, { tokenKey, org: ref.org, serverId }]),

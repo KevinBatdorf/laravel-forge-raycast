@@ -67,6 +67,17 @@ export const rememberMany = async (kind: Kind, entries: Array<[number | string, 
   });
 };
 
+// get-site reads the site then its server, so a listed row has to cache both
+export const rememberSites = async (entries: Array<[number | string, Coordinates]>) => {
+  await rememberMany("site", entries);
+  await rememberMany(
+    "server",
+    entries
+      .filter(([, where]) => where.serverId)
+      .map(([, where]) => [where.serverId as number, { tokenKey: where.tokenKey, org: where.org }]),
+  );
+};
+
 export const lookup = async (kind: Kind, id: number | string): Promise<Coordinates | undefined> =>
   (await read())[`${kind}s`][String(id)];
 

@@ -1,7 +1,7 @@
 import { deploymentStatus } from "../api/Site";
 import { locate } from "../lib/coordinates";
 import { flatten, relatedId } from "../lib/forge";
-import { rememberMany } from "../lib/index-cache";
+import { rememberSites } from "../lib/index-cache";
 import { asCursorList, asCursors, queryString, walkOrgs } from "../lib/listing";
 import { ISite } from "../types";
 import { askedFor, siteRowExtras } from "./fields";
@@ -66,10 +66,7 @@ export default async function tool({ name, serverId, fields, sort, limit, cursor
   });
 
   const located = sites.filter(({ remember }) => remember[1].serverId);
-  await rememberMany(
-    "site",
-    located.map(({ remember }) => [remember[0], remember[1]]),
-  );
+  await rememberSites(located.map(({ remember }) => [remember[0], remember[1]]));
   const stranded = sites.length - located.length;
 
   const notes = [`${sites.length} site${sites.length === 1 ? "" : "s"} on this page.`];

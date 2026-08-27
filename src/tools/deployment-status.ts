@@ -1,6 +1,6 @@
 import { deploymentStatus } from "../api/Site";
 import { flatten, relatedId } from "../lib/forge";
-import { rememberMany } from "../lib/index-cache";
+import { rememberSites } from "../lib/index-cache";
 import { queryString, walkOrgs } from "../lib/listing";
 import { ISite } from "../types";
 
@@ -24,8 +24,7 @@ export default async function tool() {
     serverId: relatedId(item, "server"),
   }));
 
-  await rememberMany(
-    "site",
+  await rememberSites(
     sites
       .filter(({ serverId }) => serverId)
       .map(({ ref, site, serverId }) => [site.id, { tokenKey: ref.account.tokenKey, org: ref.org, serverId }]),
