@@ -1,15 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { __resetStorage } from "../test/raycast-stub";
-import {
-  allKnownOrgs,
-  forget,
-  forgetOrgs,
-  knownOrgs,
-  lookup,
-  remember,
-  rememberMany,
-  rememberOrgs,
-} from "./index-cache";
+import { forget, forgetOrgs, knownOrgs, lookup, remember, rememberMany, rememberOrgs } from "./index-cache";
 
 beforeEach(() => __resetStorage());
 
@@ -28,7 +19,14 @@ describe("orgs", () => {
   it("keeps two accounts apart", async () => {
     await rememberOrgs("t1", ["acme-inc"]);
     await rememberOrgs("t2", ["other-co"]);
-    expect(await allKnownOrgs()).toEqual({ t1: ["acme-inc"], t2: ["other-co"] });
+    expect(await knownOrgs("t1")).toEqual(["acme-inc"]);
+    expect(await knownOrgs("t2")).toEqual(["other-co"]);
+  });
+
+  it("keeps both accounts when they are written at the same time", async () => {
+    await Promise.all([rememberOrgs("t1", ["acme-inc"]), rememberOrgs("t2", ["other-co"])]);
+    expect(await knownOrgs("t1")).toEqual(["acme-inc"]);
+    expect(await knownOrgs("t2")).toEqual(["other-co"]);
   });
 
   it("forgets one account without touching the other", async () => {

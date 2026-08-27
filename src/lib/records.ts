@@ -1,22 +1,7 @@
 import { Site } from "../api/Site";
 import { IDeployment, IServer, ISite } from "../types";
-import { Located, locate, locateSite, serverPath } from "./coordinates";
+import { Located, dropOnMiss, locate, locateSite, serverPath } from "./coordinates";
 import { flatten, getResource } from "./forge";
-import { forget } from "./index-cache";
-
-// apiFetch puts the status at the front of the message
-const isMissing = (error: unknown) => /^404\b/.test(error instanceof Error ? error.message : "");
-
-// Coordinates only ever come from Forge, so a 404 means deleted, not misrouted
-const dropOnMiss = async <T>(kind: "site" | "server", id: number | string, read: () => Promise<T>) => {
-  try {
-    return await read();
-  } catch (error) {
-    if (!isMissing(error)) throw error;
-    await forget(kind, id);
-    throw new Error(`Forge no longer has ${kind} ${id}. Call list-${kind}s now for the current ids.`);
-  }
-};
 
 export type ServerRecord = Located & { server: IServer };
 

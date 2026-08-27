@@ -27,46 +27,50 @@ const read = async (): Promise<Index> => {
 
 const write = (index: Index) => LocalStorage.setItem(KEY, JSON.stringify(index));
 
-// Every entry here is immutable, so nothing expires: a wrong one 404s and is dropped
-export const rememberOrgs = async (tokenKey: string, orgs: string[]) => {
-  const index = await read();
-  index.orgs[tokenKey] = orgs;
-  await write(index);
+// Concurrent writers each save their own stale copy of the blob, so writes take turns
+let queue: Promise<unknown> = Promise.resolve();
+
+const mutate = (change: (index: Index) => void): Promise<void> => {
+  const next = queue.then(async () => {
+    const index = await read();
+    change(index);
+    await write(index);
+  });
+  // A rejected turn must not poison every turn behind it
+  queue = next.catch(() => undefined);
+  return next;
 };
+
+// Every entry here is immutable, so nothing expires: a wrong one 404s and is dropped
+export const rememberOrgs = (tokenKey: string, orgs: string[]) =>
+  mutate((index) => {
+    index.orgs[tokenKey] = orgs;
+  });
 
 export const knownOrgs = async (tokenKey: string) => (await read()).orgs[tokenKey];
 
-export const allKnownOrgs = async () => (await read()).orgs;
-
-export const forgetOrgs = async (tokenKey: string) => {
-  const index = await read();
-  delete index.orgs[tokenKey];
-  await write(index);
-};
+export const forgetOrgs = (tokenKey: string) =>
+  mutate((index) => {
+    delete index.orgs[tokenKey];
+  });
 
 type Kind = "site" | "server";
 
-export const remember = async (kind: Kind, id: number | string, where: Coordinates) => {
-  if (!where.tokenKey || !where.org) return;
-  const index = await read();
-  index[`${kind}s`][String(id)] = where;
-  await write(index);
-};
+export const remember = (kind: Kind, id: number | string, where: Coordinates) => rememberMany(kind, [[id, where]]);
 
-// One write for a page of rows; remember() per row would rewrite the blob N times
+// One write for a page of rows; one per row would rewrite the blob N times
 export const rememberMany = async (kind: Kind, entries: Array<[number | string, Coordinates]>) => {
   const usable = entries.filter(([, where]) => where.tokenKey && where.org);
   if (!usable.length) return;
-  const index = await read();
-  for (const [id, where] of usable) index[`${kind}s`][String(id)] = where;
-  await write(index);
+  await mutate((index) => {
+    for (const [id, where] of usable) index[`${kind}s`][String(id)] = where;
+  });
 };
 
 export const lookup = async (kind: Kind, id: number | string): Promise<Coordinates | undefined> =>
   (await read())[`${kind}s`][String(id)];
 
-export const forget = async (kind: Kind, id: number | string) => {
-  const index = await read();
-  delete index[`${kind}s`][String(id)];
-  await write(index);
-};
+export const forget = (kind: Kind, id: number | string) =>
+  mutate((index) => {
+    delete index[`${kind}s`][String(id)];
+  });

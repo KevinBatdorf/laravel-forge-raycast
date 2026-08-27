@@ -2,6 +2,12 @@ import { LaunchType, LocalStorage, Toast, captureException, environment, popToRo
 import { clearCache } from "./cache";
 import { politeFetch } from "./limit";
 
+// doTheFetch puts the status at the front of the message it throws
+export const isStatus = (error: unknown, ...codes: number[]) => {
+  const message = error instanceof Error ? error.message : "";
+  return codes.some((code) => new RegExp(`^${code}\\b`).test(message));
+};
+
 const doTheFetch = async (url: string, options?: RequestInit) => {
   // A tool's thrown message already reaches the model; a toast on top is noise
   const silent = environment.launchType === LaunchType.Background || environment.entryPointType === "tool";

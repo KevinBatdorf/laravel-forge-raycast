@@ -1,5 +1,5 @@
 import { Site } from "../api/Site";
-import { locateSite } from "../lib/coordinates";
+import { dropOnMiss, locateSite } from "../lib/coordinates";
 
 type Input = {
   /**
@@ -10,12 +10,9 @@ type Input = {
 
 export default async function tool({ siteId }: Input) {
   const at = await locateSite(siteId);
-  const deployments = await Site.getDeploymentHistory({
-    orgSlug: at.org,
-    serverId: at.serverId,
-    siteId,
-    token: at.account.token,
-  });
+  const deployments = await dropOnMiss("site", siteId, () =>
+    Site.getDeploymentHistory({ orgSlug: at.org, serverId: at.serverId, siteId, token: at.account.token }),
+  );
   return {
     note: deployments.length
       ? "Pass an id to deployment-log to read one deploy's output."

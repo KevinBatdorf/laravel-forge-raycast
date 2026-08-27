@@ -1,5 +1,5 @@
 import { Site } from "../api/Site";
-import { locateSite } from "../lib/coordinates";
+import { dropOnMiss, locateSite } from "../lib/coordinates";
 import { ConfigFile } from "../types";
 import { tail } from "./helpers";
 
@@ -24,12 +24,8 @@ export default async function tool({ siteId, type }: Input) {
     );
   }
   const at = await locateSite(siteId);
-  const content = await Site.getConfig({
-    orgSlug: at.org,
-    serverId: at.serverId,
-    siteId,
-    token: at.account.token,
-    type,
-  });
+  const content = await dropOnMiss("site", siteId, () =>
+    Site.getConfig({ orgSlug: at.org, serverId: at.serverId, siteId, token: at.account.token, type }),
+  );
   return { siteId, type, content: tail(content) };
 }

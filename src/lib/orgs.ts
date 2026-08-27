@@ -23,13 +23,6 @@ export const everyOrg = async (): Promise<OrgRef[]> => {
   return perAccount.flat();
 };
 
-export const refreshEveryOrg = async (): Promise<OrgRef[]> => {
-  const perAccount = await Promise.all(
-    accounts().map(async (account) => (await refreshOrgs(account)).map((org) => ({ account, org }))),
-  );
-  return perAccount.flat();
-};
-
 // A slug the model handed back is only trusted if we already knew it: org goes in the path
 export const isKnownOrg = async (tokenKey: string, org: string) => {
   const account = accounts().find((one) => one.tokenKey === tokenKey);

@@ -1,5 +1,5 @@
 import { Site } from "../api/Site";
-import { locateSite } from "../lib/coordinates";
+import { dropOnMiss, locateSite } from "../lib/coordinates";
 import { tail } from "./helpers";
 
 type Input = {
@@ -19,11 +19,11 @@ export default async function tool({ siteId, deploymentId }: Input) {
 
   let deployment = deploymentId;
   if (!deployment) {
-    const [latest] = await Site.getDeploymentHistory(target);
+    const [latest] = await dropOnMiss("site", siteId, () => Site.getDeploymentHistory(target));
     if (!latest) return { siteId, log: "", note: "This site has no deployments yet." };
     deployment = latest.id;
   }
 
-  const log = await Site.getDeploymentOutput({ ...target, deploymentId: deployment });
+  const log = await dropOnMiss("site", siteId, () => Site.getDeploymentOutput({ ...target, deploymentId: deployment }));
   return { siteId, deploymentId: deployment, log: tail(log) };
 }

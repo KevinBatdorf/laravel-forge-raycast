@@ -81,6 +81,12 @@ describe("included", () => {
     expect(String(out.credentialId)).toMatch(/Withheld unless asked/);
   });
 
+  it("answers a named field Forge left empty rather than dropping the key", () => {
+    // undefined would vanish from the JSON, reading as a field Forge does not have
+    const out = included(serverIncludable({ local_public_key: "k" } as IServer), "credential_id");
+    expect(JSON.parse(JSON.stringify(out))).toMatchObject({ credentialId: null });
+  });
+
   it("withholds everything when nothing is named", () => {
     const out = included(serverIncludable({ credential_id: 7, local_public_key: "k" } as IServer), undefined) as Record<
       string,

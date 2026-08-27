@@ -9,7 +9,10 @@ const IN_FLIGHT = ["pending", "queued", "deploying"];
 const FAILED = ["failed", "failed-build"];
 
 export default async function tool() {
-  const { rows } = await walkOrgs((ref) => `orgs/${ref.org}/sites`, queryString({}, [], 30));
+  // This answers "nothing is deploying", so it has to read past the first page
+  const { rows } = await walkOrgs((ref) => `orgs/${ref.org}/sites`, queryString({}, [], 30), undefined, undefined, {
+    pages: 20,
+  });
 
   const sites = rows.map(({ ref, item }) => ({
     ref,

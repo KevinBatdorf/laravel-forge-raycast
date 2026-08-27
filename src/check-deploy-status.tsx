@@ -21,7 +21,8 @@ interface RecentEntry {
 }
 
 export default function Command() {
-  warmOrgCache();
+  // Refires on every state change if it sits in the render body
+  useEffect(() => warmOrgCache(), []);
 
   const { sites: sitesTokenOne, loading: loadingOne } = useAllSites("laravel_forge_api_token");
   const { sites: sitesTokenTwo, loading: loadingTwo } = useAllSites("laravel_forge_api_token_two");
