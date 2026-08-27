@@ -1,6 +1,6 @@
-import { sortBy } from "lodash";
+import { sortBy, uniqBy } from "lodash";
 import { IEvent, IServer, ISite } from "../types";
-import { accounts } from "../lib/accounts";
+import { Account, accounts } from "../lib/accounts";
 import { ForgeResource, flatten, getCollection, getResource, postAction } from "../lib/forge";
 import { everyOrg } from "../lib/orgs";
 import { Site } from "./Site";
@@ -31,10 +31,39 @@ type RunAction = {
 
 type ServerWithToken = { server: IServer; token: string };
 
-export type Tail = Record<string, { cursor: string; hash: string }>;
+export type Tail = Record<string, { cursor: string; ids: number[] }>;
 
-const pageHash = (items: ForgeResource[], nextCursor?: string | null) =>
-  `${items.map((item) => item.id).join(",")}|${nextCursor ? "more" : "end"}`;
+type OrgRef = { account: Account; org: string };
+
+const sameIds = (a: number[], b: number[]) => a.length === b.length && a.every((id, i) => id === b[i]);
+
+const decorate = (rows: ForgeResource[], { account, org }: OrgRef) =>
+  rows
+    .map((server) => ({
+      ...flatten<IServer>(server),
+      org_slug: org,
+      api_token_key: account.tokenKey,
+      ssh_user: account.sshUser,
+    }))
+    .filter((server) => !server.revoked);
+
+const byName = (servers: IServer[]) => sortBy(servers, (server) => server?.name?.toLowerCase());
+
+const walkFrom = async ({ account, org }: OrgRef, from: string) => {
+  const rows: ForgeResource[] = [];
+  let cursor = from;
+  let opens = from;
+  let ids: number[] = [];
+  for (let page = 0; page < 20; page++) {
+    const { items, nextCursor } = await getCollection(`orgs/${org}/servers`, account.token, { pages: 1, from: cursor });
+    rows.push(...items);
+    opens = cursor;
+    ids = items.map((item) => Number(item.id));
+    if (!nextCursor) break;
+    cursor = String(nextCursor);
+  }
+  return { rows, cursor: opens, ids };
+};
 
 export const Server = {
   async getAll() {
@@ -45,57 +74,44 @@ export const Server = {
   // Ids ascend, so anything new lands on the final page and nowhere else
   async walk(): Promise<{ servers: IServer[]; tail: Tail }> {
     const perOrg = await Promise.all(
-      (await everyOrg()).map(async ({ account, org }) => {
-        const rows: ForgeResource[] = [];
-        let from = "";
-        let opensLastPage = "";
-        let hash = "";
-        for (let page = 0; page < 20; page++) {
-          const { items, nextCursor } = await getCollection(`orgs/${org}/servers`, account.token, { pages: 1, from });
-          rows.push(...items);
-          opensLastPage = from;
-          hash = pageHash(items, nextCursor);
-          if (!nextCursor) break;
-          from = String(nextCursor);
-        }
-        return {
-          key: `${account.tokenKey}/${org}`,
-          cursor: opensLastPage,
-          hash,
-          servers: rows.map((server) => ({
-            ...flatten<IServer>(server),
-            org_slug: org,
-            api_token_key: account.tokenKey,
-            ssh_user: account.sshUser,
-          })),
-        };
+      (await everyOrg()).map(async (ref) => {
+        const { rows, cursor, ids } = await walkFrom(ref, "");
+        return { key: `${ref.account.tokenKey}/${ref.org}`, cursor, ids, servers: decorate(rows, ref) };
       }),
     );
-
     return {
-      servers: sortBy(
-        perOrg.flatMap((entry) => entry.servers).filter((server) => !server.revoked),
-        (server) => server?.name?.toLowerCase(),
-      ),
-      tail: Object.fromEntries(perOrg.map(({ key, cursor, hash }) => [key, { cursor, hash }])),
+      servers: byName(perOrg.flatMap((entry) => entry.servers)),
+      tail: Object.fromEntries(perOrg.map(({ key, cursor, ids }) => [key, { cursor, ids }])),
     };
   },
 
-  async tailChanged(tail: Tail) {
+  async catchUp(cached: IServer[], tail: Tail): Promise<{ servers: IServer[]; tail: Tail } | null> {
     const refs = await everyOrg();
-    if (refs.length !== Object.keys(tail).length) return true;
-    const checks = await Promise.all(
-      refs.map(async ({ account, org }) => {
-        const held = tail[`${account.tokenKey}/${org}`];
-        if (!held) return true;
-        const { items, nextCursor } = await getCollection(`orgs/${org}/servers`, account.token, {
-          pages: 1,
-          from: held.cursor,
-        });
-        return pageHash(items, nextCursor) !== held.hash;
-      }),
-    );
-    return checks.some(Boolean);
+    if (refs.length !== Object.keys(tail).length) return null;
+    if (refs.some((ref) => !tail[`${ref.account.tokenKey}/${ref.org}`])) return null;
+
+    let servers = cached;
+    let moved = false;
+    const next: Tail = {};
+
+    for (const ref of refs) {
+      const key = `${ref.account.tokenKey}/${ref.org}`;
+      const held = tail[key];
+      const { rows, cursor, ids } = await walkFrom(ref, held.cursor);
+      next[key] = { cursor, ids };
+      if (cursor === held.cursor && sameIds(ids, held.ids)) continue;
+
+      moved = true;
+      const replaced = new Set(held.ids);
+      servers = servers.filter(
+        (server) =>
+          !(server.api_token_key === ref.account.tokenKey && server.org_slug === ref.org && replaced.has(server.id)),
+      );
+      servers = [...servers, ...decorate(rows, ref)];
+    }
+
+    if (!moved) return { servers: cached, tail: next };
+    return { servers: byName(uniqBy(servers, (server) => `${server.api_token_key}/${server.id}`)), tail: next };
   },
 
   async runAction({ server, token, action = "reboot", service }: RunAction) {

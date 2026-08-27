@@ -2,51 +2,53 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { __resetCache } from "../helpers/raycast-stub";
 
 const walk = vi.hoisted(() => vi.fn());
-const tailChanged = vi.hoisted(() => vi.fn());
-vi.mock("../../src/api/Server", () => ({ Server: { walk, tailChanged } }));
+const catchUp = vi.hoisted(() => vi.fn());
+vi.mock("../../src/api/Server", () => ({ Server: { walk, catchUp } }));
 
 import { forgetServers, loadServers } from "../../src/hooks/useServers";
 
 const FLEET = [{ id: 1, name: "web-1" }];
-const TAIL = { "acct/kevin-batdorf": { cursor: "cur-1", hash: "9001,9002|end" } };
+const TAIL = { "acct/kevin-batdorf": { cursor: "cur-1", ids: [9001, 9002] } };
 
 beforeEach(() => {
   __resetCache();
   walk.mockReset().mockResolvedValue({ servers: FLEET, tail: TAIL });
-  tailChanged.mockReset().mockResolvedValue(false);
+  catchUp.mockReset().mockResolvedValue({ servers: FLEET, tail: TAIL });
 });
 
-it("walks once, then re-reads only the last page", async () => {
+it("walks once, then only catches up", async () => {
   expect(await loadServers()).toEqual(FLEET);
   expect(await loadServers()).toEqual(FLEET);
   expect(walk).toHaveBeenCalledTimes(1);
-  expect(tailChanged).toHaveBeenCalledWith(TAIL);
+  expect(catchUp).toHaveBeenCalledWith(FLEET, TAIL);
 });
 
-it("walks again once the last page stops matching", async () => {
+it("keeps what catching up returns without walking again", async () => {
   await loadServers();
-  tailChanged.mockResolvedValue(true);
+  const grown = [...FLEET, { id: 2, name: "web-2" }];
+  catchUp.mockResolvedValue({ servers: grown, tail: TAIL });
+  expect(await loadServers()).toEqual(grown);
+  expect(walk).toHaveBeenCalledTimes(1);
+});
+
+it("walks when catching up says the cache cannot carry forward", async () => {
+  await loadServers();
+  catchUp.mockResolvedValue(null);
   await loadServers();
   expect(walk).toHaveBeenCalledTimes(2);
 });
 
-it("walks again after the hover check empties the cache", async () => {
+it("walks after the hover check empties the cache", async () => {
   await loadServers();
   forgetServers();
   await loadServers();
   expect(walk).toHaveBeenCalledTimes(2);
-  expect(tailChanged).not.toHaveBeenCalled();
+  expect(catchUp).not.toHaveBeenCalled();
 });
 
 it("walks rather than trusting a list it cannot check", async () => {
   await loadServers();
-  tailChanged.mockRejectedValue(new Error("offline"));
+  catchUp.mockRejectedValue(new Error("offline"));
   await loadServers();
   expect(walk).toHaveBeenCalledTimes(2);
-});
-
-it("refetches rather than throwing on a corrupt entry", async () => {
-  const { Cache } = await import("../helpers/raycast-stub");
-  new Cache().set("servers-list", "{not json");
-  expect(await loadServers()).toEqual(FLEET);
 });

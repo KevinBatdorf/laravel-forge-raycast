@@ -22,12 +22,15 @@ const stored = (): Stored | undefined => {
 export const loadServers = async () => {
   const held = stored();
   if (held?.tail) {
-    const changed = await Server.tailChanged(held.tail).catch(() => true);
-    if (!changed) return held.servers;
+    const caught = await Server.catchUp(held.servers, held.tail).catch(() => null);
+    if (caught) {
+      cache.set(KEY, JSON.stringify(caught));
+      return caught.servers;
+    }
   }
-  const { servers, tail } = await Server.walk();
-  cache.set(KEY, JSON.stringify({ tail, servers }));
-  return servers;
+  const fresh = await Server.walk();
+  cache.set(KEY, JSON.stringify(fresh));
+  return fresh.servers;
 };
 
 export const forgetServers = () => cache.remove(KEY);
