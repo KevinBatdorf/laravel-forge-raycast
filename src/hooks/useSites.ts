@@ -2,6 +2,7 @@ import useSWR from "swr";
 import type { SWRConfiguration } from "swr";
 import { IServer, ISite } from "../types";
 import { Site } from "../api/Site";
+import { isStatus } from "../lib/api";
 import { unwrapToken } from "../lib/auth";
 import { LocalStorage } from "@raycast/api";
 import { USE_FAKE_DATA } from "../config";
@@ -22,7 +23,11 @@ const fetcher = async ([serverId, tokenKey, orgSlug]: key) => {
       if (archived) forgetServers();
       return LocalStorage.setItem(cacheKey, JSON.stringify(sites));
     })
-    .catch(() => LocalStorage.removeItem(cacheKey));
+    .catch((error) => {
+      // Archiving flags the server; transferring or deleting it just leaves the org
+      if (isStatus(error, 404)) forgetServers();
+      return LocalStorage.removeItem(cacheKey);
+    });
 
   return await backupData(cacheKey);
 };
