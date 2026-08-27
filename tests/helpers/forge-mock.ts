@@ -43,13 +43,13 @@ export const page = (data: unknown[], nextCursor: string | null = null) => ({
 
 export const siteRow = (id: number, serverId: number, attributes: Record<string, unknown> = {}) => ({
   id: String(id),
-  type: "site",
+  type: "sites",
   attributes: { name: `site-${id}.com`, status: "installed", deployment_status: null, ...attributes },
-  relationships: { server: { data: { id: String(serverId), type: "server" } } },
+  relationships: { server: { data: { id: String(serverId), type: "servers" } } },
 });
 
 export const serverRow = (id: number, attributes: Record<string, unknown> = {}) => ({
   id: String(id),
-  type: "server",
+  type: "servers",
   attributes: { name: `web-${id}`, slug: `web-${id}`, connection_status: "connected", ...attributes },
 });

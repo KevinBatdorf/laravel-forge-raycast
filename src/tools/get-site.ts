@@ -10,12 +10,15 @@ type Input = {
   siteId: number;
 };
 
+const answered = (fields: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(fields).map(([name, value]) => [name, value ?? null]));
+
 export default async function tool({ siteId }: Input) {
   const { site: found, serverId } = await siteRecord(siteId, { withDeployment: true });
   const { server } = await serverRecord(serverId);
   const deployment = found.latest_deployment;
 
-  return {
+  return answered({
     id: found.id,
     name: found.name,
     server: { id: server.id, name: server.name },
@@ -53,5 +56,5 @@ export default async function tool({ siteId }: Input) {
       branch: deployment.commit?.branch,
       message: deployment.commit?.message,
     },
-  };
+  });
 }

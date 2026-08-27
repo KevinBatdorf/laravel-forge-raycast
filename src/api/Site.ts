@@ -28,6 +28,10 @@ export const Site = {
     const endpoint = `orgs/${orgSlug}/servers/${serverId}/sites?include=server,latestDeployment`;
     const { items, included } = await getCollection(endpoint, token);
     const server = included.find((entry) => entry.type === "servers");
+    // A server with no sites includes nothing, so it costs one request to ask
+    const revoked = server
+      ? Boolean(server.attributes?.revoked)
+      : Boolean((await getResource(`orgs/${orgSlug}/servers/${serverId}`, token))?.attributes?.revoked);
     return {
       sites: sortAndFilterSites(
         items.map((site) => {
@@ -39,7 +43,7 @@ export const Site = {
           };
         }),
       ),
-      archived: server ? Boolean(server.attributes?.revoked) : false,
+      archived: revoked,
     };
   },
 

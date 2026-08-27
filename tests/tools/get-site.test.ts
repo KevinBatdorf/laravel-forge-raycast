@@ -27,3 +27,24 @@ it("works on a site found by name, without a list-servers call first", async () 
   expect(out.id).toBe(2330132);
   expect(out.server).toEqual({ id: 782891, name: "web-782891" });
 });
+
+it("answers null for a field Forge left out rather than dropping the key", async () => {
+  vi.unstubAllGlobals();
+  installFetch([
+    (u) => (u.pathname === "/api/orgs" ? orgPage("kevin-batdorf") : undefined),
+    (u) =>
+      u.pathname === "/api/orgs/kevin-batdorf/sites/2330132"
+        ? { data: { id: "2330132", type: "sites", attributes: { name: "bare.com" } } }
+        : undefined,
+    (u) => (u.pathname === "/api/orgs/kevin-batdorf/servers/782891" ? { data: serverRow(782891) } : undefined),
+    (u) => (u.pathname.endsWith("/deployments") ? page([]) : undefined),
+  ]);
+  const { remember } = await import("../../src/lib/index-cache");
+  await remember("site", 2330132, { tokenKey: T1, org: "kevin-batdorf", serverId: 782891 });
+  await remember("server", 782891, { tokenKey: T1, org: "kevin-batdorf" });
+
+  const out = JSON.parse(JSON.stringify(await getSite({ siteId: 2330132 })));
+  expect(out).toHaveProperty("healthcheckUrl", null);
+  expect(out).toHaveProperty("phpVersion", null);
+  expect(out).toHaveProperty("maintenanceMode", null);
+});
