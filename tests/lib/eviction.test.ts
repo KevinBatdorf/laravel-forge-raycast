@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { __resetStorage, __setPreferences } from "../test/raycast-stub";
-import { installFetch, orgPage, serverRow } from "../test/forge-mock";
-import { lookup, remember } from "./index-cache";
-import deploymentHistory from "../tools/deployment-history";
-import deploymentLog from "../tools/deployment-log";
-import siteConfig from "../tools/site-config";
-import serverEvents from "../tools/server-events";
-import getSite from "../tools/get-site";
+import { __resetStorage, __setPreferences } from "../helpers/raycast-stub";
+import { installFetch, orgPage, serverRow } from "../helpers/forge-mock";
+import { lookup, remember } from "../../src/lib/index-cache";
+import deploymentHistory from "../../src/tools/deployment-history";
+import deploymentLog from "../../src/tools/deployment-log";
+import siteConfig from "../../src/tools/site-config";
+import serverEvents from "../../src/tools/server-events";
+import getSite from "../../src/tools/get-site";
 
 const T1 = "laravel_forge_api_token";
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { askedFor, included, namesAsked, pick, serverIncludable, siteLinks } from "./fields";
-import { IServer } from "../types";
+import { askedFor, included, namesAsked, pick, serverIncludable, siteLinks } from "../../src/tools/fields";
+import { IServer } from "../../src/types";
 
 const server = { id: 9001, name: "web-1", org_slug: "acme-inc", slug: "web-1" } as IServer;
 

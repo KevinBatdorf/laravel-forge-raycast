@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { __resetStorage, __setPreferences } from "../test/raycast-stub";
+import { __resetStorage, __setPreferences } from "../helpers/raycast-stub";
 
 const getCollection = vi.hoisted(() => vi.fn());
-vi.mock("./forge", async (original) => ({ ...(await original<object>()), getCollection }));
+vi.mock("../../src/lib/forge", async (original) => ({ ...(await original<object>()), getCollection }));
 
-import { asCursorList, asCursors, cursorKey, perPage, queryString, usableCursors, walkOrgs } from "./listing";
-import { rememberOrgs } from "./index-cache";
+import { asCursorList, asCursors, cursorKey, perPage, queryString, usableCursors, walkOrgs } from "../../src/lib/listing";
+import { rememberOrgs } from "../../src/lib/index-cache";
 
 const T1 = "laravel_forge_api_token";
 const T2 = "laravel_forge_api_token_two";

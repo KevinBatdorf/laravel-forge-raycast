@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { __resetStorage, __setPreferences } from "../test/raycast-stub";
-import { locate, locateSite, serverPath } from "./coordinates";
-import { lookup, remember } from "./index-cache";
+import { __resetStorage, __setPreferences } from "../helpers/raycast-stub";
+import { locate, locateSite, serverPath } from "../../src/lib/coordinates";
+import { lookup, remember } from "../../src/lib/index-cache";
 
 const T1 = "laravel_forge_api_token";
 

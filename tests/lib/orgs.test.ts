@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { __resetStorage, __setPreferences } from "../test/raycast-stub";
+import { __resetStorage, __setPreferences } from "../helpers/raycast-stub";
 
 const getCollection = vi.hoisted(() => vi.fn());
-vi.mock("./forge", () => ({ getCollection }));
+vi.mock("../../src/lib/forge", () => ({ getCollection }));
 
-import { accounts } from "./accounts";
-import { everyOrg, isKnownOrg, orgsFor, refreshOrgs } from "./orgs";
+import { accounts } from "../../src/lib/accounts";
+import { everyOrg, isKnownOrg, orgsFor, refreshOrgs } from "../../src/lib/orgs";
 
 beforeEach(() => {
   __resetStorage();
@@ -68,7 +68,7 @@ describe("isKnownOrg", () => {
   it("accepts a slug we fetched and rejects one we did not", async () => {
     getCollection.mockResolvedValue(orgPage("acme-inc"));
     expect(await isKnownOrg("laravel_forge_api_token", "acme-inc")).toBe(true);
-    expect(await isKnownOrg("laravel_forge_api_token", "../../user/credentials")).toBe(false);
+    expect(await isKnownOrg("laravel_forge_api_token", "../../src/../user/credentials")).toBe(false);
   });
 
   it("rejects any org for a token that is not configured", async () => {

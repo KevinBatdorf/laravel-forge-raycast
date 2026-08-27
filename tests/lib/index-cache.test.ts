@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { __resetStorage } from "../test/raycast-stub";
-import { forget, forgetOrgs, knownOrgs, lookup, remember, rememberMany, rememberOrgs } from "./index-cache";
+import { __resetStorage } from "../helpers/raycast-stub";
+import { forget, forgetOrgs, knownOrgs, lookup, remember, rememberMany, rememberOrgs } from "../../src/lib/index-cache";
 
 beforeEach(() => __resetStorage());
 
@@ -83,7 +83,7 @@ describe("coordinates", () => {
   });
 
   it("survives a corrupt blob by starting over instead of throwing", async () => {
-    const { LocalStorage } = await import("../test/raycast-stub");
+    const { LocalStorage } = await import("../helpers/raycast-stub");
     await LocalStorage.setItem("forge:index", "{not json");
     expect(await lookup("site", 5001)).toBeUndefined();
     await remember("site", 5001, { tokenKey: "t1", org: "acme-inc" });

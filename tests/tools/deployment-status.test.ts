@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from "vitest";
-import { __resetStorage, __setPreferences } from "../test/raycast-stub";
-import { installFetch, orgPage, page, siteRow } from "../test/forge-mock";
-import deploymentStatus from "./deployment-status";
+import { __resetStorage, __setPreferences } from "../helpers/raycast-stub";
+import { installFetch, orgPage, page, siteRow } from "../helpers/forge-mock";
+import deploymentStatus from "../../src/tools/deployment-status";
 
 beforeEach(() => {
   __resetStorage();

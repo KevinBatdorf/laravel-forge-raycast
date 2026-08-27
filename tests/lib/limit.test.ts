@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { politeFetch } from "./limit";
+import { politeFetch } from "../../src/lib/limit";
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => {
