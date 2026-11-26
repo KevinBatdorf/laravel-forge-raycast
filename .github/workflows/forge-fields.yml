@@ -12,6 +12,9 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -22,3 +25,24 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/check-forge-fields.mjs
+
+  # GitHub disables a public repo's cron after 60 days with no commits.
+  keepalive:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Commit if the repo has gone quiet
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          idle=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "Last commit was $idle days ago."
+          if [ "$idle" -lt 50 ]; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "Keep the scheduled Forge fields check alive"
+          git push origin "HEAD:$BRANCH"
